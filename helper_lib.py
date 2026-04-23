@@ -12,6 +12,19 @@ def select_channel(energies, channels, rawid):
     return energies[channels == rawid]
 
 
+def expand_range(item):
+    if ".." not in item:
+        return [item]  # already single
+    start, end = item.split("..")
+
+    prefix = start[0]  # 'r'
+    s = int(start[1:])
+    e = int(end[1:])
+    width = len(start) - 1  # number of digits
+
+    return [f"{prefix}{i:0{width}d}" for i in range(s, e + 1)]
+
+
 def prendi_ene_rawid(cvt_file):
     data_ak = lh5.read_as(
         "/evt", cvt_file, field_mask=["coincident", "geds", "trigger"], library="ak"
@@ -134,7 +147,17 @@ def get_values_type(det_dict, ene, bins, lw=1):
     plt.show()
 
 
-def get_mean_fcc_det_type(ratio_dict):
+def get_mean_fcc_det_type(ratio_dict, key="ratio"):
+    """Compute per-detector-type mean of a nested dict {ene: {ge: {key: value}}}.
+
+    Parameters
+    ----------
+    ratio_dict : dict
+        Nested dictionary with structure ``{ene: {ge: {key: value, ...}, ...}, ...}``.
+    key : str, optional
+        Inner key whose value is averaged across detectors of the same type.
+        Defaults to ``"ratio"``.
+    """
     ratio_dict_means = {}
 
     for ene in ratio_dict.keys():
@@ -147,16 +170,16 @@ def get_mean_fcc_det_type(ratio_dict):
 
         for ge in ratio_dict[ene].keys():
             if ge[0] == "B":
-                bege.append(ratio_dict[ene][ge]["ratio"])
+                bege.append(ratio_dict[ene][ge][key])
 
             if ge[0] == "C":
-                coax.append(ratio_dict[ene][ge]["ratio"])
+                coax.append(ratio_dict[ene][ge][key])
 
             if ge[0] == "V":
-                icpc.append(ratio_dict[ene][ge]["ratio"])
+                icpc.append(ratio_dict[ene][ge][key])
 
             if ge[0] == "P":
-                ppc.append(ratio_dict[ene][ge]["ratio"])
+                ppc.append(ratio_dict[ene][ge][key])
 
         ratio_dict_means[ene]["BEGe"] = np.mean(clean_array(bege))
         ratio_dict_means[ene]["ICPC"] = np.mean(clean_array(icpc))
