@@ -17,7 +17,7 @@ def weighted_resolution_from_nested_dict(data: dict, E: float) -> float:
     Parameters
     ----------
     data : dict
-        Nested dict like {period: {run: {detector: {"expo", "a", "b", "a_unc", "b_unc"}}}}.
+        Nested dict like {period: {run: {detector: {"expo", "a", "b", "a_unc", "b_unc", "ab_corr"}}}}.
     E : float
         Energy at which to compute the resolution.
 
@@ -27,7 +27,7 @@ def weighted_resolution_from_nested_dict(data: dict, E: float) -> float:
         Weighted mean FWHM at energy E.
     """
     a_list, b_list, w_list = [], [], []
-    a_unc_list, b_unc_list = [], []
+    a_unc_list, b_unc_list, cab_list = [], [], []
 
     for period, period_dict in data.items():
         for run, run_dict in period_dict.items():
@@ -48,6 +48,7 @@ def weighted_resolution_from_nested_dict(data: dict, E: float) -> float:
                 w_list.append(w_val)
                 a_unc_list.append(vals.get("a_unc", 0.0))
                 b_unc_list.append(vals.get("b_unc", 0.0))
+                cab_list.append(vals.get("ab_corr", 0.0))
 
     # arrays
     a_arr = np.array(a_list)
@@ -56,34 +57,26 @@ def weighted_resolution_from_nested_dict(data: dict, E: float) -> float:
 
     a_unc_arr = np.array(a_unc_list)
     b_unc_arr = np.array(b_unc_list)
-    cab = np.zeros(len(a_arr))  # null cov
+    cab_arr = np.array(cab_list)
 
     # per-detector FWHM
-    f_i = np.sqrt(a_arr + b_arr * E)
+    fwhm_arr = np.sqrt(a_arr + b_arr * E)
 
     # propagate uncertainties
-    df_da = 1.0 / (2.0 * f_i)
-    df_db = E / (2.0 * f_i)
-    sigma_f_i = np.sqrt(
-        (df_da * a_unc_arr) ** 2 + (df_db * b_unc_arr) ** 2 + 2 * df_da * df_db * cab
+    sigma_f_arr = propagate_resolution_uncertainty(
+        a_arr, b_arr, a_unc_arr, b_unc_arr, cab_arr, E
     )
 
     # weighted average
     total_expo = np.sum(w_arr)
-    f_weighted = np.sum(w_arr * f_i) / total_expo
-
-    # propagate measurement uncertainty to weighted mean
-    unc_meas = np.sqrt(np.sum((w_arr * sigma_f_i) ** 2)) / total_expo
-
-    # scatter uncertainty (not needed anymore)
-    var_w = np.sum(w_arr * (f_i - f_weighted) ** 2) / total_expo
-    N_eff = total_expo**2 / np.sum(w_arr**2)
-    unc_scatter = np.sqrt(var_w / N_eff)
+    fwhm_weighted = np.sum(w_arr * fwhm_arr) / total_expo
 
     # total uncertainty
-    unc_total = np.sqrt(unc_meas**2 + unc_scatter**2)
+    unc_total = compute_weighted_uncertainty(
+        w_arr, fwhm_arr, fwhm_weighted, sigma_f_arr
+    )
 
-    return f_weighted, unc_total
+    return fwhm_weighted, unc_total
 
 
 def compute_fwhm(a: float, b: float, energy: float) -> float:
@@ -106,6 +99,81 @@ def compute_fwhm(a: float, b: float, energy: float) -> float:
     return np.sqrt(a + b * energy)
 
 
+def propagate_resolution_uncertainty(
+    a: float | np.ndarray,
+    b: float | np.ndarray,
+    a_unc: float | np.ndarray,
+    b_unc: float | np.ndarray,
+    ab_corr: float | np.ndarray,
+    energy: float | np.ndarray,
+) -> float | np.ndarray:
+    """Propagate uncertainties of a and b to the FWHM resolution sqrt(a + b * energy).
+
+    Parameters
+    ----------
+    a : float or np.ndarray
+        Constant term of the resolution parametrisation.
+    b : float or np.ndarray
+        Linear term of the resolution parametrisation.
+    a_unc : float or np.ndarray
+        Uncertainty on a.
+    b_unc : float or np.ndarray
+        Uncertainty on b.
+    ab_corr : float or np.ndarray
+        Covariance (or correlation-derived covariance) between a and b.
+    energy : float or np.ndarray
+        Energy at which to evaluate the uncertainty.
+
+    Returns
+    -------
+    float or np.ndarray
+        Propagated uncertainty on the FWHM.
+    """
+    fwhm = compute_fwhm(a, b, energy)
+    df_da = 1.0 / (2.0 * fwhm)
+    df_db = energy / (2.0 * fwhm)
+
+    return np.sqrt(
+        (df_da * a_unc) ** 2 + (df_db * b_unc) ** 2 + 2 * df_da * df_db * ab_corr
+    )
+
+
+def compute_weighted_uncertainty(
+    w_arr: np.ndarray, vals_arr: np.ndarray, mean_val: float, s_arr: np.ndarray
+) -> float:
+    """Compute the total weighted uncertainty including measurement and scatter components.
+
+    Parameters
+    ----------
+    w_arr : np.ndarray
+        Array of weights.
+    vals_arr : np.ndarray
+        Array of values.
+    mean_val : float
+        Weighted mean of the values.
+    s_arr : np.ndarray
+        Array of uncertainties for each value.
+
+    Returns
+    -------
+    unc_total : float
+        Total combined uncertainty.
+    """
+    total_w = np.sum(w_arr)
+    if total_w == 0:
+        return 0.0
+
+    # measurement component: quadrature propagation through weighted average
+    unc_meas = float(np.sqrt(np.sum((w_arr * s_arr) ** 2)) / total_w)
+
+    # scatter component: weighted variance across entries
+    var_w = float(np.sum(w_arr * (vals_arr - mean_val) ** 2) / total_w)
+    n_eff = float(total_w**2 / np.sum(w_arr**2))
+    unc_scatter = float(np.sqrt(var_w / n_eff)) if n_eff > 0 else 0.0
+
+    return float(np.sqrt(unc_meas**2 + unc_scatter**2))
+
+
 def weighted_resolution_per_detector(data: dict, E: float) -> dict:
     """Compute exposure-weighted FWHM resolution sqrt(a + b*E) per detector.
 
@@ -114,7 +182,7 @@ def weighted_resolution_per_detector(data: dict, E: float) -> dict:
     Parameters
     ----------
     data : dict
-        Nested dict like {period: {run: {detector: {"expo", "a", "b", "a_unc", "b_unc"}}}}.
+        Nested dict like {period: {run: {detector: {"expo", "a", "b", "a_unc", "b_unc", "ab_corr"}}}}.
     E : float
         Energy at which to compute the resolution.
 
@@ -138,7 +206,14 @@ def weighted_resolution_per_detector(data: dict, E: float) -> dict:
                     continue
 
                 if det not in det_data:
-                    det_data[det] = {"a": [], "b": [], "w": []}
+                    det_data[det] = {
+                        "a": [],
+                        "b": [],
+                        "w": [],
+                        "sa": [],
+                        "sb": [],
+                        "cab": [],
+                    }
 
                 det_data[det]["a"].append(vals["a"])
                 det_data[det]["b"].append(vals["b"])
@@ -155,32 +230,24 @@ def weighted_resolution_per_detector(data: dict, E: float) -> dict:
         w_arr = np.array(d["w"])
         sa_arr = np.array(d["sa"])
         sb_arr = np.array(d["sb"])
-        cab = np.array(d["cab"])
+        cab_arr = np.array(d["cab"])
 
         # per-run sigma
         fwhm_arr = compute_fwhm(a_arr, b_arr, E)
 
         # propagate uncertainties
-        df_da = 1.0 / (2.0 * fwhm_arr)
-        df_db = E / (2.0 * fwhm_arr)
-        sigma_f_arr = np.sqrt(
-            (df_da * sa_arr) ** 2 + (df_db * sb_arr) ** 2 + 2 * df_da * df_db * cab
+        sigma_f_arr = propagate_resolution_uncertainty(
+            a_arr, b_arr, sa_arr, sb_arr, cab_arr, E
         )
 
         # weighted average
         total_expo = np.sum(w_arr)
         fwhm_weighted = np.sum(w_arr * fwhm_arr) / total_expo
 
-        # propagate measurement uncertainty to weighted mean
-        unc_meas = np.sqrt(np.sum((w_arr * sigma_f_arr) ** 2)) / total_expo
-
-        # scatter uncertainty
-        var_w = np.sum(w_arr * (fwhm_arr - fwhm_weighted) ** 2) / total_expo
-        N_eff = total_expo**2 / np.sum(w_arr**2)
-        unc_scatter = np.sqrt(var_w / N_eff)
-
         # total uncertainty
-        unc_total = np.sqrt(unc_meas**2 + unc_scatter**2)
+        unc_total = compute_weighted_uncertainty(
+            w_arr, fwhm_arr, fwhm_weighted, sigma_f_arr
+        )
 
         result[det] = {"fwhm": fwhm_weighted, "unc": unc_total, "expo": total_expo}
 
@@ -402,15 +469,7 @@ def weighted_value_per_det_type(
         # replace any remaining non-finite sigma with 0
         s_arr = np.where(np.isfinite(s_arr), s_arr, 0.0)
 
-        # measurement component: quadrature propagation through weighted average
-        unc_meas = float(np.sqrt(np.sum((w_arr * s_arr) ** 2)) / total_w)
-
-        # scatter component: weighted variance across entries
-        var_w = float(np.sum(w_arr * (vals_arr - mean) ** 2) / total_w)
-        n_eff = float(total_w**2 / np.sum(w_arr**2))
-        unc_scatter = float(np.sqrt(var_w / n_eff)) if n_eff > 0 else 0.0
-
-        unc_total = float(np.sqrt(unc_meas**2 + unc_scatter**2))
+        unc_total = compute_weighted_uncertainty(w_arr, vals_arr, mean, s_arr)
         return {"value": mean, "unc": unc_total}
 
     result = {}
@@ -452,10 +511,13 @@ def plot_resolution_per_det_type(
     for det_type in results_dict:
         if "fwhm" in results_dict[det_type][ene_values[0]].keys():
             fwhms = [results_dict[det_type][ene]["fwhm"] for ene in ene_values]
+            uncs = [results_dict[det_type][ene]["unc"] for ene in ene_values]
+            plt.errorbar(
+                ene_values, fwhms, yerr=uncs, label=det_type, marker=".", linestyle="--"
+            )
         else:
             fwhms = [results_dict[det_type][ene] for ene in ene_values]
-
-        plt.plot(ene_values, fwhms, label=det_type, marker="o", linestyle="--")
+            plt.plot(ene_values, fwhms, label=det_type, marker=".", linestyle="--")
 
     plt.xlabel("Energy [keV]")
     plt.ylabel("FWHM [keV]")
@@ -514,11 +576,12 @@ def get_eres_per_detector(
                 nested_dict[period][run][ge]["expo"] = exp_kg_yr
 
                 # get a and b
-                a, b, a_unc, b_unc = get_eres(chmap, ge, pars)
+                a, b, a_unc, b_unc, cov = get_eres(chmap, ge, pars)
                 nested_dict[period][run][ge]["a"] = a
                 nested_dict[period][run][ge]["b"] = b
                 nested_dict[period][run][ge]["a_unc"] = a_unc
                 nested_dict[period][run][ge]["b_unc"] = b_unc
+                nested_dict[period][run][ge]["ab_corr"] = cov
 
     return nested_dict
 
@@ -568,6 +631,8 @@ def get_eres(chmap: object, ge: str, pars: dict) -> tuple[float, float]:
         Constant term of the FWHM parametrisation.
     b : float
         Linear term of the FWHM parametrisation.
+    cov : float
+        Covariance between a and b.
     """
     channel = f"ch{chmap[ge].daq.rawid}"
 
@@ -577,5 +642,8 @@ def get_eres(chmap: object, ge: str, pars: dict) -> tuple[float, float]:
     uncertainties = pars[channel]["results"]["partition_ecal"]["cuspEmax_ctc_cal"][
         "eres_linear"
     ]["uncertainties"]
+    cov = pars[channel]["results"]["partition_ecal"]["cuspEmax_ctc_cal"]["eres_linear"][
+        "cov"
+    ][0][1]
 
-    return parameters["a"], parameters["b"], uncertainties["a"], uncertainties["b"]
+    return parameters["a"], parameters["b"], uncertainties["a"], uncertainties["b"], cov
