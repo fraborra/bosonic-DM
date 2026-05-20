@@ -1,11 +1,25 @@
 from __future__ import annotations
 
+import logging
+from pathlib import Path
+
 import awkward as ak
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import polars as pl
 from lgdo import lh5
 from tqdm.notebook import tqdm
+
+logger = logging.getLogger(__name__)
+
+_DET_TYPE_MAP = {"B": "BEGe", "C": "COAX", "V": "ICPC", "P": "PPC"}
+_DET_TYPE_COLOR = {
+    "BEGe": "tab:blue",
+    "COAX": "tab:orange",
+    "ICPC": "tab:green",
+    "PPC": "tab:red",
+}
 
 
 def select_channel(energies, channels, rawid):
@@ -116,6 +130,16 @@ def plot_e_det_type(ene_dict, ene, bins=300, lw=1):
     plt.show()
 
 
+def get_rawid_lists(chmap, rawids):
+    rawid_by_det_type = {"ICPC": [], "BEGe": [], "PPC": [], "COAX": []}
+
+    for rid in np.unique(rawids):
+        ge = chmap.map("daq.rawid")[rid]["name"]
+        rawid_by_det_type[_DET_TYPE_MAP[ge[0]]].append(rid)
+
+    return rawid_by_det_type
+
+
 def get_values_type(det_dict, ene, bins, lw=1):
     bege = ak.Array([])
     coax = ak.Array([])
@@ -147,44 +171,56 @@ def get_values_type(det_dict, ene, bins, lw=1):
     plt.show()
 
 
-def get_mean_fcc_det_type(ratio_dict, key="ratio"):
-    """Compute per-detector-type mean of a nested dict {ene: {ge: {key: value}}}.
+def get_mean_fcc_det_type(
+    ratio_dict: dict,
+    key: str = "ratio",
+    weight_key: str = "expo",
+) -> dict:
+    """Compute per-detector-type weighted mean of a nested dict.
 
     Parameters
     ----------
-    ratio_dict : dict
-        Nested dictionary with structure ``{ene: {ge: {key: value, ...}, ...}, ...}``.
-    key : str, optional
+    ratio_dict
+        Nested dictionary with structure
+        ``{ene: {ge: {key: value, weight_key: weight, ...}, ...}, ...}``.
+    key
         Inner key whose value is averaged across detectors of the same type.
-        Defaults to ``"ratio"``.
+    weight_key
+        Inner key used as weight for the weighted average.
     """
-    ratio_dict_means = {}
+    ratio_dict_means: dict = {}
 
-    for ene in ratio_dict.keys():
+    for ene, ge_dict in ratio_dict.items():
         ratio_dict_means[ene] = {}
 
-        bege = []
-        coax = []
-        icpc = []
-        ppc = []
+        type_data: dict[str, dict[str, list]] = {
+            label: {"vals": [], "w": []} for label in _DET_TYPE_MAP.values()
+        }
 
-        for ge in ratio_dict[ene].keys():
-            if ge[0] == "B":
-                bege.append(ratio_dict[ene][ge][key])
+        for ge, data_dict in ge_dict.items():
+            prefix = ge[0].upper()
+            det_type = _DET_TYPE_MAP.get(prefix)
+            if det_type is None:
+                continue
 
-            if ge[0] == "C":
-                coax.append(ratio_dict[ene][ge][key])
+            val = data_dict.get(key)
+            w = data_dict.get(weight_key)
+            if val is None or w is None:
+                continue
 
-            if ge[0] == "V":
-                icpc.append(ratio_dict[ene][ge][key])
+            type_data[det_type]["vals"].append(val)
+            type_data[det_type]["w"].append(w)
 
-            if ge[0] == "P":
-                ppc.append(ratio_dict[ene][ge][key])
+        for det_type, d in type_data.items():
+            vals_arr = clean_array(d["vals"])
+            w_arr = clean_array(d["w"])
 
-        ratio_dict_means[ene]["BEGe"] = np.mean(clean_array(bege))
-        ratio_dict_means[ene]["ICPC"] = np.mean(clean_array(icpc))
-        ratio_dict_means[ene]["COAX"] = np.mean(clean_array(coax))
-        ratio_dict_means[ene]["PPC"] = np.mean(clean_array(ppc))
+            # keep only entries where both value and weight survived cleaning
+            min_len = min(len(vals_arr), len(w_arr))
+            vals_arr = vals_arr[:min_len]
+            w_arr = w_arr[:min_len]
+
+            ratio_dict_means[ene][det_type] = weighted_mean(vals_arr, w_arr)
 
     return ratio_dict_means
 
@@ -193,6 +229,72 @@ def clean_array(arr):
     arr = np.asarray(arr)
     arr = arr.astype(float)
     return arr[(arr != 0) & np.isfinite(arr)]
+
+
+def weighted_mean(
+    values: np.ndarray,
+    weights: np.ndarray,
+) -> float:
+    """Compute the weighted mean ``sum(w * v) / sum(w)``.
+
+    Parameters
+    ----------
+    values
+        Array of values.
+    weights
+        Array of weights (same length as *values*).
+
+    Returns
+    -------
+    float
+        Weighted mean, or ``nan`` if the total weight is zero or arrays are empty.
+    """
+    values = np.asarray(values, dtype=float)
+    weights = np.asarray(weights, dtype=float)
+
+    total_w = np.sum(weights)
+    if total_w == 0 or len(values) == 0:
+        return np.nan
+    return float(np.sum(weights * values) / total_w)
+
+
+def compute_weighted_uncertainty(
+    w_arr: np.ndarray,
+    vals_arr: np.ndarray,
+    mean_val: float,
+    s_arr: np.ndarray,
+) -> float:
+    """Compute the total weighted uncertainty including measurement and scatter components.
+
+    Parameters
+    ----------
+    w_arr
+        Array of weights.
+    vals_arr
+        Array of values.
+    mean_val
+        Weighted mean of the values.
+    s_arr
+        Array of uncertainties for each value.
+
+    Returns
+    -------
+    float
+        Total combined uncertainty (measurement ⊕ scatter).
+    """
+    total_w = np.sum(w_arr)
+    if total_w == 0:
+        return 0.0
+
+    # measurement component: quadrature propagation through weighted average
+    unc_meas = float(np.sqrt(np.sum((w_arr * s_arr) ** 2)) / total_w)
+
+    # scatter component: weighted variance across entries
+    var_w = float(np.sum(w_arr * (vals_arr - mean_val) ** 2) / total_w)
+    n_eff = float(total_w**2 / np.sum(w_arr**2))
+    unc_scatter = float(np.sqrt(var_w / n_eff)) if n_eff > 0 else 0.0
+
+    return float(np.sqrt(unc_meas**2 + unc_scatter**2))
 
 
 def ak_to_pandas(ak_obj1, ak_obj2):
@@ -229,3 +331,111 @@ def get_values_sorted(det_dict, ges_sorted):
         values.append(det_dict[ge]["ratio"])
 
     return values, ges_sorted
+
+
+## NEW VERSION
+
+
+def build_parquet_dataset(
+    simulated_energies: list[int],
+    scratch_folder: str | Path,
+    job_base: str,
+    outdir_name: str,
+    overwrite: bool = False,
+) -> None:
+    """Build a parquet dataset partitioned by simulated energy.
+
+    For each energy in `simulated_energies`, the function:
+      - locates the corresponding LH5 file,
+      - reads the event data,
+      - selects multiplicity-1 events,
+      - converts awkward arrays to a pandas DataFrame,
+      - appends a `sim_e` column,
+      - concatenates all energies together,
+      - writes the final dataset as partitioned parquet.
+
+    Parameters
+    ----------
+    simulated_energies : list[int]
+        List of simulated energies in keV.
+        Example:
+            [500, 1000, 1500]
+
+    scratch_folder : str | Path
+        Base scratch directory containing the generated LH5 files.
+
+    job_base : str
+        Job string template containing the `{tag}` placeholder.
+        Example:
+            "fromfile_dark_compton_{tag}_hpge_bulk"
+
+        The placeholder is replaced with:
+            tag = f"{energy}keV"
+
+    outdir_name : str
+        Final name of the parquet output directory.
+        Example:
+            "dark-compton"
+
+        The dataset will be written to:
+            ./v1/parquet/{outdir_name}
+
+    overwrite : bool, default=False
+        If True, remove the output directory if it already exists.
+        If False and the output directory exists, an exception
+        is raised.
+
+    Returns
+    -------
+    None
+        The function writes the parquet dataset to disk and
+        does not return any object.
+    """
+    outdir = Path(f"./v1/parquet/{outdir_name}")
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    for ene in tqdm(simulated_energies):
+        tag = f"{ene}keV"
+
+        job_string = job_base.format(tag=tag)
+
+        # If outfile already exist and overwrite=False exit
+        partition_dir = outdir / f"sim_e={ene}"
+        partition_dir.mkdir(parents=True, exist_ok=True)
+        outfile = partition_dir / f"{job_string}.parquet"
+
+        if outfile.exists() and not overwrite:
+            msg = f"File already exists: {outfile}"
+            raise FileExistsError(msg)
+
+        if overwrite and outfile.exists():
+            outfile.unlink()
+
+        # Search for simulation output file
+        search_dir = Path(scratch_folder) / "generated" / "tier" / "cvt"
+        filename_pattern = f"l200cfg01-{job_string}-tier_cvt.lh5"
+        matches = list(search_dir.glob(filename_pattern))
+
+        if len(matches) == 0:
+            logger.warning("File not found for %d keV", ene)
+            continue
+
+        cvt_file = str(matches[0])
+
+        data = lh5.read_as(
+            "evt",
+            cvt_file,
+            field_mask=["coincident", "geds", "trigger"],
+            library="ak",
+        )
+
+        tmp = data.geds[data.geds.multiplicity == 1]
+        tmp2 = data.trigger[data.geds.multiplicity == 1]
+
+        df = ak_to_pandas(tmp, tmp2)
+
+        df["sim_e"] = np.full(len(df), ene, dtype=int)
+
+        pl_df = pl.from_pandas(df, include_index=False)
+
+        pl_df.write_parquet(outfile)

@@ -4,6 +4,7 @@ v1/tiers/
 
 # data files
 *.parquet
+v1/dictionaries/first.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
