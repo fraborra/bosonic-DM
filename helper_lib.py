@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 import awkward as ak
@@ -324,13 +325,37 @@ def get_rawids_map(chmap, ges):
     return rawids_map
 
 
-def get_values_sorted(det_dict, ges_sorted):
+def get_values_sorted(
+    det_dict: Mapping[str, dict], ges_sorted: Sequence[str]
+) -> tuple[list[str], list[float]]:
+    """Extract ratio values from a dictionary according to a specific detector order.
+
+    Parameters
+    ----------
+    det_dict
+        Dictionary containing ratio values for each detector.
+        Example: ``{'V02160A': {'ratio': 0.9, ...}, ...}``
+    ges_sorted
+        List of detector names specifying the desired order.
+
+    Returns
+    -------
+    tuple[list[str], list[float]]
+        A tuple containing the list of detectors and the corresponding
+        ratio values ordered as requested. If a detector is not found
+        in *det_dict*, its ratio defaults to ``nan``.
+    """
     values = []
+    keys = []
 
     for ge in ges_sorted:
-        values.append(det_dict[ge]["ratio"])
+        keys.append(ge)
+        if ge in det_dict:
+            values.append(det_dict[ge].get("ratio", np.nan))
+        else:
+            values.append(np.nan)
 
-    return values, ges_sorted
+    return keys, values
 
 
 ## NEW VERSION
@@ -439,3 +464,128 @@ def build_parquet_dataset(
         pl_df = pl.from_pandas(df, include_index=False)
 
         pl_df.write_parquet(outfile)
+
+
+def compute_ratio_from_lazyframe(
+    lf: pl.LazyFrame,
+    eres_dict: dict,
+    simulated_energies: Sequence[int],
+    rawid_by_det_type: Mapping[str, Sequence[int]],
+    chmap: object,
+) -> dict:
+    """Compute per-detector efficiency ratios from a Polars lazy scan.
+
+    For every combination of simulated energy and detector listed in
+    *eres_dict*, the function:
+
+    1. Looks up the detector-specific FWHM from *eres_dict*.
+    2. Defines the full-energy-peak integration window as
+       ``[e_value - 2·FWHM, e_value + 2·FWHM]``.
+    3. Filters the lazy frame *lf* (collecting only the needed rows)
+       to count the events inside the window (``n_events``) and the
+       total number of good-channel events for that detector and
+       simulated energy (``n_primaries``).
+    4. Computes ``ratio = n_events / n_primaries``
+       (or ``nan`` when ``n_primaries == 0``).
+
+    Parameters
+    ----------
+    lf
+        A Polars *lazy* scan of the parquet dataset.  Expected columns:
+        ``rawid``, ``energy``, ``sim_e``, ``is_good_channel``.
+    eres_dict
+        Nested dictionary with structure
+        ``{energy: {detector_name: {"fwhm": float, ...}, ...}, ...}``
+        as produced by the resolution-extraction pipeline
+        (e.g. ``eres_per_det_tot.yaml``).
+    simulated_energies
+        List of simulated energies (in keV) to iterate over.
+    rawid_by_det_type
+        Mapping ``{det_type: [rawid, ...], ...}`` used only to build
+        the inverse map rawid → detector name when *chmap* is not
+        available for a given rawid.
+    chmap
+        LEGEND channel-map object (``LegendMetadata.channelmap(...)``).
+        Must support ``chmap.map("daq.rawid")[rawid]["name"]``.
+
+    Returns
+    -------
+    dict
+        Nested dictionary with structure::
+
+            {
+                energy: {
+                    detector_name: {
+                        "n_events":    int,
+                        "n_primaries": int,
+                        "ratio":       float,
+                        "expo":        float,   # from eres_dict
+                    },
+                    ...
+                },
+                ...
+            }
+    """
+    # Build an inverse map: rawid → detector name for quick lookup
+    all_rawids: list[int] = []
+    for rids in rawid_by_det_type.values():
+        all_rawids.extend(rids)
+
+    rawid_to_name: dict[int, str] = {}
+    for rid in all_rawids:
+        try:
+            rawid_to_name[rid] = chmap.map("daq.rawid")[rid]["name"]
+        except (KeyError, TypeError):
+            continue
+
+    ratio_dict: dict = {}
+
+    for ene in tqdm(simulated_energies):
+        ene_key = int(ene)
+        ratio_dict[ene_key] = {}
+
+        # Skip energies not present in the resolution dictionary
+        if ene_key not in eres_dict:
+            logger.warning("Energy %d keV not found in eres_dict, skipping", ene_key)
+            continue
+
+        det_eres = eres_dict[ene_key]
+
+        for det_name, eres_info in det_eres.items():
+            fwhm = float(eres_info["fwhm"])
+            low = ene - 2.0 * fwhm
+            high = ene + 2.0 * fwhm
+
+            # Resolve rawid for this detector
+            rawid: int | None = None
+            try:
+                rawid = chmap[det_name].daq.rawid
+            except (KeyError, AttributeError):
+                logger.warning("Cannot resolve rawid for %s, skipping", det_name)
+                continue
+
+            # Collect counts from the lazy frame.
+            # First: all good-channel events for this detector + energy
+            df_filtered = lf.filter(
+                (pl.col("rawid") == rawid)
+                & (pl.col("is_good_channel"))
+                & (pl.col("sim_e") == ene)
+            ).collect()
+
+            n_primaries: int = len(df_filtered)
+
+            # Second: events inside the FEP window
+            n_events: int = int(
+                df_filtered.filter(pl.col("energy").is_between(low, high)).height
+            )
+
+            ratio: float = n_events / n_primaries if n_primaries > 0 else np.nan
+
+            ratio_dict[ene_key][det_name] = {
+                "n_events": n_events,
+                "n_primaries": n_primaries,
+                "ratio": ratio,
+                "expo": float(eres_info.get("expo", 0.0)),
+            }
+
+    return ratio_dict

@@ -1,6 +1,11 @@
 # specific folders
 legend-metadata/
 v1/tiers/
+plots/
+tmp_configfiles/
+
+# not useful .md files
+*.md
 
 # data files
 *.parquet
