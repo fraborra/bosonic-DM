@@ -522,13 +522,13 @@ def build_parquet_dataset(
         pl_df.write_parquet(outfile)
 
 
-def compute_ratio_from_lazyframe(
+def compute_efficiency_from_lazyframe(
     lf: pl.LazyFrame,
     eres_dict: dict,
     simulated_energies: Sequence[int],
     chmap: object,
 ) -> dict:
-    """Compute per-detector efficiency ratios from a Polars lazy scan.
+    """Compute per-detector efficiencies from a Polars lazy scan.
 
     For every combination of simulated energy and detector listed in
     *eres_dict*, the function:
@@ -569,10 +569,13 @@ def compute_ratio_from_lazyframe(
             {
                 energy: {
                     detector_name: {
-                        "n_events":    int,
-                        "n_primaries": int,
-                        "ratio":       float,
-                        "expo":        float,   # from eres_dict
+                        "n_events":         int,
+                        "n_primaries":      int,
+                        "ratio":            float,
+                        "ratio_sigma":      float,
+                        "ratio_sigma_freq": float,
+                        "ratio_syst_fwhm":  float,
+                        "expo":             float,   # from eres_dict
                     },
                     ...
                 },
@@ -633,6 +636,12 @@ def compute_ratio_from_lazyframe(
                 )
             ).height
 
+            if n_primaries > 0:
+                eff = n_events / n_primaries
+                ratio_sigma_freq = float(np.sqrt(eff * (1.0 - eff) / n_primaries))
+            else:
+                ratio_sigma_freq = 0.0
+
             ratio, ratio_sigma = bayesian_efficiency(n_events, n_primaries)
             ratio_up, _ = bayesian_efficiency(n_events_up, n_primaries)
             ratio_down, _ = bayesian_efficiency(n_events_down, n_primaries)
@@ -644,6 +653,7 @@ def compute_ratio_from_lazyframe(
                 "n_primaries": n_primaries,
                 "ratio": ratio,
                 "ratio_sigma": ratio_sigma,
+                "ratio_sigma_freq": ratio_sigma_freq,
                 "ratio_syst_fwhm": ratio_syst_fwhm,
                 "expo": float(eres_info.get("expo", 0.0)),
             }
