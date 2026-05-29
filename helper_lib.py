@@ -173,9 +173,10 @@ def get_values_type(det_dict, ene, bins, lw=1):
 
 
 def get_mean_fcc_det_type(
-    ratio_dict: dict,
+    ratio_dict: Mapping,
     key: str = "ratio",
     weight_key: str = "expo",
+    unc_key: str | None = None,
 ) -> dict:
     """Compute per-detector-type weighted mean of a nested dict.
 
@@ -188,6 +189,11 @@ def get_mean_fcc_det_type(
         Inner key whose value is averaged across detectors of the same type.
     weight_key
         Inner key used as weight for the weighted average.
+    unc_key
+        Inner key used as the uncertainty for each detector's value. If provided,
+        the uncertainty is propagated using `compute_weighted_uncertainty` and
+        the function returns a dict ``{"value": mean, "unc": unc_total}`` instead
+        of just a float.
     """
     ratio_dict_means: dict = {}
 
@@ -195,7 +201,7 @@ def get_mean_fcc_det_type(
         ratio_dict_means[ene] = {}
 
         type_data: dict[str, dict[str, list]] = {
-            label: {"vals": [], "w": []} for label in _DET_TYPE_MAP.values()
+            label: {"vals": [], "w": [], "unc": []} for label in _DET_TYPE_MAP.values()
         }
 
         for ge, data_dict in ge_dict.items():
@@ -211,17 +217,34 @@ def get_mean_fcc_det_type(
 
             type_data[det_type]["vals"].append(val)
             type_data[det_type]["w"].append(w)
+            if unc_key is not None:
+                type_data[det_type]["unc"].append(data_dict.get(unc_key, 0.0))
 
         for det_type, d in type_data.items():
-            vals_arr = clean_array(d["vals"])
-            w_arr = clean_array(d["w"])
+            if not d["vals"]:
+                continue
 
-            # keep only entries where both value and weight survived cleaning
-            min_len = min(len(vals_arr), len(w_arr))
-            vals_arr = vals_arr[:min_len]
-            w_arr = w_arr[:min_len]
+            vals_arr = np.array(d["vals"], dtype=float)
+            w_arr = np.array(d["w"], dtype=float)
 
-            ratio_dict_means[ene][det_type] = weighted_mean(vals_arr, w_arr)
+            # Mask to drop non-finite values/weights and keep arrays aligned
+            mask = np.isfinite(vals_arr) & np.isfinite(w_arr)
+            vals_arr = vals_arr[mask]
+            w_arr = w_arr[mask]
+
+            if len(vals_arr) == 0 or np.sum(w_arr) == 0:
+                continue
+
+            mean = weighted_mean(vals_arr, w_arr)
+
+            if unc_key is not None:
+                s_arr = np.array(d["unc"], dtype=float)[mask]
+                s_arr = np.where(np.isfinite(s_arr), s_arr, 0.0)
+
+                unc_total = compute_weighted_uncertainty(w_arr, vals_arr, mean, s_arr)
+                ratio_dict_means[ene][det_type] = {"value": mean, "unc": unc_total}
+            else:
+                ratio_dict_means[ene][det_type] = mean
 
     return ratio_dict_means
 
@@ -257,6 +280,39 @@ def weighted_mean(
     if total_w == 0 or len(values) == 0:
         return np.nan
     return float(np.sum(weights * values) / total_w)
+
+
+def bayesian_efficiency(
+    k: int,
+    n: int,
+    alpha0: float = 0.5,
+    beta0: float = 0.5,
+) -> tuple[float, float]:
+    """Compute Bayesian estimate of binomial efficiency with a Beta conjugate prior.
+
+    Parameters
+    ----------
+    k
+        Number of successes (events in the FEP window).
+    n
+        Number of trials (total good-channel events).
+    alpha0
+        First shape parameter of the Beta prior (default: Jeffrey's 0.5).
+    beta0
+        Second shape parameter of the Beta prior (default: Jeffrey's 0.5).
+
+    Returns
+    -------
+    tuple[float, float]
+        Posterior mean (ratio) and posterior standard deviation (ratio uncertainty).
+    """
+    alpha = alpha0 + k
+    beta = beta0 + n - k
+
+    mean = alpha / (alpha + beta)
+    var = (alpha * beta) / ((alpha + beta) ** 2 * (alpha + beta + 1))
+
+    return mean, float(np.sqrt(var))
 
 
 def compute_weighted_uncertainty(
@@ -470,7 +526,6 @@ def compute_ratio_from_lazyframe(
     lf: pl.LazyFrame,
     eres_dict: dict,
     simulated_energies: Sequence[int],
-    rawid_by_det_type: Mapping[str, Sequence[int]],
     chmap: object,
 ) -> dict:
     """Compute per-detector efficiency ratios from a Polars lazy scan.
@@ -480,7 +535,8 @@ def compute_ratio_from_lazyframe(
 
     1. Looks up the detector-specific FWHM from *eres_dict*.
     2. Defines the full-energy-peak integration window as
-       ``[e_value - 2·FWHM, e_value + 2·FWHM]``.
+       ``[e_value - 2·FWHM, e_value + 2·FWHM]``, where ``e_value`` is the
+       reconstructed energy corresponding to the simulated energy ``ene``.
     3. Filters the lazy frame *lf* (collecting only the needed rows)
        to count the events inside the window (``n_events``) and the
        total number of good-channel events for that detector and
@@ -491,19 +547,16 @@ def compute_ratio_from_lazyframe(
     Parameters
     ----------
     lf
-        A Polars *lazy* scan of the parquet dataset.  Expected columns:
-        ``rawid``, ``energy``, ``sim_e``, ``is_good_channel``.
+        A Polars *lazy* scan of the parquet dataset partitioned by ``sim_e``.
+        Expected columns: ``rawid``, ``energy``, ``sim_e``, ``is_good_channel``.
     eres_dict
         Nested dictionary with structure
         ``{energy: {detector_name: {"fwhm": float, ...}, ...}, ...}``
         as produced by the resolution-extraction pipeline
         (e.g. ``eres_per_det_tot.yaml``).
     simulated_energies
-        List of simulated energies (in keV) to iterate over.
-    rawid_by_det_type
-        Mapping ``{det_type: [rawid, ...], ...}`` used only to build
-        the inverse map rawid → detector name when *chmap* is not
-        available for a given rawid.
+        List of simulated energies (in keV) to iterate over. The ``ene``
+        in the loop corresponds to that simulated-energy partition.
     chmap
         LEGEND channel-map object (``LegendMetadata.channelmap(...)``).
         Must support ``chmap.map("daq.rawid")[rawid]["name"]``.
@@ -526,18 +579,6 @@ def compute_ratio_from_lazyframe(
                 ...
             }
     """
-    # Build an inverse map: rawid → detector name for quick lookup
-    all_rawids: list[int] = []
-    for rids in rawid_by_det_type.values():
-        all_rawids.extend(rids)
-
-    rawid_to_name: dict[int, str] = {}
-    for rid in all_rawids:
-        try:
-            rawid_to_name[rid] = chmap.map("daq.rawid")[rid]["name"]
-        except (KeyError, TypeError):
-            continue
-
     ratio_dict: dict = {}
 
     for ene in tqdm(simulated_energies):
@@ -553,6 +594,8 @@ def compute_ratio_from_lazyframe(
 
         for det_name, eres_info in det_eres.items():
             fwhm = float(eres_info["fwhm"])
+            fwhm_unc = float(eres_info.get("unc", 0.0))
+
             low = ene - 2.0 * fwhm
             high = ene + 2.0 * fwhm
 
@@ -572,19 +615,36 @@ def compute_ratio_from_lazyframe(
                 & (pl.col("sim_e") == ene)
             ).collect()
 
-            n_primaries: int = len(df_filtered)
+            n_primaries = df_filtered.height
 
-            # Second: events inside the FEP window
-            n_events: int = int(
-                df_filtered.filter(pl.col("energy").is_between(low, high)).height
-            )
+            # Second: events inside the nominal FEP window
+            n_events = df_filtered.filter(pl.col("energy").is_between(low, high)).height
 
-            ratio: float = n_events / n_primaries if n_primaries > 0 else np.nan
+            # FWHM systematic: vary window by ±sigma_FWHM and recount
+            fwhm_up = fwhm + fwhm_unc
+            fwhm_down = max(fwhm - fwhm_unc, 0.0)
+
+            n_events_up = df_filtered.filter(
+                pl.col("energy").is_between(ene - 2.0 * fwhm_up, ene + 2.0 * fwhm_up)
+            ).height
+            n_events_down = df_filtered.filter(
+                pl.col("energy").is_between(
+                    ene - 2.0 * fwhm_down, ene + 2.0 * fwhm_down
+                )
+            ).height
+
+            ratio, ratio_sigma = bayesian_efficiency(n_events, n_primaries)
+            ratio_up, _ = bayesian_efficiency(n_events_up, n_primaries)
+            ratio_down, _ = bayesian_efficiency(n_events_down, n_primaries)
+
+            ratio_syst_fwhm = abs(ratio_up - ratio_down) / 2.0
 
             ratio_dict[ene_key][det_name] = {
                 "n_events": n_events,
                 "n_primaries": n_primaries,
                 "ratio": ratio,
+                "ratio_sigma": ratio_sigma,
+                "ratio_syst_fwhm": ratio_syst_fwhm,
                 "expo": float(eres_info.get("expo", 0.0)),
             }
 

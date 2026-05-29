@@ -41,6 +41,13 @@ including Pixi configuration.
 - Make sure to include a concise description of the changes in a PR and link the
   relevant related PRs or issues
 
+## Statistics & Uncertainty
+- Use a **Bayesian approach** for all uncertainty calculations
+- Prefer a **Bayesian approach** for every analysis
+- For binomial efficiencies: use a **Beta conjugate prior** (Jeffrey's prior,
+  `Beta(0.5, 0.5)`) and derive posterior mean and standard deviation
+- Report posterior standard deviation as the uncertainty
+
 ## Boundaries
 
 - ALWAYS: make sure linting, testing and docs building succeed **before**
@@ -52,3 +59,4 @@ including Pixi configuration.
 
 - ALWAYS run commands via: `pixi run`
 - ALWAYS use `python3`, never `python`
+- ALWAYS run `pre-commit` only on modified files
