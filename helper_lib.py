@@ -177,6 +177,7 @@ def get_mean_fcc_det_type(
     key: str = "ratio",
     weight_key: str = "expo",
     unc_key: str | None = None,
+    exclude_dets: Sequence[str] | None = None,
 ) -> dict:
     """Compute per-detector-type weighted mean of a nested dict.
 
@@ -194,6 +195,8 @@ def get_mean_fcc_det_type(
         the uncertainty is propagated using `compute_weighted_uncertainty` and
         the function returns a dict ``{"value": mean, "unc": unc_total}`` instead
         of just a float.
+    exclude_dets
+        List of detector names to exclude from the average.
     """
     ratio_dict_means: dict = {}
 
@@ -205,6 +208,9 @@ def get_mean_fcc_det_type(
         }
 
         for ge, data_dict in ge_dict.items():
+            if exclude_dets is not None and ge in exclude_dets:
+                continue
+
             prefix = ge[0].upper()
             det_type = _DET_TYPE_MAP.get(prefix)
             if det_type is None:
@@ -354,22 +360,65 @@ def compute_weighted_uncertainty(
     return float(np.sqrt(unc_meas**2 + unc_scatter**2))
 
 
-def ak_to_pandas(ak_obj1, ak_obj2):
-    df = pd.DataFrame()
+def ak_to_pandas(
+    ak_obj1: ak.Array,
+    ak_obj2: ak.Array,
+    library: str = "pandas",
+) -> pd.DataFrame | pl.DataFrame:
+    """Convert Awkward Array objects into a flat Pandas or Polars DataFrame.
 
-    df["energy"] = ak.to_numpy(ak.flatten(ak_obj1.energy))
-    df["energy_sum"] = ak.to_numpy(ak_obj1.energy_sum)
-    df["hit_idx"] = ak.to_numpy(ak.flatten(ak_obj1.hit_idx))
-    df["is_good_channel"] = ak.to_numpy(ak.flatten(ak_obj1.is_good_channel))
-    df["is_single_site"] = ak.to_numpy(ak.flatten(ak_obj1.is_single_site))
-    df["multiplicity"] = ak.to_numpy(ak_obj1.multiplicity)
-    df["rawid"] = ak.to_numpy(ak.flatten(ak_obj1.rawid))
+    This function extracts data from Awkward objects (data.geds and data.trigger)
+    for single-multiplicity events (multiplicity == 1) and converts them into a
+    flat DataFrame of the requested library.
 
-    df["evtid"] = ak.to_numpy(ak_obj2.evtid)
-    df["period"] = ak.to_numpy(ak_obj2.period)
-    df["run"] = ak.to_numpy(ak_obj2.run)
+    Parameters
+    ----------
+    ak_obj1 : ak.Array
+        Awkward object containing Germanium detector data (geds), filtered for
+        multiplicity == 1 events. It contains event-level variables (e.g. energy_sum,
+        multiplicity) and channel/hit-level nested arrays (e.g. energy, hit_idx).
+    ak_obj2 : ak.Array
+        Awkward object containing trigger data, filtered for multiplicity == 1 events.
+        It contains global event/trigger variables (e.g. evtid, period, run).
+    library : {"pandas", "polars"}, default="pandas"
+        The DataFrame library to return.
 
-    return df
+    Returns
+    -------
+    pd.DataFrame or pl.DataFrame
+        DataFrame with one row per event and columns for each variable.
+    """
+    data = {
+        # For nested fields in geds (ak_obj1), use ak.flatten to remove the nested
+        # list structure (since multiplicity == 1, there is exactly one value per
+        # event/list) and ak.to_numpy for the final conversion.
+        "energy": ak.to_numpy(ak.flatten(ak_obj1.energy)),
+        "energy_sum": ak.to_numpy(
+            ak_obj1.energy_sum
+        ),  # Already flat at event level, no flatten needed
+        "hit_idx": ak.to_numpy(ak.flatten(ak_obj1.hit_idx)),
+        "aoe": ak.to_numpy(ak.flatten(ak_obj1.aoe)),
+        "has_aoe": ak.to_numpy(ak.flatten(ak_obj1.has_aoe)),
+        "is_good_channel": ak.to_numpy(ak.flatten(ak_obj1.is_good_channel)),
+        "is_single_site": ak.to_numpy(ak.flatten(ak_obj1.is_single_site)),
+        "multiplicity": ak.to_numpy(
+            ak_obj1.multiplicity
+        ),  # Already flat at event level, no flatten needed
+        "rawid": ak.to_numpy(ak.flatten(ak_obj1.rawid)),
+        # For trigger fields (ak_obj2), variables are already flat at event level
+        # and do not have nested structures, so use ak.to_numpy directly.
+        "evtid": ak.to_numpy(ak_obj2.evtid),
+        "period": ak.to_numpy(ak_obj2.period),
+        "run": ak.to_numpy(ak_obj2.run),
+    }
+
+    if library.lower() == "pandas":
+        return pd.DataFrame(data)
+    if library.lower() == "polars":
+        return pl.DataFrame(data)
+
+    msg = f"Unknown library '{library}'; expected 'pandas' or 'polars'"
+    raise ValueError(msg)
 
 
 def get_rawids_map(chmap, ges):
@@ -382,24 +431,28 @@ def get_rawids_map(chmap, ges):
 
 
 def get_values_sorted(
-    det_dict: Mapping[str, dict], ges_sorted: Sequence[str]
+    det_dict: Mapping[str, dict],
+    ges_sorted: Sequence[str],
+    key: str = "ratio",
 ) -> tuple[list[str], list[float]]:
-    """Extract ratio values from a dictionary according to a specific detector order.
+    """Extract values from a dictionary according to a specific detector order.
 
     Parameters
     ----------
     det_dict
-        Dictionary containing ratio values for each detector.
+        Dictionary containing per-detector data.
         Example: ``{'V02160A': {'ratio': 0.9, ...}, ...}``
     ges_sorted
         List of detector names specifying the desired order.
+    key
+        Inner key whose value is extracted for each detector.
 
     Returns
     -------
     tuple[list[str], list[float]]
         A tuple containing the list of detectors and the corresponding
-        ratio values ordered as requested. If a detector is not found
-        in *det_dict*, its ratio defaults to ``nan``.
+        values ordered as requested. If a detector is not found
+        in *det_dict* or the key is missing, the value defaults to ``nan``.
     """
     values = []
     keys = []
@@ -407,7 +460,7 @@ def get_values_sorted(
     for ge in ges_sorted:
         keys.append(ge)
         if ge in det_dict:
-            values.append(det_dict[ge].get("ratio", np.nan))
+            values.append(det_dict[ge].get(key, np.nan))
         else:
             values.append(np.nan)
 
@@ -421,7 +474,8 @@ def build_parquet_dataset(
     simulated_energies: list[int],
     scratch_folder: str | Path,
     job_base: str,
-    outdir_name: str,
+    outdir_name: str | Path,
+    datasets_outdir: str | Path = "./v1/parquet",
     overwrite: bool = False,
 ) -> None:
     """Build a parquet dataset partitioned by simulated energy.
@@ -431,7 +485,7 @@ def build_parquet_dataset(
       - reads the event data,
       - selects multiplicity-1 events,
       - converts awkward arrays to a pandas DataFrame,
-      - appends a `sim_e` column,
+      - appends a `sim_e` column and a `coincident_spms` column,
       - concatenates all energies together,
       - writes the final dataset as partitioned parquet.
 
@@ -453,13 +507,13 @@ def build_parquet_dataset(
         The placeholder is replaced with:
             tag = f"{energy}keV"
 
-    outdir_name : str
+    outdir_name : str | Path
         Final name of the parquet output directory.
-        Example:
-            "dark-compton"
 
-        The dataset will be written to:
-            ./v1/parquet/{outdir_name}
+    datasets_outdir : str | Path, default="./v1/parquet"
+        Base directory for the parquet dataset.
+        The output dataset will be written to:
+            {datasets_outdir}/{outdir_name}
 
     overwrite : bool, default=False
         If True, remove the output directory if it already exists.
@@ -472,7 +526,7 @@ def build_parquet_dataset(
         The function writes the parquet dataset to disk and
         does not return any object.
     """
-    outdir = Path(f"./v1/parquet/{outdir_name}")
+    outdir = Path(f"{datasets_outdir}/{outdir_name}")
     outdir.mkdir(parents=True, exist_ok=True)
 
     for ene in tqdm(simulated_energies):
@@ -510,14 +564,17 @@ def build_parquet_dataset(
             library="ak",
         )
 
-        tmp = data.geds[data.geds.multiplicity == 1]
-        tmp2 = data.trigger[data.geds.multiplicity == 1]
+        mult1_mask = data.geds.multiplicity == 1
+        tmp = data.geds[mult1_mask]
+        tmp2 = data.trigger[mult1_mask]
+        pl_df = ak_to_pandas(tmp, tmp2, library="polars")
 
-        df = ak_to_pandas(tmp, tmp2)
-
-        df["sim_e"] = np.full(len(df), ene, dtype=int)
-
-        pl_df = pl.from_pandas(df, include_index=False)
+        # Store the SiPM coincidence flag instead of cutting on it
+        spms_col = ak.to_numpy(data.coincident.spms[mult1_mask])
+        pl_df = pl_df.with_columns(
+            pl.Series("coincident_spms", spms_col),
+            pl.lit(ene).alias("sim_e"),
+        )
 
         pl_df.write_parquet(outfile)
 
@@ -527,6 +584,8 @@ def compute_efficiency_from_lazyframe(
     eres_dict: dict,
     simulated_energies: Sequence[int],
     chmap: object,
+    scratch_folder: str | Path,
+    job_base: str,
 ) -> dict:
     """Compute per-detector efficiencies from a Polars lazy scan.
 
@@ -537,11 +596,11 @@ def compute_efficiency_from_lazyframe(
     2. Defines the full-energy-peak integration window as
        ``[e_value - 2·FWHM, e_value + 2·FWHM]``, where ``e_value`` is the
        reconstructed energy corresponding to the simulated energy ``ene``.
-    3. Filters the lazy frame *lf* (collecting only the needed rows)
-       to count the events inside the window (``n_events``) and the
-       total number of good-channel events for that detector and
-       simulated energy (``n_primaries``).
-    4. Computes ``ratio = n_events / n_primaries``
+    3. Collects the lazy frame *lf* **once per energy** and uses a
+       vectorised join + group-by to count events inside the FEP window
+       for every detector simultaneously.
+    4. Reads ``n_primaries`` from the STP files for each detector.
+    5. Computes ``ratio = n_events / n_primaries``
        (or ``nan`` when ``n_primaries == 0``).
 
     Parameters
@@ -559,7 +618,11 @@ def compute_efficiency_from_lazyframe(
         in the loop corresponds to that simulated-energy partition.
     chmap
         LEGEND channel-map object (``LegendMetadata.channelmap(...)``).
-        Must support ``chmap.map("daq.rawid")[rawid]["name"]``.
+        Must support ``chmap[det_name].daq.rawid``.
+    scratch_folder
+        Base scratch directory containing the generated LH5 STP files.
+    job_base
+        Job string template containing the ``{ene}`` placeholder.
 
     Returns
     -------
@@ -595,46 +658,96 @@ def compute_efficiency_from_lazyframe(
 
         det_eres = eres_dict[ene_key]
 
+        # Format the job string and find STP files once per energy
+        job_string = job_base.format(ene=ene)
+        stp_files = [
+            str(p)
+            for p in Path(f"{scratch_folder}/generated/tier/stp/{job_string}/").glob(
+                f"l200cfg01-{job_string}-job_*-tier_stp.lh5"
+            )
+        ]
+
+        # --- Phase 1: build per-detector info and read n_primaries ----------
+        det_rows: list[dict] = []
+        n_prim_map: dict[str, int] = {}
+        expo_map: dict[str, float] = {}
+
         for det_name, eres_info in det_eres.items():
-            fwhm = float(eres_info["fwhm"])
-            fwhm_unc = float(eres_info.get("unc", 0.0))
-
-            low = ene - 2.0 * fwhm
-            high = ene + 2.0 * fwhm
-
-            # Resolve rawid for this detector
-            rawid: int | None = None
             try:
                 rawid = chmap[det_name].daq.rawid
             except (KeyError, AttributeError):
                 logger.warning("Cannot resolve rawid for %s, skipping", det_name)
                 continue
 
-            # Collect counts from the lazy frame.
-            # First: all good-channel events for this detector + energy
-            df_filtered = lf.filter(
-                (pl.col("rawid") == rawid)
-                & (pl.col("is_good_channel"))
-                & (pl.col("sim_e") == ene)
-            ).collect()
+            n_primaries = 0
+            for stp_file in stp_files:
+                stp_ge = lh5.read_as(f"/stp/{det_name}", stp_file, library="ak")
+                n_primaries += len(np.unique(ak.to_numpy(stp_ge.evtid)))
+            n_prim_map[det_name] = n_primaries
+            expo_map[det_name] = float(eres_info.get("expo", 0.0))
 
-            n_primaries = df_filtered.height
-
-            # Second: events inside the nominal FEP window
-            n_events = df_filtered.filter(pl.col("energy").is_between(low, high)).height
-
-            # FWHM systematic: vary window by ±sigma_FWHM and recount
+            fwhm = float(eres_info["fwhm"])
+            fwhm_unc = float(eres_info.get("unc", 0.0))
             fwhm_up = fwhm + fwhm_unc
             fwhm_down = max(fwhm - fwhm_unc, 0.0)
 
-            n_events_up = df_filtered.filter(
-                pl.col("energy").is_between(ene - 2.0 * fwhm_up, ene + 2.0 * fwhm_up)
-            ).height
-            n_events_down = df_filtered.filter(
-                pl.col("energy").is_between(
-                    ene - 2.0 * fwhm_down, ene + 2.0 * fwhm_down
-                )
-            ).height
+            det_rows.append(
+                {
+                    "rawid": rawid,
+                    "det_name": det_name,
+                    "low": ene - 2.0 * fwhm,
+                    "high": ene + 2.0 * fwhm,
+                    "low_up": ene - 2.0 * fwhm_up,
+                    "high_up": ene + 2.0 * fwhm_up,
+                    "low_down": ene - 2.0 * fwhm_down,
+                    "high_down": ene + 2.0 * fwhm_down,
+                }
+            )
+
+        if not det_rows:
+            continue
+
+        det_df = pl.DataFrame(det_rows)
+        known_rawids = det_df["rawid"].to_list()
+
+        # --- Phase 2: single collect per energy -----------------------------
+        df_ene = (
+            lf.filter(
+                (pl.col("is_good_channel"))
+                & (pl.col("sim_e") == ene)
+                & (pl.col("rawid").is_in(known_rawids))
+            )
+            .select("rawid", "energy")
+            .collect()
+        )
+
+        # --- Phase 3: vectorised FEP counting via join + group_by -----------
+        df_joined = df_ene.join(det_df, on="rawid")
+
+        counts = df_joined.group_by("det_name").agg(
+            pl.col("energy")
+            .is_between(pl.col("low"), pl.col("high"))
+            .sum()
+            .alias("n_events"),
+            pl.col("energy")
+            .is_between(pl.col("low_up"), pl.col("high_up"))
+            .sum()
+            .alias("n_events_up"),
+            pl.col("energy")
+            .is_between(pl.col("low_down"), pl.col("high_down"))
+            .sum()
+            .alias("n_events_down"),
+        )
+
+        # Index counts by detector name for fast lookup
+        counts_map = {row["det_name"]: row for row in counts.iter_rows(named=True)}
+
+        # --- Phase 4: compute efficiencies ----------------------------------
+        for det_name, n_primaries in n_prim_map.items():
+            row = counts_map.get(det_name)
+            n_events = row["n_events"] if row else 0
+            n_events_up = row["n_events_up"] if row else 0
+            n_events_down = row["n_events_down"] if row else 0
 
             if n_primaries > 0:
                 eff = n_events / n_primaries
@@ -655,7 +768,575 @@ def compute_efficiency_from_lazyframe(
                 "ratio_sigma": ratio_sigma,
                 "ratio_sigma_freq": ratio_sigma_freq,
                 "ratio_syst_fwhm": ratio_syst_fwhm,
-                "expo": float(eres_info.get("expo", 0.0)),
+                "expo": expo_map[det_name],
             }
 
     return ratio_dict
+
+
+_FEP_COLORS = {
+    "e$^-$ + $\\gamma$": "red",
+    "$\\gamma$": "green",
+    "e$^-$": "purple",
+}
+
+
+def plot_lar_cut_spectra(
+    lf: pl.LazyFrame,
+    simulated_energies: Sequence[int],
+    chmap: object,
+    bin_factor: int = 2,
+    x_range: tuple[float, float] | None = None,
+    save_dir: str | Path = "notebooks/plots",
+) -> None:
+    """Plot the LAr-veto survival fraction as a function of energy.
+
+    For each simulated energy a 2x2 figure is produced with one panel
+    per detector type (BEGe, ICPC, PPC, COAX).  Each panel shows the
+    bin-by-bin survival fraction ``SF(E) = N_surviving / N_total``
+    with Bayesian uncertainty bands (Beta conjugate prior,
+    ``Beta(0.5, 0.5)``).  Three vertical bands mark the expected
+    full-energy-peak positions of the dark-Compton process:
+    e⁻ + gamma (total), gamma only, and e⁻ only.
+
+    Parameters
+    ----------
+    lf
+        Polars lazy scan of the parquet dataset.
+        Expected columns: ``rawid``, ``energy``, ``sim_e``,
+        ``is_good_channel``, ``coincident_spms``.
+    simulated_energies
+        Simulated energies (keV) to iterate over.
+    chmap
+        LEGEND channel-map object.  Used to map ``rawid`` → detector
+        type via ``chmap.map("daq.rawid")``.
+    # bins
+    #     Number of histogram bins (default 200).
+    x_range
+        Optional ``(low, high)`` tuple for the x-axis range.  If
+        *None*, the range is determined from the data.
+    save_dir
+        Directory where figures are saved.  Figures are named
+        ``lar_survival_fraction_{ene}keV.png``.
+    """
+    from dark_compton_generators import calculate_energies  # noqa: PLC0415
+
+    save_path = Path(save_dir)
+    save_path.mkdir(parents=True, exist_ok=True)
+
+    det_type_order = ["BEGe", "ICPC", "PPC", "COAX"]
+
+    for ene in tqdm(simulated_energies):
+        # --- Collect data for this energy -----------------------------------
+        df = (
+            lf.filter(pl.col("is_good_channel") & (pl.col("sim_e") == ene))
+            .select("rawid", "energy", "coincident_spms")
+            .collect()
+        )
+
+        if df.is_empty():
+            logger.warning("No data for %d keV, skipping", ene)
+            continue
+
+        # --- Map rawid → detector type via channel map ----------------------
+        rawid_map = chmap.map("daq.rawid")
+        unique_rawids = df["rawid"].unique().to_list()
+
+        type_rows: list[dict] = []
+        for rid in unique_rawids:
+            try:
+                name = rawid_map[rid]["name"]
+                det_type = _DET_TYPE_MAP.get(name[0].upper())
+                if det_type is not None:
+                    type_rows.append({"rawid": rid, "det_type": det_type})
+            except (KeyError, IndexError):
+                continue
+
+        if not type_rows:
+            logger.warning("No mappable rawids for %d keV, skipping", ene)
+            continue
+
+        type_df = pl.DataFrame(type_rows)
+        df = df.join(type_df, on="rawid", how="inner")
+
+        # --- Determine common x-range --------------------------------------
+        xlim = (
+            x_range
+            if x_range is not None
+            else (
+                float(df["energy"].min()),
+                float(df["energy"].max()),
+            )
+        )
+
+        # --- FEP positions for this simulated energy ------------------------
+        e_elec, e_gamma = calculate_energies(ene)
+        fep_lines = {
+            "e$^-$ + $\\gamma$": float(e_elec + e_gamma),
+            "$\\gamma$": float(e_gamma),
+            "e$^-$": float(e_elec),
+        }
+
+        # --- Plot 2x2 figure ------------------------------------------------
+        fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+        fig.suptitle(
+            f"LAr veto survival fraction - simulated {ene} keV",
+            fontsize=16,
+        )
+
+        for ax, det_type in zip(axes.flat, det_type_order, strict=False):
+            subset = df.filter(pl.col("det_type") == det_type)
+
+            if subset.is_empty():
+                ax.set_title(det_type, fontsize=13)
+                ax.text(
+                    0.5,
+                    0.5,
+                    "No data",
+                    transform=ax.transAxes,
+                    ha="center",
+                    va="center",
+                    fontsize=12,
+                    color="grey",
+                )
+                continue
+
+            all_energy = subset["energy"].to_numpy()
+            surv_energy = subset.filter(~pl.col("coincident_spms"))["energy"].to_numpy()
+
+            # Bin-by-bin counts
+            n_total, bin_edges = np.histogram(
+                all_energy,
+                bins=int(ene / bin_factor),
+                range=xlim,
+            )
+            n_surv, _ = np.histogram(surv_energy, bins=bin_edges)
+            bin_centres = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+
+            # Bayesian survival fraction per bin
+            mask = n_total > 0
+            sf = np.full_like(n_total, np.nan, dtype=float)
+            sf_sigma = np.full_like(n_total, np.nan, dtype=float)
+
+            for i in np.where(mask)[0]:
+                sf[i], sf_sigma[i] = bayesian_efficiency(
+                    int(n_surv[i]),
+                    int(n_total[i]),
+                )
+
+            ax.errorbar(
+                bin_centres[mask],
+                sf[mask],
+                yerr=sf_sigma[mask],
+                fmt=".",
+                markersize=3,
+                linewidth=0.8,
+                color=_DET_TYPE_COLOR[det_type],
+            )
+
+            # --- Shade the 3 FEP regions ------------------------------------
+            bin_width = bin_edges[1] - bin_edges[0]
+            for label, e_fep in fep_lines.items():
+                ax.axvspan(
+                    e_fep - bin_width,
+                    e_fep + bin_width,
+                    alpha=0.20,
+                    color=_FEP_COLORS[label],
+                    label=label,
+                )
+
+            ax.axhline(1.0, color="grey", linestyle="--", linewidth=0.6)
+            ax.set_ylim(-0.05, 1.15)
+            ax.set_xlabel("Energy in HPGe [keV]", fontsize=12)
+            ax.set_ylabel("Survival fraction", fontsize=12)
+            ax.set_title(det_type, fontsize=13)
+            ax.legend(fontsize=8, loc="lower left")
+
+        fig.tight_layout()
+        fig.savefig(
+            save_path / f"lar_survival_fraction_{ene}keV.png",
+            dpi=300,
+            bbox_inches="tight",
+        )
+        plt.show()
+
+
+def plot_aoe_by_detector(
+    lf: pl.LazyFrame,
+    eres_dict: Mapping,
+    chmap: object,
+    sim_e: int,
+    title_string: str | None = None,
+    energy_range: tuple[float, float] | None = None,
+    save_plot: bool = True,
+    show_plot: bool = True,
+    plot_m1: bool = True,
+    bin_edges: Sequence[float] | int = 150,
+    save_dir: str | Path = "plots",
+) -> None:
+    """Plot AoE histograms for each detector, split by coincident_spms status.
+
+    Only events with energy inside the specified energy range (or sim_e +- 2*FWHM
+    if not specified) are plotted. Two histograms are plotted: one for coincident_spms
+    == True (M1, step style, conditional on plot_m1) and one for coincident_spms
+    == False (M1 + LAr, filled style with alpha = 0.4).
+
+    Parameters
+    ----------
+    lf
+        Polars LazyFrame containing the data.
+    eres_dict
+        Dictionary containing energy resolution (FWHM) per detector.
+    chmap
+        LEGEND channel-map object.
+    sim_e
+        Selected simulated energy in keV.
+    energy_range
+        Optional custom energy range (low, high) in keV to study. If None, the FWHM
+        window (sim_e +- 2*FWHM) is computed per detector.
+    save_plot
+        Whether to save the generated plots to files.
+    show_plot
+        Whether to display the generated plots.
+    plot_m1
+        Whether to plot the M1 histogram (coincident_spms == True).
+    bin_edges
+        Number of histogram bins (int) or sequence defining the bin edges.
+    save_dir
+        Directory where the generated plots will be saved if save_plot is True.
+    """
+    ene_key = int(sim_e)
+    if ene_key not in eres_dict:
+        msg = f"Energy {ene_key} not found in eres_dict."
+        raise KeyError(msg)
+
+    det_eres = eres_dict[ene_key]
+
+    # --- Phase 1: Build per-detector info ----------
+    det_rows = []
+    for det_name, eres_info in det_eres.items():
+        try:
+            rawid = chmap[det_name].daq.rawid
+        except (KeyError, AttributeError):
+            logger.warning("Cannot resolve rawid for %s, skipping", det_name)
+            continue
+
+        if energy_range is not None:
+            low = energy_range[0]
+            high = energy_range[1]
+        else:
+            fwhm = float(eres_info["fwhm"])
+            low = sim_e - 2.0 * fwhm
+            high = sim_e + 2.0 * fwhm
+
+        det_rows.append(
+            {
+                "rawid": rawid,
+                "det_name": det_name,
+                "low": low,
+                "high": high,
+            }
+        )
+
+    if not det_rows:
+        logger.warning("No detector info found for simulated energy %d keV", sim_e)
+        return
+
+    det_df = pl.DataFrame(det_rows)
+    known_rawids = det_df["rawid"].to_list()
+
+    # --- Phase 2: Collect data for the selected energy ----------
+    df_ene = (
+        lf.filter(
+            (pl.col("is_good_channel"))
+            & (pl.col("sim_e") == sim_e)
+            & (pl.col("rawid").is_in(known_rawids))
+        )
+        .select("rawid", "energy", "aoe", "coincident_spms")
+        .collect()
+    )
+
+    if df_ene.is_empty():
+        logger.warning("No data found for simulated energy %d keV", sim_e)
+        return
+
+    # --- Phase 3: Join and filter within FWHM or custom energy window ----------
+    df_joined = df_ene.join(det_df, on="rawid")
+    df_filtered = df_joined.filter(
+        pl.col("energy").is_between(pl.col("low"), pl.col("high"))
+    )
+
+    if df_filtered.is_empty():
+        logger.warning("No events within window for simulated energy %d keV", sim_e)
+        return
+
+    # --- Phase 4: Plot per detector ----------
+    if save_plot:
+        save_path = Path(save_dir)
+        save_path.mkdir(parents=True, exist_ok=True)
+
+    unique_dets = df_filtered["det_name"].unique().to_list()
+
+    for det_name in unique_dets:
+        det_df = df_filtered.filter(pl.col("det_name") == det_name)
+        if det_df.is_empty():
+            continue
+
+        aoe_anticoincident = det_df.filter(~pl.col("coincident_spms"))["aoe"].to_numpy()
+        aoe_anticoincident_clean = aoe_anticoincident[np.isfinite(aoe_anticoincident)]
+
+        if plot_m1:
+            aoe_coincident = det_df["aoe"].to_numpy()
+            aoe_coincident_clean = aoe_coincident[np.isfinite(aoe_coincident)]
+            aoe_all_clean = aoe_coincident_clean
+            # Count events and NaNs for M1 (commented out as requested)
+            # n_coincident = len(aoe_coincident)
+            # nans_coincident = int(np.isnan(aoe_coincident).sum())
+        else:
+            aoe_all_clean = np.array([])
+
+        # Count events and NaNs for anticoincident (commented out as requested)
+        # n_anticoincident = len(aoe_anticoincident)
+        # nans_anticoincident = int(np.isnan(aoe_anticoincident).sum())
+
+        aoe_all = np.concatenate([aoe_all_clean, aoe_anticoincident_clean])
+        if len(aoe_all) == 0:
+            continue
+
+        if isinstance(bin_edges, (int, str)):
+            xmin, xmax = np.percentile(aoe_all, [0.1, 99.9])
+            hist_range = None if xmin == xmax else (xmin, xmax)
+        else:
+            hist_range = None
+
+        plt.figure(figsize=(10, 6))
+
+        # M1 (coincident_spms == True): step style
+        if plot_m1:
+            plt.hist(
+                aoe_coincident_clean,
+                bins=bin_edges,
+                range=hist_range,
+                label="M1",
+                histtype="step",
+                linewidth=1.5,
+                color="tab:blue",
+            )
+
+        # M1 + LAr (coincident_spms == False): filled but with alpha = 0.4
+        plt.hist(
+            aoe_anticoincident_clean,
+            bins=bin_edges,
+            range=hist_range,
+            label="M1 + LAr",
+            histtype="stepfilled",
+            alpha=0.4,
+            color="tab:orange",
+        )
+
+        plt.xlabel("AoE [a.u.]", fontsize=12)
+        plt.ylabel("Counts", fontsize=12)
+
+        if energy_range is not None:
+            title_str = f"AoE distribution - {det_name} ({energy_range[0]:0.0f} - {energy_range[1]:0.0f} keV)"
+            save_name = f"aoe_hist_{det_name}_{energy_range[0]:0.0f}_{energy_range[1]:0.0f}keV.png"
+        else:
+            title_str = f"AoE distribution - {det_name} ({sim_e}+-{2 * fwhm:0.1f} keV)"
+            save_name = f"aoe_hist_{det_name}_{sim_e}keV.png"
+
+        plt.yscale("log")
+
+        plt.title(title_str, fontsize=13)
+        # plt.grid(True, linestyle="--", alpha=0.5)
+        if title_string is not None:
+            plt.legend(fontsize=10, title=title_string)
+        else:
+            plt.legend(fontsize=10)
+
+        plt.tight_layout()
+        if save_plot:
+            plot_file = save_path / save_name
+            plt.savefig(plot_file, dpi=300, bbox_inches="tight")
+        if show_plot:
+            plt.show()
+        plt.close()
+
+
+def plot_aoe_by_detector_type(
+    lf: pl.LazyFrame,
+    eres_dict: Mapping,
+    chmap: object,
+    simulated_energies: Sequence[int],
+    title_string: str | None = None,
+    save_plot: bool = True,
+    show_plot: bool = True,
+    bin_edges: Sequence[float] | int = 150,
+    save_dir: str | Path = "plots",
+) -> None:
+    """Plot AoE histograms grouped by detector type for each simulated energy.
+
+    For each simulated energy, a single figure is produced with all detector
+    types (BEGe, ICPC, PPC, COAX) overlaid as step histograms. Only events
+    within each detector's specific FWHM window (sim_e ± 2·FWHM) are plotted,
+    and only for anticoincident (M1 + LAr cut) events.
+
+    Parameters
+    ----------
+    lf
+        Polars LazyFrame containing the data.
+    eres_dict
+        Nested dictionary ``{energy: {det_name: {"fwhm": float, ...}, ...}}``.
+    chmap
+        LEGEND channel-map object.
+    simulated_energies
+        List of simulated energies in keV to iterate over.
+    title_string
+        Optional legend title string.
+    save_plot
+        Whether to save the generated plots to files.
+    show_plot
+        Whether to display the generated plots.
+    bin_edges
+        Number of histogram bins (int) or sequence defining the bin edges.
+    save_dir
+        Directory where the generated plots will be saved if *save_plot* is
+        True.
+    """
+    if save_plot:
+        save_path = Path(save_dir)
+        save_path.mkdir(parents=True, exist_ok=True)
+
+    det_types = list(_DET_TYPE_MAP.values())  # BEGe, COAX, ICPC, PPC
+
+    for sim_e in tqdm(simulated_energies):
+        ene_key = int(sim_e)
+        if ene_key not in eres_dict:
+            logger.warning("Energy %d keV not found in eres_dict, skipping", ene_key)
+            continue
+
+        det_eres = eres_dict[ene_key]
+
+        # --- Phase 1: Build per-detector info with detector type ----------
+        det_rows: list[dict] = []
+        for det_name, eres_info in det_eres.items():
+            try:
+                rawid = chmap[det_name].daq.rawid
+            except (KeyError, AttributeError):
+                logger.warning("Cannot resolve rawid for %s, skipping", det_name)
+                continue
+
+            prefix = det_name[0].upper()
+            det_type = _DET_TYPE_MAP.get(prefix)
+            if det_type is None:
+                continue
+
+            fwhm = float(eres_info["fwhm"])
+            low = sim_e - 2.0 * fwhm
+            high = sim_e + 2.0 * fwhm
+
+            det_rows.append(
+                {
+                    "rawid": rawid,
+                    "det_name": det_name,
+                    "det_type": det_type,
+                    "low": low,
+                    "high": high,
+                }
+            )
+
+        if not det_rows:
+            logger.warning("No detector info found for simulated energy %d keV", sim_e)
+            continue
+
+        det_df = pl.DataFrame(det_rows)
+        known_rawids = det_df["rawid"].to_list()
+
+        # --- Phase 2: Collect data for the selected energy ----------
+        df_ene = (
+            lf.filter(
+                (pl.col("is_good_channel"))
+                & (pl.col("sim_e") == sim_e)
+                & (pl.col("rawid").is_in(known_rawids))
+            )
+            .select("rawid", "energy", "aoe", "coincident_spms")
+            .collect()
+        )
+
+        if df_ene.is_empty():
+            logger.warning("No data found for simulated energy %d keV", sim_e)
+            continue
+
+        # --- Phase 3: Join and filter within energy window ----------
+        df_joined = df_ene.join(det_df, on="rawid")
+        df_filtered = df_joined.filter(
+            pl.col("energy").is_between(pl.col("low"), pl.col("high"))
+        )
+
+        if df_filtered.is_empty():
+            logger.warning("No events within window for simulated energy %d keV", sim_e)
+            continue
+
+        # --- Phase 4: single figure, one histogram per detector type ----------
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        # Compute shared bin range across all detector types
+        aoe_all_types = df_filtered.filter(
+            pl.col("coincident_spms") == False  # noqa: E712
+        )["aoe"].to_numpy()
+        aoe_all_types = aoe_all_types[np.isfinite(aoe_all_types)]
+
+        if len(aoe_all_types) == 0:
+            logger.warning("No finite AoE values for simulated energy %d keV", sim_e)
+            plt.close(fig)
+            continue
+
+        if isinstance(bin_edges, int):
+            xmin, xmax = np.percentile(aoe_all_types, [0.1, 99.9])
+            hist_range = None if xmin == xmax else (xmin, xmax)
+        else:
+            hist_range = None
+
+        for det_type in det_types:
+            det_type_df = df_filtered.filter(
+                (pl.col("det_type") == det_type) & (pl.col("coincident_spms") == False)  # noqa: E712
+            )
+            if det_type_df.is_empty():
+                continue
+
+            aoe = det_type_df["aoe"].to_numpy()
+            aoe_clean = aoe[np.isfinite(aoe)]
+            if len(aoe_clean) == 0:
+                continue
+
+            ax.hist(
+                aoe_clean,
+                bins=bin_edges,
+                range=hist_range,
+                label=det_type,
+                histtype="step",
+                linewidth=1.5,
+                color=_DET_TYPE_COLOR[det_type],
+            )
+
+        ax.set_xlabel("AoE [a.u.]", fontsize=12)
+        ax.set_ylabel("Counts", fontsize=12)
+        ax.set_yscale("log")
+
+        title_str = f"AoE by detector type (M1 + LAr) — {sim_e} keV (±2·FWHM window)"
+        save_name = f"aoe_det_type_{sim_e}keV.png"
+
+        ax.set_title(title_str, fontsize=13)
+
+        if title_string is not None:
+            ax.legend(fontsize=10, title=title_string)
+        else:
+            ax.legend(fontsize=10)
+
+        fig.tight_layout()
+
+        if save_plot:
+            plot_file = save_path / save_name
+            fig.savefig(plot_file, dpi=300, bbox_inches="tight")
+        if show_plot:
+            plt.show()
+        plt.close(fig)
