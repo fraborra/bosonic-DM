@@ -37,6 +37,30 @@ def calculate_energies(m_dm):
     return T, omega_prime
 
 
+def get_energy_interval(m_dm: float, region: str) -> tuple[float, float]:
+    """Calculate the recoil energy interval for a given dark matter mass.
+
+    Parameters
+    ----------
+    m_dm : float
+        Dark matter mass (sim_e) in keV.
+    region : {"low", "mid"}
+        Selected region interval ("low" or "mid").
+
+    Returns
+    -------
+    tuple of float
+        The calculated (low, high) energy interval bounds in keV.
+    """
+    T, omega_prime = calculate_energies(m_dm)
+    if region == "low":
+        return 25.0, T - 10.0
+    if region == "mid":
+        return T + 10.0, omega_prime - 10.0
+    msg = f"Unknown region '{region}'; expected 'low' or 'mid'"
+    raise ValueError(msg)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate dark compton GPS macros.")
     parser.add_argument(
