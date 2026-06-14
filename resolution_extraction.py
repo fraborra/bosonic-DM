@@ -789,3 +789,115 @@ def plot_fwhm_vs_period_run(
         if pdf is not None:
             pdf.close()
             logger.info("Saved multi-page PDF to %s", pdf_path)
+
+
+def plot_fwhm_vs_period_run_overlay(
+    data: dict,
+    detectors: list[str],
+    energy: float = 1000.0,
+    fig_path: str | None = None,
+    show: bool = True,
+) -> None:
+    """Plot FWHM vs period-run for several detectors on the same figure.
+
+    Parameters
+    ----------
+    data : dict
+        Nested dict ``{period: {run: {detector: {"a", "b", "usability", ...}}}}``.
+    detectors : list of str
+        Detectors to overlay on the same axes.
+    energy : float, optional
+        Energy (keV) at which to evaluate ``sqrt(a + b*E)``.  Default is 1000 keV.
+    fig_path : str or None, optional
+        If given, the figure is saved to this path.  When ``None`` (default),
+        the figure is not saved.
+    show : bool, optional
+        Whether to call ``plt.show()``.  Set to ``False`` when running
+        non-interactively and only saving to file.
+    """
+    # ── 1. build a sorted list of (period, run) labels ──────────────────
+    period_runs: list[tuple[str, str]] = []
+    for period in sorted(data.keys()):
+        for run in sorted(data[period].keys()):
+            period_runs.append((period, run))
+
+    x_labels = [f"{p}-{r}" for p, r in period_runs]
+    x_pos = np.arange(len(x_labels))
+
+    if not detectors:
+        logger.warning("No detectors to plot.")
+        return
+
+    # ── 2. unique color per detector ────────────────────────────────────
+    cmap = plt.get_cmap("tab10") if len(detectors) <= 10 else plt.get_cmap("tab20")
+    _markers = ["o", "s", "^", "D", "v", "<", ">", "p", "h", "*"]
+
+    fig, ax = plt.subplots(figsize=(max(8, len(x_labels) * 0.45), 5))
+
+    for idx, det in enumerate(detectors):
+        fwhm_vals: list[float | None] = []
+        unc_vals: list[float | None] = []
+
+        for period, run in period_runs:
+            vals = data.get(period, {}).get(run, {}).get(det)
+            if (
+                vals is None
+                or vals.get("usability") != "on"
+                or "a" not in vals
+                or "b" not in vals
+            ):
+                fwhm_vals.append(None)
+                unc_vals.append(None)
+            else:
+                a_val = vals["a"]
+                b_val = vals["b"]
+                fwhm = compute_fwhm(a_val, b_val, energy)
+                fwhm_vals.append(fwhm)
+
+                a_unc = vals.get("a_unc", 0.0)
+                b_unc = vals.get("b_unc", 0.0)
+                ab_corr = vals.get("ab_corr", 0.0)
+                unc = propagate_resolution_uncertainty(
+                    a_val, b_val, a_unc, b_unc, ab_corr, energy
+                )
+                unc_vals.append(float(unc))
+
+        mask = np.array([v is not None for v in fwhm_vals])
+        if not mask.any():
+            logger.info("Detector %s has no valid data - skipping.", det)
+            continue
+
+        y_plot = np.array([v if v is not None else 0.0 for v in fwhm_vals])
+        e_plot = np.array([v if v is not None else 0.0 for v in unc_vals])
+
+        color = cmap(idx % cmap.N)
+        marker = _markers[idx % len(_markers)]
+
+        ax.errorbar(
+            x_pos[mask],
+            y_plot[mask],
+            yerr=e_plot[mask],
+            fmt=marker,
+            capsize=3,
+            color=color,
+            label=det,
+        )
+
+    ax.set_xticks(x_pos)
+    ax.set_xticklabels(x_labels, rotation=60, ha="right", fontsize=8)
+    ax.set_xlabel("Period - Run")
+    ax.set_ylabel(f"FWHM @{energy} keV [keV]")
+    ax.set_title("FWHM vs Period-Run")
+    ncol = int(np.ceil(len(detectors) / 15))
+    # Place the legend to the right of the plot area
+    ax.legend(
+        bbox_to_anchor=(1.02, 1.0), loc="upper left", ncol=ncol, borderaxespad=0.0
+    )
+    # Use tight layout to automaically make room for the legend on the right
+    fig.tight_layout()
+    if fig_path is not None:
+        fig.savefig(fig_path, dpi=400)
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)
