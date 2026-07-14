@@ -11,10 +11,10 @@ license-files = [
 py-modules = []
 
 [tool.setuptools.package-dir]
-"" = "workflow/src"
+"" = "src"
 
 [tool.setuptools.packages.find]
-where = ["workflow/src"]
+where = ["src"]
 
 
 [project]
@@ -26,7 +26,6 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.11"
 version = "0.1.0"
-
 
 dependencies = [
     "awkward",
@@ -73,6 +72,11 @@ dependencies = [
     "cmdstanpy",
 ]
 
+[project.scripts]
+generate-dark-compton = "bosonic_dm.dark_compton_generators:main"
+check-dark-compton-stats = "bosonic_dm.check_dark_compton_stats:main"
+
+
 
 [project.optional-dependencies]
 test = [
@@ -94,7 +98,7 @@ testpaths = [
 ]
 
 [tool.ruff]
-src = ["workflow/src"]
+src = ["src"]
 
 [tool.ruff.lint]
 extend-select = [
