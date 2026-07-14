@@ -523,9 +523,9 @@ def get_expo_per_detector(meta: LegendMetadata, periods_dict: dict) -> dict:
     """
     nested_dict = {}
 
-    for period, period_list in periods_dict.items():
+    for period, runs_list in periods_dict.items():
         nested_dict[period] = {}
-        for run in period_list:
+        for run in runs_list:
             nested_dict[period][run] = {}
 
             start_key = meta.datasets.runinfo[period][run].phy.start_key
@@ -573,11 +573,19 @@ def get_eres_per_detector(
             start_key = meta.datasets.runinfo[period][run].phy.start_key
             chmap = get_channelmap_cached(meta, start_key)
 
-            timestamp_cal = meta.datasets.runinfo[period][run].cal.start_key
-            file_name = f"l200-{period}-{run}-cal-{timestamp_cal}-par_pht.json"
-            pars = Props.read_from(
-                f"{config['par_pht']}/cal/{period}/{run}/{file_name}"
-            )
+            if (
+                period == "p09" and run == "r004"
+            ):  # Hardcoded cause p09-r004 calibration is missing from data
+                timestamp_cal = meta.datasets.runinfo["p09"]["r005"].cal.start_key
+                file_name = f"l200-p09-r005-cal-{timestamp_cal}-par_pht.json"
+                pars = Props.read_from(f"{config['par_pht']}/cal/p09/r005/{file_name}")
+
+            else:
+                timestamp_cal = meta.datasets.runinfo[period][run].cal.start_key
+                file_name = f"l200-{period}-{run}-cal-{timestamp_cal}-par_pht.json"
+                pars = Props.read_from(
+                    f"{config['par_pht']}/cal/{period}/{run}/{file_name}"
+                )
 
             for ge, ge_data in tqdm(
                 nested_dict[period][run].items(), desc=f"{period}-{run} (eres)"
