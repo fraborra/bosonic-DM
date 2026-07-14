@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 
 
-def calculate_energies(m_dm):
+def calculate_energies(m_dm: float) -> tuple[float, float]:
     """
     Calcola l'energia di rinculo dell'elettrone e il fotone emesso.
 
@@ -61,7 +61,7 @@ def get_energy_interval(m_dm: float, region: str) -> tuple[float, float]:
     raise ValueError(msg)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Generate dark compton GPS macros.")
     parser.add_argument(
         "-e",
