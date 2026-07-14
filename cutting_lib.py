@@ -9,9 +9,14 @@ from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 
 import awkward as ak
+import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
+from helper_lib import _DET_TYPE_COLOR, _DET_TYPE_MAP
+from legendmeta import LegendMetadata
 from lgdo import lh5
+from matplotlib.backends.backend_pdf import PdfPages
+from tqdm.notebook import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +132,8 @@ def apply_quality_cuts(evt: ak.Array) -> ak.Array:
       - ``ak.all(geds.quality.is_good_channel, axis=-1)`` — all hits in good channels
       - ``~coincident.puls`` — no pulser coincidence
       - ``~trigger.is_forced`` — no forced trigger
+      - ``~coincident.muon_offline`` — no muon coincidence
+      - ``coincident.geds`` — geds in coincidence
 
     Parameters
     ----------
@@ -145,6 +152,8 @@ def apply_quality_cuts(evt: ak.Array) -> ak.Array:
         & (ak.all(evt.geds.quality.is_good_channel, axis=-1))
         & (~evt.coincident.puls)
         & (~evt.trigger.is_forced)
+        & (~evt.coincident.muon_offline)
+        & (evt.coincident.geds)
     )
     return evt[mask]
 
@@ -574,3 +583,117 @@ def compute_group_exposure(
                     total_expo += det_info["expo"]
 
     return total_expo
+
+
+def plot_detector_spectra(
+    df_all: pl.DataFrame,
+    df_no_qc: pl.DataFrame,
+    eres_dict: Mapping,
+    energy_range: Sequence[float],
+    bins: int,
+    pdf_filename: str | Path,
+    yscale: str = "log",
+) -> None:
+    """Plot the energy spectra for each detector, pre and post QC, saving to a single PDF.
+
+    Parameters
+    ----------
+    df_all
+        DataFrame containing all events (post-QC).
+    df_no_qc
+        DataFrame containing events before QC (pre-QC).
+    eres_dict
+        Exposure/resolution dictionary loaded from eres_dict.yaml.
+    energy_range
+        A sequence/tuple containing (emin, emax) for the energy range in keV.
+    bins
+        The number of bins to use in the histogram.
+    yscale
+        The scale to use for the y-axis. Can be "linear" or "log".
+    pdf_filename
+        The output path for the PDF file.
+    """
+    metadata_path = "/global/homes/b/borrfran/workspace/l200/legend-metadata"
+    meta = LegendMetadata(metadata_path)
+
+    emin, emax = energy_range
+    bin_width = (emax - emin) / bins
+
+    # Get a sorted list of unique detectors from the pre-QC dataset
+    all_detectors = df_all["detector_name"].unique().to_list()
+    # Skip any "unknown" detector names
+    detectors = sorted([det for det in all_detectors if det != "unknown"])
+
+    with PdfPages(pdf_filename) as pdf:
+        for det_name in tqdm(detectors):
+            # Determine detector type and color
+            det_type = _DET_TYPE_MAP.get(det_name[0].upper(), "unknown")
+            color = _DET_TYPE_COLOR.get(det_type, "tab:gray")
+
+            # Filter data for this detector
+            df_det_all = df_all.filter(pl.col("detector_name") == det_name)
+            df_det_no_qc = df_no_qc.filter(pl.col("detector_name") == det_name)
+
+            energy_all = df_det_all["energy"].to_numpy()
+            energy_no_qc = df_det_no_qc["energy"].to_numpy()
+
+            # Compute exposure
+            expo = compute_group_exposure(eres_dict, {det_name: "all"})
+
+            fig, ax = plt.subplots(figsize=(10, 6))
+
+            if expo > 0:
+                weights_all = np.ones_like(energy_all) / (expo * bin_width)
+                weights_no_qc = np.ones_like(energy_no_qc) / (expo * bin_width)
+                y_label = "Counts / (keV · kg · yr)"
+                title_suffix = f"Exposure: {expo:.3g} kg·yr"
+            else:
+                weights_all = None
+                weights_no_qc = None
+                y_label = "Counts / keV"
+                title_suffix = "Exposure: N/A"
+
+            mass = (
+                meta.hardware.detectors.germanium.diodes[det_name].production.mass_in_g
+                / 1000
+            )
+            title_suffix_mass = f"Mass: {mass:.3g} kg"
+            # Plot pre-QC (no QC) - solid line
+            ax.hist(
+                energy_no_qc,
+                bins=bins,
+                range=(emin, emax),
+                histtype="step",
+                linewidth=1.5,
+                color=color,
+                linestyle="-",
+                weights=weights_no_qc,
+                label=f"{det_name} (no QC)",
+            )
+
+            # Plot post-QC (QC) - dashed line
+            ax.hist(
+                energy_all,
+                bins=bins,
+                range=(emin, emax),
+                histtype="step",
+                linewidth=1.5,
+                color=color,
+                linestyle="--",
+                weights=weights_all,
+                label=f"{det_name} (QC)",
+            )
+
+            ax.set_xlabel("Energy [keV]", fontsize=12)
+            ax.set_ylabel(y_label, fontsize=12)
+            ax.set_title(
+                f"Energy Spectrum for {det_name} — {title_suffix} - {title_suffix_mass}",
+                fontsize=13,
+            )
+            ax.set_yscale(yscale)
+            ax.grid(True, linestyle=":", alpha=0.6)
+            ax.legend(frameon=True, facecolor="white", edgecolor="none")
+
+            plt.tight_layout()
+            pdf.savefig(fig)
+            plt.close(fig)
