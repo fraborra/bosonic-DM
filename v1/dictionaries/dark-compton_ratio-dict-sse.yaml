@@ -1,0 +1,5841 @@
+200:
+  V02160A:
+    n_events: 239143
+    n_primaries: 506788
+    ratio: 0.4718798158602495
+    ratio_sigma: 0.0007012422350086743
+    ratio_sigma_freq: 0.0007012436143161644
+    ratio_syst_fwhm: 1.5785662277584267e-05
+    expo: 1.1298439995436915
+  V02160B:
+    n_events: 243257
+    n_primaries: 504196
+    ratio: 0.482465187218488
+    ratio_sigma: 0.0007037237623294848
+    ratio_sigma_freq: 0.0007037251563439183
+    ratio_syst_fwhm: 4.9583793636232e-06
+    expo: 1.1098296201232034
+  V05261B:
+    n_events: 0
+    n_primaries: 697432
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5449809662331735
+  V05266A:
+    n_events: 0
+    n_primaries: 605819
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3383809206023272
+  V05266B:
+    n_events: 0
+    n_primaries: 581506
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2835027834816337
+  V05268B:
+    n_events: 0
+    n_primaries: 524184
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.1563146303901437
+  V05612A:
+    n_events: 0
+    n_primaries: 642991
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.421020938854666
+  V07647A:
+    n_events: 233348
+    n_primaries: 556038
+    ratio: 0.4196621100318503
+    ratio_sigma: 0.0006618160965917802
+    ratio_sigma_freq: 0.0006618172552837229
+    ratio_syst_fwhm: 3.5968700037303236e-06
+    expo: 1.2221683949349762
+  V07647B:
+    n_events: 241102
+    n_primaries: 514960
+    ratio: 0.4681956497676523
+    ratio_sigma: 0.0006953477255815071
+    ratio_sigma_freq: 0.0006953490703892384
+    ratio_syst_fwhm: 4.854736572301732e-06
+    expo: 1.148567128678987
+  B00035C:
+    n_events: 85873
+    n_primaries: 195169
+    ratio: 0.4399933391402367
+    ratio_sigma: 0.0011236007065674673
+    ratio_sigma_freq: 0.0011236063794855988
+    ratio_syst_fwhm: 7.685607419177787e-06
+    expo: 0.40932634040611454
+  C000RG1:
+    n_events: 0
+    n_primaries: 614440
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.364205926306183
+  C000RG2:
+    n_events: 0
+    n_primaries: 632191
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.399715309148985
+  C00ANG3:
+    n_events: 0
+    n_primaries: 703481
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.9815468939336325
+  C00ANG5:
+    n_events: 0
+    n_primaries: 805875
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0763801125560877
+  C00ANG2:
+    n_events: 0
+    n_primaries: 835559
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.161163020001521
+  V04549A:
+    n_events: 0
+    n_primaries: 572751
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2544496520647956
+  B00032B:
+    n_events: 69449
+    n_primaries: 217639
+    ratio: 0.3191026465723213
+    ratio_sigma: 0.0009991614504740855
+    ratio_sigma_freq: 0.0009991653499353808
+    ratio_syst_fwhm: 4.594743613306473e-06
+    expo: 0.46226760209901896
+  B00091C:
+    n_events: 0
+    n_primaries: 199203
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00574B:
+    n_events: 0
+    n_primaries: 239654
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5028774235683321
+  P00698A:
+    n_events: 0
+    n_primaries: 304199
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6210913871777322
+  P00661B:
+    n_events: 0
+    n_primaries: 233687
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4840897319187771
+  P00574A:
+    n_events: 0
+    n_primaries: 233484
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.49325760894364595
+  B00000B:
+    n_events: 101981
+    n_primaries: 211629
+    ratio: 0.48188583849170724
+    ratio_sigma: 0.001086163416898265
+    ratio_sigma_freq: 0.001086168542535049
+    ratio_syst_fwhm: 0.0
+    expo: 0.45000072438968736
+  B00000C:
+    n_events: 121212
+    n_primaries: 260729
+    ratio: 0.4648966363671231
+    ratio_sigma: 0.0009767888809905892
+    ratio_sigma_freq: 0.0009767926088020491
+    ratio_syst_fwhm: 0.0
+    expo: 0.526184491216062
+  B00061A:
+    n_events: 0
+    n_primaries: 231277
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4719519792379649
+  B00061C:
+    n_events: 0
+    n_primaries: 204450
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  B00076C:
+    n_events: 0
+    n_primaries: 260350
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5166376809389813
+  B00079B:
+    n_events: 0
+    n_primaries: 237261
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4751801049509468
+  B00079C:
+    n_events: 0
+    n_primaries: 255259
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5242476157882728
+  V08682B:
+    n_events: 174911
+    n_primaries: 441844
+    ratio: 0.39586619742217294
+    ratio_sigma: 0.0007357077211154397
+    ratio_sigma_freq: 0.0007357093106995912
+    ratio_syst_fwhm: 4.300150505268108e-05
+    expo: 0.9794133413187314
+  V08682A:
+    n_events: 491377
+    n_primaries: 977535
+    ratio: 0.5026694669045436
+    ratio_sigma: 0.0005057049589763172
+    ratio_sigma_freq: 0.0005057054762880095
+    ratio_syst_fwhm: 3.836175854393664e-05
+    expo: 2.0894199051892413
+  V09372A:
+    n_events: 533981
+    n_primaries: 1182983
+    ratio: 0.4513852258356833
+    ratio_sigma: 0.000457528129860364
+    ratio_sigma_freq: 0.0004575285129270439
+    ratio_syst_fwhm: 3.0431518938528468e-05
+    expo: 2.612199326945015
+  V09374A:
+    n_events: 367424
+    n_primaries: 781795
+    ratio: 0.469974903939135
+    ratio_sigma: 0.0005644669917252604
+    ratio_sigma_freq: 0.000564467711125842
+    ratio_syst_fwhm: 3.7733628721559054e-05
+    expo: 1.7096153775952545
+  V09724A:
+    n_events: 382160
+    n_primaries: 763603
+    ratio: 0.500469484182901
+    ratio_sigma: 0.0005721836333604414
+    ratio_sigma_freq: 0.0005721843826801196
+    ratio_syst_fwhm: 3.470385173470758e-05
+    expo: 1.7063872518822722
+  V02162B:
+    n_events: 334142
+    n_primaries: 714094
+    ratio: 0.4679244358243651
+    ratio_sigma: 0.000590467800550122
+    ratio_sigma_freq: 0.0005904686240094263
+    ratio_syst_fwhm: 4.201121699493049e-06
+    expo: 1.6011503536390599
+  V02166B:
+    n_events: 364862
+    n_primaries: 777813
+    ratio: 0.4690870825158714
+    ratio_sigma: 0.0005658485741344095
+    ratio_sigma_freq: 0.0005658492988291473
+    ratio_syst_fwhm: 4.499790438317053e-06
+    expo: 1.7005766255989048
+  V04199A:
+    n_events: 377753
+    n_primaries: 878246
+    ratio: 0.4301221638104087
+    ratio_sigma: 0.0005282970791327306
+    ratio_sigma_freq: 0.00052829766868588
+    ratio_syst_fwhm: 3.9852114496474744e-06
+    expo: 1.9284823009354324
+  V04545A:
+    n_events: 454856
+    n_primaries: 915003
+    ratio: 0.4971087558087178
+    ratio_sigma: 0.0005226982063361717
+    ratio_sigma_freq: 0.0005226987775697552
+    ratio_syst_fwhm: 1.8579153752334987e-05
+    expo: 1.968767453798768
+  V07646A:
+    n_events: 373202
+    n_primaries: 768718
+    ratio: 0.48548624399813195
+    ratio_sigma: 0.000570036768626385
+    ratio_sigma_freq: 0.0005700375095426649
+    ratio_syst_fwhm: 7.1547600618560026e-06
+    expo: 1.6979941250285193
+  V07302B:
+    n_events: 172902
+    n_primaries: 464495
+    ratio: 0.3722367899831215
+    ratio_sigma: 0.0007092773978516868
+    ratio_sigma_freq: 0.0007092788181684063
+    ratio_syst_fwhm: 5.382177672152988e-06
+    expo: 1.0278352270134612
+  B00089C:
+    n_events: 75171
+    n_primaries: 179919
+    ratio: 0.41780513561582927
+    ratio_sigma: 0.0011627333893189983
+    ratio_sigma_freq: 0.0011627396723434453
+    ratio_syst_fwhm: 1.3895064473107288e-05
+    expo: 0.3841469598448551
+  C00ANG4:
+    n_events: 0
+    n_primaries: 699977
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5333597136664388
+  V00048B:
+    n_events: 308802
+    n_primaries: 545695
+    ratio: 0.5658874171699995
+    ratio_sigma: 0.0006709504099385507
+    ratio_sigma_freq: 0.0006709516177434339
+    ratio_syst_fwhm: 0.0
+    expo: 1.172326133926534
+  V00050A:
+    n_events: 338902
+    n_primaries: 570028
+    ratio: 0.5945355411742209
+    ratio_sigma: 0.0006503040376578729
+    ratio_sigma_freq: 0.0006503051361908868
+    ratio_syst_fwhm: 6.140038489255151e-06
+    expo: 1.2144854557380789
+  V00050B:
+    n_events: 332040
+    n_primaries: 575655
+    ratio: 0.5768036813652598
+    ratio_sigma: 0.0006511830046721744
+    ratio_sigma_freq: 0.0006511841085387149
+    ratio_syst_fwhm: 6.0800200119559555e-06
+    expo: 1.210057931211499
+  V05261A:
+    n_events: 0
+    n_primaries: 536192
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4258519183968362
+  V05268A:
+    n_events: 0
+    n_primaries: 674422
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4836465776865162
+  V07302A:
+    n_events: 223126
+    n_primaries: 518710
+    ratio: 0.4301557129114285
+    ratio_sigma: 0.0006874289207118872
+    ratio_sigma_freq: 0.000687430219602478
+    ratio_syst_fwhm: 2.3134269371560823e-05
+    expo: 1.1640621321013003
+  B00002A:
+    n_events: 0
+    n_primaries: 164952
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.18030268144599085
+  B00089A:
+    n_events: 69826
+    n_primaries: 165053
+    ratio: 0.42305245555999854
+    ratio_sigma: 0.0012160486005631489
+    ratio_sigma_freq: 0.001216055789438653
+    ratio_syst_fwhm: 1.8175869715364446e-05
+    expo: 0.33830757472051104
+  B00091A:
+    n_events: 0
+    n_primaries: 198778
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00538A:
+    n_events: 0
+    n_primaries: 319684
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6700943355007986
+  P00573A:
+    n_events: 0
+    n_primaries: 321688
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6790039624686288
+  P00662C:
+    n_events: 0
+    n_primaries: 230762
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4837023568332193
+  P00664A:
+    n_events: 0
+    n_primaries: 248473
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43365160924785146
+  P00909B:
+    n_events: 0
+    n_primaries: 256165
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5327053051562858
+  B00000D:
+    n_events: 66190
+    n_primaries: 243754
+    ratio: 0.2715451990728395
+    ratio_sigma: 0.0009008338813212864
+    ratio_sigma_freq: 0.0009008366018760741
+    ratio_syst_fwhm: 1.2307439847397683e-05
+    expo: 0.4356342003194159
+  B00002C:
+    n_events: 0
+    n_primaries: 247733
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5087526123659595
+  B00032C:
+    n_events: 74745
+    n_primaries: 233752
+    ratio: 0.31976274101294955
+    ratio_sigma: 0.0009646385449521838
+    ratio_sigma_freq: 0.0009646420553742909
+    ratio_syst_fwhm: 2.1390099806117835e-06
+    expo: 0.35805717545060456
+  B00032D:
+    n_events: 113105
+    n_primaries: 229395
+    ratio: 0.49305785628345744
+    ratio_sigma: 0.0010438408125277652
+    ratio_sigma_freq: 0.0010438453620483408
+    ratio_syst_fwhm: 4.359273919340989e-06
+    expo: 0.4648501026694045
+  B00035A:
+    n_events: 103183
+    n_primaries: 242982
+    ratio: 0.4246531650362371
+    ratio_sigma: 0.0010027512413063667
+    ratio_sigma_freq: 0.001002755272258701
+    ratio_syst_fwhm: 8.231028508165483e-06
+    expo: 0.4958401095140315
+  B00035B:
+    n_events: 96350
+    n_primaries: 253699
+    ratio: 0.37978123768230193
+    ratio_sigma: 0.0009635585584450184
+    ratio_sigma_freq: 0.0009635621234372745
+    ratio_syst_fwhm: 1.5766653527787833e-05
+    expo: 0.5229563655030801
+  B00061B:
+    n_events: 0
+    n_primaries: 235622
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4848644820898928
+  B00089B:
+    n_events: 81653
+    n_primaries: 198544
+    ratio: 0.4112594122239291
+    ratio_sigma: 0.0011043057736574537
+    ratio_sigma_freq: 0.001104311154762949
+    ratio_syst_fwhm: 1.0073283134792721e-05
+    expo: 0.40028758840976497
+  V00048A:
+    n_events: 281316
+    n_primaries: 573891
+    ratio: 0.4901906630515846
+    ratio_sigma: 0.0006598890869277335
+    ratio_sigma_freq: 0.0006598902363348984
+    ratio_syst_fwhm: 9.583684735109399e-06
+    expo: 1.2388900861282228
+  V01240A:
+    n_events: 0
+    n_primaries: 636507
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.35581279945243
+  V05267A:
+    n_events: 0
+    n_primaries: 645119
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4093996862879306
+  V05612B:
+    n_events: 0
+    n_primaries: 608242
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3506477983116585
+  B00000A:
+    n_events: 49398
+    n_primaries: 146139
+    ratio: 0.33802175995620637
+    ratio_sigma: 0.0012373944076123776
+    ratio_sigma_freq: 0.0012374018820037497
+    ratio_syst_fwhm: 3.421376762013928e-06
+    expo: 0.320230070727812
+  B00002B:
+    n_events: 0
+    n_primaries: 190701
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40351571412274695
+  B00032A:
+    n_events: 52397
+    n_primaries: 144473
+    ratio: 0.3626777136370558
+    ratio_sigma: 0.0012648634283687174
+    ratio_sigma_freq: 0.0012648714690823854
+    ratio_syst_fwhm: 6.921660644809702e-06
+    expo: 0.295696315309149
+  P00573B:
+    n_events: 0
+    n_primaries: 314036
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6893985272644307
+  P00575A:
+    n_events: 0
+    n_primaries: 311513
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6813927754962354
+  P00574C:
+    n_events: 0
+    n_primaries: 239379
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5183078644763861
+  P00662A:
+    n_events: 0
+    n_primaries: 189228
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.33955890866225574
+  P00662B:
+    n_events: 0
+    n_primaries: 186918
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.3930476029229093
+  P00909C:
+    n_events: 0
+    n_primaries: 273755
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4577266991786447
+  P00661C:
+    n_events: 0
+    n_primaries: 279871
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4653995445154258
+  P00665C:
+    n_events: 0
+    n_primaries: 262496
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43807799389053664
+  V01389A:
+    n_events: 0
+    n_primaries: 634509
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0851373361092096
+  P00748A:
+    n_events: 0
+    n_primaries: 299275
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5195242102694755
+300:
+  V02160A:
+    n_events: 82397
+    n_primaries: 518888
+    ratio: 0.15879600454047013
+    ratio_sigma: 0.0005073793623567969
+    ratio_sigma_freq: 0.0005073794879635179
+    ratio_syst_fwhm: 2.890791672205406e-06
+    expo: 1.1298439995436915
+  V02160B:
+    n_events: 92479
+    n_primaries: 525299
+    ratio: 0.17605082809822958
+    ratio_sigma: 0.0005254908194624727
+    ratio_sigma_freq: 0.0005254910960987205
+    ratio_syst_fwhm: 9.518370455013914e-07
+    expo: 1.1098296201232034
+  V05261B:
+    n_events: 0
+    n_primaries: 723617
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5449809662331735
+  V05266A:
+    n_events: 0
+    n_primaries: 631892
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3383809206023272
+  V05266B:
+    n_events: 0
+    n_primaries: 604788
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2835027834816337
+  V05268B:
+    n_events: 0
+    n_primaries: 547529
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.1563146303901437
+  V05612A:
+    n_events: 0
+    n_primaries: 669707
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.421020938854666
+  V07647A:
+    n_events: 77877
+    n_primaries: 576921
+    ratio: 0.1349879186441148
+    ratio_sigma: 0.00044988302900938153
+    ratio_sigma_freq: 0.00044988291902961145
+    ratio_syst_fwhm: 8.666682844438167e-07
+    expo: 1.2221683949349762
+  V07647B:
+    n_events: 90918
+    n_primaries: 526469
+    ratio: 0.17269455049670446
+    ratio_sigma: 0.0005209367933336823
+    ratio_sigma_freq: 0.0005209370408727464
+    ratio_syst_fwhm: 1.8994434630714707e-06
+    expo: 1.148567128678987
+  B00035C:
+    n_events: 26352
+    n_primaries: 205080
+    ratio: 0.12849800810411496
+    ratio_sigma: 0.0007389560646368096
+    ratio_sigma_freq: 0.0007389552271255877
+    ratio_syst_fwhm: 2.438061058804286e-06
+    expo: 0.40932634040611454
+  C000RG1:
+    n_events: 0
+    n_primaries: 642539
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.364205926306183
+  C000RG2:
+    n_events: 0
+    n_primaries: 662629
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.399715309148985
+  C00ANG3:
+    n_events: 0
+    n_primaries: 738565
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.9815468939336325
+  C00ANG5:
+    n_events: 0
+    n_primaries: 843118
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0763801125560877
+  C00ANG2:
+    n_events: 0
+    n_primaries: 870188
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.161163020001521
+  V04549A:
+    n_events: 0
+    n_primaries: 596887
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2544496520647956
+  B00032B:
+    n_events: 21729
+    n_primaries: 227841
+    ratio: 0.09537091493227763
+    ratio_sigma: 0.0006153545309786189
+    ratio_sigma_freq: 0.000615352106401646
+    ratio_syst_fwhm: 0.0
+    expo: 0.46226760209901896
+  B00091C:
+    n_events: 0
+    n_primaries: 214034
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00574B:
+    n_events: 0
+    n_primaries: 256954
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5028774235683321
+  P00698A:
+    n_events: 0
+    n_primaries: 326360
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6210913871777322
+  P00661B:
+    n_events: 0
+    n_primaries: 253583
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4840897319187771
+  P00574A:
+    n_events: 0
+    n_primaries: 248630
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.49325760894364595
+  B00000B:
+    n_events: 70902
+    n_primaries: 222033
+    ratio: 0.31933172397020276
+    ratio_sigma: 0.0009894140388290638
+    ratio_sigma_freq: 0.0009894178257859976
+    ratio_syst_fwhm: 0.0
+    expo: 0.45000072438968736
+  B00000C:
+    n_events: 44460
+    n_primaries: 278399
+    ratio: 0.15970007183908047
+    ratio_sigma: 0.0006942794703928267
+    ratio_sigma_freq: 0.0006942798121593876
+    ratio_syst_fwhm: 0.0
+    expo: 0.526184491216062
+  B00061A:
+    n_events: 0
+    n_primaries: 248763
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4719519792379649
+  B00061C:
+    n_events: 0
+    n_primaries: 222119
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  B00076C:
+    n_events: 0
+    n_primaries: 281962
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5166376809389813
+  B00079B:
+    n_events: 0
+    n_primaries: 256707
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4751801049509468
+  B00079C:
+    n_events: 0
+    n_primaries: 276096
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5242476157882728
+  V08682B:
+    n_events: 68280
+    n_primaries: 459589
+    ratio: 0.1485682891272656
+    ratio_sigma: 0.0005246289038498204
+    ratio_sigma_freq: 0.0005246289308395697
+    ratio_syst_fwhm: 5.4396309754345396e-06
+    expo: 0.9794133413187314
+  V08682A:
+    n_events: 160101
+    n_primaries: 1014408
+    ratio: 0.1578273654906453
+    ratio_sigma: 0.0003619803164573941
+    ratio_sigma_freq: 0.00036198035897024977
+    ratio_syst_fwhm: 7.886365361503556e-06
+    expo: 2.0894199051892413
+  V09372A:
+    n_events: 182509
+    n_primaries: 1224570
+    ratio: 0.14903954119442644
+    ratio_sigma: 0.0003218201850039268
+    ratio_sigma_freq: 0.00032182019257398996
+    ratio_syst_fwhm: 5.30798132569732e-06
+    expo: 2.612199326945015
+  V09374A:
+    n_events: 137787
+    n_primaries: 814502
+    ratio: 0.16916757826551898
+    ratio_sigma: 0.0004154020861506361
+    ratio_sigma_freq: 0.0004154021989999804
+    ratio_syst_fwhm: 8.594197934197467e-06
+    expo: 1.7096153775952545
+  V09724A:
+    n_events: 134004
+    n_primaries: 787812
+    ratio: 0.1700968377013327
+    ratio_sigma: 0.00042330167055762506
+    ratio_sigma_freq: 0.0004233017936058274
+    ratio_syst_fwhm: 6.346683794247743e-06
+    expo: 1.7063872518822722
+  V02162B:
+    n_events: 114659
+    n_primaries: 733405
+    ratio: 0.1563383719249638
+    ratio_sigma: 0.0004240767036613812
+    ratio_sigma_freq: 0.0004240767641292095
+    ratio_syst_fwhm: 0.0
+    expo: 1.6011503536390599
+  V02166B:
+    n_events: 117832
+    n_primaries: 809418
+    ratio: 0.14557664201112155
+    ratio_sigma: 0.0003920084596572434
+    ratio_sigma_freq: 0.00039200845485939516
+    ratio_syst_fwhm: 1.2354540726150498e-06
+    expo: 1.7005766255989048
+  V04199A:
+    n_events: 122894
+    n_primaries: 916558
+    ratio: 0.1340824758689839
+    ratio_sigma: 0.0003559129782797404
+    ratio_sigma_freq: 0.00035591291877505024
+    ratio_syst_fwhm: 1.6365558572900563e-06
+    expo: 1.9284823009354324
+  V04545A:
+    n_events: 151979
+    n_primaries: 949573
+    ratio: 0.16005019092772127
+    ratio_sigma: 0.0003762618010913474
+    ratio_sigma_freq: 0.0003762618567044255
+    ratio_syst_fwhm: 4.212415251475532e-06
+    expo: 1.968767453798768
+  V07646A:
+    n_events: 116050
+    n_primaries: 793450
+    ratio: 0.1462604496055837
+    ratio_sigma: 0.00039670330894943774
+    ratio_sigma_freq: 0.0003967033078934499
+    ratio_syst_fwhm: 0.0
+    expo: 1.6979941250285193
+  V07302B:
+    n_events: 61728
+    n_primaries: 481578
+    ratio: 0.12817938489842787
+    ratio_sigma: 0.0004817130783971417
+    ratio_sigma_freq: 0.00048171284117626864
+    ratio_syst_fwhm: 0.0
+    expo: 1.0278352270134612
+  B00089C:
+    n_events: 23201
+    n_primaries: 188536
+    ratio: 0.12306072548094008
+    ratio_sigma: 0.0007565629126919756
+    ratio_sigma_freq: 0.0007565616421596338
+    ratio_syst_fwhm: 0.0
+    expo: 0.3841469598448551
+  C00ANG4:
+    n_events: 0
+    n_primaries: 733788
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5333597136664388
+  V00048B:
+    n_events: 84077
+    n_primaries: 576795
+    ratio: 0.14576644082136492
+    ratio_sigma: 0.00046462822966244496
+    ratio_sigma_freq: 0.00046462822343020313
+    ratio_syst_fwhm: 0.0
+    expo: 1.172326133926534
+  V00050A:
+    n_events: 139645
+    n_primaries: 602732
+    ratio: 0.23168716496359085
+    ratio_sigma: 0.0005434469886409851
+    ratio_sigma_freq: 0.0005434475256290995
+    ratio_syst_fwhm: 8.295547116177193e-07
+    expo: 1.2144854557380789
+  V00050B:
+    n_events: 128010
+    n_primaries: 605830
+    ratio: 0.21129737501052273
+    ratio_sigma: 0.0005244783788625322
+    ratio_sigma_freq: 0.0005244788115962518
+    ratio_syst_fwhm: 0.0
+    expo: 1.210057931211499
+  V05261A:
+    n_events: 0
+    n_primaries: 564173
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4258519183968362
+  V05268A:
+    n_events: 0
+    n_primaries: 702709
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4836465776865162
+  V07302A:
+    n_events: 76784
+    n_primaries: 534070
+    ratio: 0.1437720827380629
+    ratio_sigma: 0.0004801004015288968
+    ratio_sigma_freq: 0.00048010037379956656
+    ratio_syst_fwhm: 9.362051113098735e-07
+    expo: 1.1640621321013003
+  B00002A:
+    n_events: 0
+    n_primaries: 174045
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.18030268144599085
+  B00089A:
+    n_events: 27199
+    n_primaries: 177981
+    ratio: 0.15282163364834647
+    ratio_sigma: 0.0008528852154866642
+    ratio_sigma_freq: 0.0008528855461137993
+    ratio_syst_fwhm: 5.618545695626476e-06
+    expo: 0.33830757472051104
+  B00091A:
+    n_events: 0
+    n_primaries: 215804
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00538A:
+    n_events: 0
+    n_primaries: 344042
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6700943355007986
+  P00573A:
+    n_events: 0
+    n_primaries: 343912
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6790039624686288
+  P00662C:
+    n_events: 0
+    n_primaries: 248999
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4837023568332193
+  P00664A:
+    n_events: 0
+    n_primaries: 268115
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43365160924785146
+  P00909B:
+    n_events: 0
+    n_primaries: 273656
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5327053051562858
+  B00000D:
+    n_events: 22043
+    n_primaries: 253776
+    ratio: 0.08686169353408701
+    ratio_sigma: 0.0005590561662845047
+    ratio_sigma_freq: 0.000559053628608904
+    ratio_syst_fwhm: 0.0
+    expo: 0.4356342003194159
+  B00002C:
+    n_events: 0
+    n_primaries: 264638
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5087526123659595
+  B00032C:
+    n_events: 22713
+    n_primaries: 251250
+    ratio: 0.09040163024226769
+    ratio_sigma: 0.0005720818955965337
+    ratio_sigma_freq: 0.0005720795268794601
+    ratio_syst_fwhm: 0.0
+    expo: 0.35805717545060456
+  B00032D:
+    n_events: 73015
+    n_primaries: 247392
+    ratio: 0.295139716968548
+    ratio_sigma: 0.0009170030220537178
+    ratio_sigma_freq: 0.0009170059809482607
+    ratio_syst_fwhm: 2.0210757782079813e-06
+    expo: 0.4648501026694045
+  B00035A:
+    n_events: 31636
+    n_primaries: 260721
+    ratio: 0.12134188906191269
+    ratio_sigma: 0.0006394780835428409
+    ratio_sigma_freq: 0.0006394772377627935
+    ratio_syst_fwhm: 0.0
+    expo: 0.4958401095140315
+  B00035B:
+    n_events: 28730
+    n_primaries: 273463
+    ratio: 0.10506136091039406
+    ratio_sigma: 0.0005863639551740368
+    ratio_sigma_freq: 0.0005863625422927519
+    ratio_syst_fwhm: 3.656788462098881e-06
+    expo: 0.5229563655030801
+  B00061B:
+    n_events: 0
+    n_primaries: 255264
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4848644820898928
+  B00089B:
+    n_events: 39809
+    n_primaries: 215697
+    ratio: 0.1845612847592467
+    ratio_sigma: 0.000835298881743994
+    ratio_sigma_freq: 0.0008353001939406139
+    ratio_syst_fwhm: 0.0
+    expo: 0.40028758840976497
+  V00048A:
+    n_events: 91737
+    n_primaries: 601758
+    ratio: 0.1524489039632145
+    ratio_sigma: 0.00046337589732404864
+    ratio_sigma_freq: 0.00046337594748034947
+    ratio_syst_fwhm: 1.6617948381258962e-06
+    expo: 1.2388900861282228
+  V01240A:
+    n_events: 0
+    n_primaries: 668252
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.35581279945243
+  V05267A:
+    n_events: 0
+    n_primaries: 675236
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4093996862879306
+  V05612B:
+    n_events: 0
+    n_primaries: 628562
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3506477983116585
+  B00000A:
+    n_events: 30899
+    n_primaries: 151417
+    ratio: 0.20406754811184932
+    ratio_sigma: 0.0010357021849798427
+    ratio_sigma_freq: 0.0010357053369424685
+    ratio_syst_fwhm: 3.302117317624531e-06
+    expo: 0.320230070727812
+  B00002B:
+    n_events: 0
+    n_primaries: 199827
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40351571412274695
+  B00032A:
+    n_events: 16314
+    n_primaries: 152930
+    ratio: 0.10667882901439212
+    ratio_sigma: 0.0007893938692208171
+    ratio_sigma_freq: 0.000789390651535392
+    ratio_syst_fwhm: 0.0
+    expo: 0.295696315309149
+  P00573B:
+    n_events: 0
+    n_primaries: 328909
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6893985272644307
+  P00575A:
+    n_events: 0
+    n_primaries: 326644
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6813927754962354
+  P00574C:
+    n_events: 0
+    n_primaries: 251392
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5183078644763861
+  P00662A:
+    n_events: 0
+    n_primaries: 198997
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.33955890866225574
+  P00662B:
+    n_events: 0
+    n_primaries: 195940
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.3930476029229093
+  P00909C:
+    n_events: 0
+    n_primaries: 294689
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4577266991786447
+  P00661C:
+    n_events: 0
+    n_primaries: 300103
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4653995445154258
+  P00665C:
+    n_events: 0
+    n_primaries: 282898
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43807799389053664
+  V01389A:
+    n_events: 0
+    n_primaries: 664925
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0851373361092096
+  P00748A:
+    n_events: 0
+    n_primaries: 313149
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5195242102694755
+400:
+  V02160A:
+    n_events: 38128
+    n_primaries: 527624
+    ratio: 0.07226439232409382
+    ratio_sigma: 0.00035646032294358795
+    ratio_sigma_freq: 0.0003564591548341137
+    ratio_syst_fwhm: 0.0
+    expo: 1.1298439995436915
+  V02160B:
+    n_events: 45384
+    n_primaries: 539994
+    ratio: 0.08404614857544977
+    ratio_sigma: 0.00037757256778409124
+    ratio_sigma_freq: 0.00037757169550649614
+    ratio_syst_fwhm: 0.0
+    expo: 1.1098296201232034
+  V05261B:
+    n_events: 0
+    n_primaries: 743826
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5449809662331735
+  V05266A:
+    n_events: 0
+    n_primaries: 649983
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3383809206023272
+  V05266B:
+    n_events: 0
+    n_primaries: 622028
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2835027834816337
+  V05268B:
+    n_events: 0
+    n_primaries: 565452
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.1563146303901437
+  V05612A:
+    n_events: 0
+    n_primaries: 687710
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.421020938854666
+  V07647A:
+    n_events: 36430
+    n_primaries: 591931
+    ratio: 0.061545076123608794
+    ratio_sigma: 0.00031236839712040973
+    ratio_sigma_freq: 0.0003123671683577093
+    ratio_syst_fwhm: 0.0
+    expo: 1.2221683949349762
+  V07647B:
+    n_events: 44822
+    n_primaries: 536228
+    ratio: 0.08358835497520649
+    ratio_sigma: 0.00037795721053999066
+    ratio_sigma_freq: 0.0003779563198548131
+    ratio_syst_fwhm: 0.0
+    expo: 1.148567128678987
+  B00035C:
+    n_events: 10385
+    n_primaries: 212704
+    ratio: 0.04882583860275969
+    ratio_sigma: 0.0004672668887872939
+    ratio_sigma_freq: 0.0004672594567007037
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  C000RG1:
+    n_events: 0
+    n_primaries: 661809
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.364205926306183
+  C000RG2:
+    n_events: 0
+    n_primaries: 686111
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.399715309148985
+  C00ANG3:
+    n_events: 0
+    n_primaries: 764901
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.9815468939336325
+  C00ANG5:
+    n_events: 0
+    n_primaries: 871803
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0763801125560877
+  C00ANG2:
+    n_events: 0
+    n_primaries: 897741
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.161163020001521
+  V04549A:
+    n_events: 0
+    n_primaries: 611686
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2544496520647956
+  B00032B:
+    n_events: 9531
+    n_primaries: 236441
+    ratio: 0.04031221187437088
+    ratio_sigma: 0.0004045014359760638
+    ratio_sigma_freq: 0.00040449380208569394
+    ratio_syst_fwhm: 0.0
+    expo: 0.46226760209901896
+  B00091C:
+    n_events: 0
+    n_primaries: 223932
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00574B:
+    n_events: 0
+    n_primaries: 269709
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5028774235683321
+  P00698A:
+    n_events: 0
+    n_primaries: 340440
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6210913871777322
+  P00661B:
+    n_events: 0
+    n_primaries: 264545
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4840897319187771
+  P00574A:
+    n_events: 0
+    n_primaries: 261374
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.49325760894364595
+  B00000B:
+    n_events: 41361
+    n_primaries: 229335
+    ratio: 0.18035328077580493
+    ratio_sigma: 0.0008028572108440184
+    ratio_sigma_freq: 0.0008028582919435104
+    ratio_syst_fwhm: 2.180207206894935e-06
+    expo: 0.45000072438968736
+  B00000C:
+    n_events: 15618
+    n_primaries: 290507
+    ratio: 0.05376271909895769
+    ratio_sigma: 0.0004184666424297065
+    ratio_sigma_freq: 0.0004184624444460316
+    ratio_syst_fwhm: 0.0
+    expo: 0.526184491216062
+  B00061A:
+    n_events: 0
+    n_primaries: 261691
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4719519792379649
+  B00061C:
+    n_events: 0
+    n_primaries: 234310
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  B00076C:
+    n_events: 0
+    n_primaries: 296256
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5166376809389813
+  B00079B:
+    n_events: 0
+    n_primaries: 271302
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4751801049509468
+  B00079C:
+    n_events: 0
+    n_primaries: 288667
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5242476157882728
+  V08682B:
+    n_events: 34581
+    n_primaries: 472250
+    ratio: 0.07322694922827055
+    ratio_sigma: 0.00037908383533256137
+    ratio_sigma_freq: 0.0003790824837037887
+    ratio_syst_fwhm: 2.1175180147797734e-06
+    expo: 0.9794133413187314
+  V08682A:
+    n_events: 72267
+    n_primaries: 1039832
+    ratio: 0.06949914072740526
+    ratio_sigma: 0.0002493825721470926
+    ratio_sigma_freq: 0.00024938212466140666
+    ratio_syst_fwhm: 4.808464436116544e-06
+    expo: 2.0894199051892413
+  V09372A:
+    n_events: 86757
+    n_primaries: 1258888
+    ratio: 0.0689159250736165
+    ratio_sigma: 0.0002257669430366345
+    ratio_sigma_freq: 0.00022576660298953975
+    ratio_syst_fwhm: 2.780229233875775e-06
+    expo: 2.612199326945015
+  V09374A:
+    n_events: 66505
+    n_primaries: 839610
+    ratio: 0.07920989601136717
+    ratio_sigma: 0.00029473433012079274
+    ratio_sigma_freq: 0.00029473382895002655
+    ratio_syst_fwhm: 5.955138748722777e-07
+    expo: 1.7096153775952545
+  V09724A:
+    n_events: 63226
+    n_primaries: 806114
+    ratio: 0.07843359818388196
+    ratio_sigma: 0.00029944399991286907
+    ratio_sigma_freq: 0.00029944345805689194
+    ratio_syst_fwhm: 3.1012944803135434e-06
+    expo: 1.7063872518822722
+  V02162B:
+    n_events: 53751
+    n_primaries: 746193
+    ratio: 0.07203421630299896
+    ratio_sigma: 0.0002993017333664365
+    ratio_sigma_freq: 0.0002993010354475268
+    ratio_syst_fwhm: 6.700670335119119e-07
+    expo: 1.6011503536390599
+  V02166B:
+    n_events: 54706
+    n_primaries: 831355
+    ratio: 0.06580393958785406
+    ratio_sigma: 0.000271926281750672
+    ratio_sigma_freq: 0.0002719256057296135
+    ratio_syst_fwhm: 0.0
+    expo: 1.7005766255989048
+  V04199A:
+    n_events: 56239
+    n_primaries: 940714
+    ratio: 0.05978378148535954
+    ratio_sigma: 0.00024444226249177245
+    ratio_sigma_freq: 0.0002444416264771842
+    ratio_syst_fwhm: 0.0
+    expo: 1.9284823009354324
+  V04545A:
+    n_events: 69869
+    n_primaries: 975469
+    ratio: 0.07162649799583791
+    ratio_sigma: 0.0002610904854229006
+    ratio_sigma_freq: 0.00026109001444801116
+    ratio_syst_fwhm: 1.025146852282055e-06
+    expo: 1.968767453798768
+  V07646A:
+    n_events: 52053
+    n_primaries: 814147
+    ratio: 0.06393616394070857
+    ratio_sigma: 0.0002711278152388905
+    ratio_sigma_freq: 0.00027112709017333616
+    ratio_syst_fwhm: 0.0
+    expo: 1.6979941250285193
+  V07302B:
+    n_events: 29411
+    n_primaries: 493057
+    ratio: 0.05965119722223349
+    ratio_sigma: 0.00033729090058753805
+    ratio_sigma_freq: 0.0003372892198600486
+    ratio_syst_fwhm: 0.0
+    expo: 1.0278352270134612
+  B00089C:
+    n_events: 9269
+    n_primaries: 194997
+    ratio: 0.04753638498856399
+    ratio_sigma: 0.0004818602269946017
+    ratio_sigma_freq: 0.00048185152447393124
+    ratio_syst_fwhm: 0.0
+    expo: 0.3841469598448551
+  C00ANG4:
+    n_events: 0
+    n_primaries: 756284
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5333597136664388
+  V00048B:
+    n_events: 32900
+    n_primaries: 598921
+    ratio: 0.054932862710002306
+    ratio_sigma: 0.00029441636825880695
+    ratio_sigma_freq: 0.00029441498418963615
+    ratio_syst_fwhm: 0.0
+    expo: 1.172326133926534
+  V00050A:
+    n_events: 53235
+    n_primaries: 625526
+    ratio: 0.08510503943075198
+    ratio_sigma: 0.00035280918186217873
+    ratio_sigma_freq: 0.00035280849894009624
+    ratio_syst_fwhm: 0.0
+    expo: 1.2144854557380789
+  V00050B:
+    n_events: 49110
+    n_primaries: 628521
+    ratio: 0.07813648527816051
+    ratio_sigma: 0.0003385319493923632
+    ratio_sigma_freq: 0.0003385311572319861
+    ratio_syst_fwhm: 0.0
+    expo: 1.210057931211499
+  V05261A:
+    n_events: 0
+    n_primaries: 586515
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4258519183968362
+  V05268A:
+    n_events: 0
+    n_primaries: 723697
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4836465776865162
+  V07302A:
+    n_events: 36180
+    n_primaries: 543901
+    ratio: 0.06652025548720174
+    ratio_sigma: 0.000337884816601318
+    ratio_sigma_freq: 0.00033788355794599505
+    ratio_syst_fwhm: 0.0
+    expo: 1.1640621321013003
+  B00002A:
+    n_events: 0
+    n_primaries: 179359
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.18030268144599085
+  B00089A:
+    n_events: 10217
+    n_primaries: 186370
+    ratio: 0.0548234435614983
+    ratio_sigma: 0.0005272897062753897
+    ratio_sigma_freq: 0.0005272817145514679
+    ratio_syst_fwhm: 5.365641650257463e-06
+    expo: 0.33830757472051104
+  B00091A:
+    n_events: 0
+    n_primaries: 226557
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00538A:
+    n_events: 0
+    n_primaries: 357980
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6700943355007986
+  P00573A:
+    n_events: 0
+    n_primaries: 361084
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6790039624686288
+  P00662C:
+    n_events: 0
+    n_primaries: 261266
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4837023568332193
+  P00664A:
+    n_events: 0
+    n_primaries: 281922
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43365160924785146
+  P00909B:
+    n_events: 0
+    n_primaries: 285315
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5327053051562858
+  B00000D:
+    n_events: 9961
+    n_primaries: 261189
+    ratio: 0.038138902714499025
+    ratio_sigma: 0.00037476685384330374
+    ratio_sigma_freq: 0.0003747599450446018
+    ratio_syst_fwhm: 3.828630498869251e-06
+    expo: 0.4356342003194159
+  B00002C:
+    n_events: 0
+    n_primaries: 273158
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5087526123659595
+  B00032C:
+    n_events: 9272
+    n_primaries: 261503
+    ratio: 0.03545834862946647
+    ratio_sigma: 0.0003616427370649931
+    ratio_sigma_freq: 0.00036163539389258165
+    ratio_syst_fwhm: 0.0
+    expo: 0.35805717545060456
+  B00032D:
+    n_events: 46945
+    n_primaries: 258629
+    ratio: 0.18151606542164483
+    ratio_sigma: 0.0007579181804125225
+    ratio_sigma_freq: 0.0007579191101556888
+    ratio_syst_fwhm: 0.0
+    expo: 0.4648501026694045
+  B00035A:
+    n_events: 13509
+    n_primaries: 273329
+    ratio: 0.049425602751253066
+    ratio_sigma: 0.00041459551380902313
+    ratio_sigma_freq: 0.0004145904761421222
+    ratio_syst_fwhm: 3.658581202208022e-06
+    expo: 0.4958401095140315
+  B00035B:
+    n_events: 12182
+    n_primaries: 286234
+    ratio: 0.042561182245357834
+    ratio_sigma: 0.00037731166322918806
+    ratio_sigma_freq: 0.0003773062123889802
+    ratio_syst_fwhm: 0.0
+    expo: 0.5229563655030801
+  B00061B:
+    n_events: 0
+    n_primaries: 266274
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4848644820898928
+  B00089B:
+    n_events: 16346
+    n_primaries: 226800
+    ratio: 0.07207419720371604
+    ratio_sigma: 0.0005430290865143503
+    ratio_sigma_freq: 0.0005430249249610074
+    ratio_syst_fwhm: 2.2045758175659458e-06
+    expo: 0.40028758840976497
+  V00048A:
+    n_events: 43194
+    n_primaries: 623291
+    ratio: 0.0693005846376979
+    ratio_sigma: 0.00032168221093220904
+    ratio_sigma_freq: 0.000321681242670399
+    ratio_syst_fwhm: 0.0
+    expo: 1.2388900861282228
+  V01240A:
+    n_events: 0
+    n_primaries: 690974
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.35581279945243
+  V05267A:
+    n_events: 0
+    n_primaries: 696996
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4093996862879306
+  V05612B:
+    n_events: 0
+    n_primaries: 643624
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3506477983116585
+  B00000A:
+    n_events: 19109
+    n_primaries: 155667
+    ratio: 0.1227580491815916
+    ratio_sigma: 0.000831732395473655
+    ratio_sigma_freq: 0.0008317306775208115
+    ratio_syst_fwhm: 0.0
+    expo: 0.320230070727812
+  B00002B:
+    n_events: 0
+    n_primaries: 206405
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40351571412274695
+  B00032A:
+    n_events: 7161
+    n_primaries: 159621
+    ratio: 0.044865369435290875
+    ratio_sigma: 0.0005181317259136479
+    ratio_sigma_freq: 0.000518119280405717
+    ratio_syst_fwhm: 0.0
+    expo: 0.295696315309149
+  P00573B:
+    n_events: 0
+    n_primaries: 339668
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6893985272644307
+  P00575A:
+    n_events: 0
+    n_primaries: 336008
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6813927754962354
+  P00574C:
+    n_events: 0
+    n_primaries: 260548
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5183078644763861
+  P00662A:
+    n_events: 0
+    n_primaries: 206661
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.33955890866225574
+  P00662B:
+    n_events: 0
+    n_primaries: 202713
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.3930476029229093
+  P00909C:
+    n_events: 0
+    n_primaries: 309099
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4577266991786447
+  P00661C:
+    n_events: 0
+    n_primaries: 315446
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4653995445154258
+  P00665C:
+    n_events: 0
+    n_primaries: 296738
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43807799389053664
+  V01389A:
+    n_events: 0
+    n_primaries: 685574
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0851373361092096
+  P00748A:
+    n_events: 0
+    n_primaries: 321986
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5195242102694755
+500:
+  V02160A:
+    n_events: 21617
+    n_primaries: 535541
+    ratio: 0.040365648259146805
+    ratio_sigma: 0.00026894389181779307
+    ratio_sigma_freq: 0.00026894165508658976
+    ratio_syst_fwhm: 0.0
+    expo: 1.1298439995436915
+  V02160B:
+    n_events: 26432
+    n_primaries: 552549
+    ratio: 0.04783729979187404
+    ratio_sigma: 0.0002871129136529144
+    ratio_sigma_freq: 0.00028711110090273376
+    ratio_syst_fwhm: 0.0
+    expo: 1.1098296201232034
+  V05261B:
+    n_events: 0
+    n_primaries: 758274
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5449809662331735
+  V05266A:
+    n_events: 0
+    n_primaries: 663977
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3383809206023272
+  V05266B:
+    n_events: 0
+    n_primaries: 636010
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2835027834816337
+  V05268B:
+    n_events: 0
+    n_primaries: 578709
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.1563146303901437
+  V05612A:
+    n_events: 0
+    n_primaries: 702078
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.421020938854666
+  V07647A:
+    n_events: 20833
+    n_primaries: 602408
+    ratio: 0.03458364665866546
+    ratio_sigma: 0.00023542177617294897
+    ratio_sigma_freq: 0.00023541963151150363
+    ratio_syst_fwhm: 8.300008797999803e-07
+    expo: 1.2221683949349762
+  V07647B:
+    n_events: 26556
+    n_primaries: 542889
+    ratio: 0.048916907660852105
+    ratio_sigma: 0.00029274022815679114
+    ratio_sigma_freq: 0.00029273840902374696
+    ratio_syst_fwhm: 0.0
+    expo: 1.148567128678987
+  B00035C:
+    n_events: 5083
+    n_primaries: 217194
+    ratio: 0.023405234927139206
+    ratio_sigma: 0.0003244051849667894
+    ratio_sigma_freq: 0.00032439183550250837
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  C000RG1:
+    n_events: 0
+    n_primaries: 674452
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.364205926306183
+  C000RG2:
+    n_events: 0
+    n_primaries: 701845
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.399715309148985
+  C00ANG3:
+    n_events: 0
+    n_primaries: 783206
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.9815468939336325
+  C00ANG5:
+    n_events: 0
+    n_primaries: 891736
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0763801125560877
+  C00ANG2:
+    n_events: 0
+    n_primaries: 916581
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.161163020001521
+  V04549A:
+    n_events: 0
+    n_primaries: 623913
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2544496520647956
+  B00032B:
+    n_events: 5090
+    n_primaries: 240634
+    ratio: 0.021154445529536436
+    ratio_sigma: 0.0002933442702720148
+    ratio_sigma_freq: 0.00029333199010489773
+    ratio_syst_fwhm: 0.0
+    expo: 0.46226760209901896
+  B00091C:
+    n_events: 0
+    n_primaries: 230768
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00574B:
+    n_events: 0
+    n_primaries: 277833
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5028774235683321
+  P00698A:
+    n_events: 0
+    n_primaries: 351834
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6210913871777322
+  P00661B:
+    n_events: 0
+    n_primaries: 275104
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4840897319187771
+  P00574A:
+    n_events: 0
+    n_primaries: 269406
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.49325760894364595
+  B00000B:
+    n_events: 14203
+    n_primaries: 234910
+    ratio: 0.06046332440796727
+    ratio_sigma: 0.0004917566920363287
+    ratio_sigma_freq: 0.0004917516660845252
+    ratio_syst_fwhm: 0.0
+    expo: 0.45000072438968736
+  B00000C:
+    n_events: 7596
+    n_primaries: 298220
+    ratio: 0.02547271989564786
+    ratio_sigma: 0.0002885126243857286
+    ratio_sigma_freq: 0.00028850481596887073
+    ratio_syst_fwhm: 0.0
+    expo: 0.526184491216062
+  B00061A:
+    n_events: 0
+    n_primaries: 270130
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4719519792379649
+  B00061C:
+    n_events: 0
+    n_primaries: 242106
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  B00076C:
+    n_events: 0
+    n_primaries: 305784
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5166376809389813
+  B00079B:
+    n_events: 0
+    n_primaries: 279313
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4751801049509468
+  B00079C:
+    n_events: 0
+    n_primaries: 299155
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5242476157882728
+  V08682B:
+    n_events: 20524
+    n_primaries: 480063
+    ratio: 0.04275367451006532
+    ratio_sigma: 0.00029197694165954255
+    ratio_sigma_freq: 0.0002919744427497041
+    ratio_syst_fwhm: 2.083055592586036e-06
+    expo: 0.9794133413187314
+  V08682A:
+    n_events: 39474
+    n_primaries: 1057808
+    ratio: 0.03731722834651624
+    ratio_sigma: 0.00018428604756227972
+    ratio_sigma_freq: 0.00018428518362383628
+    ratio_syst_fwhm: 1.890700495079528e-06
+    expo: 2.0894199051892413
+  V09372A:
+    n_events: 48973
+    n_primaries: 1280128
+    ratio: 0.03825669131782813
+    ratio_sigma: 0.00016953378273635046
+    ratio_sigma_freq: 0.00016953314774094142
+    ratio_syst_fwhm: 1.5623425451659345e-06
+    expo: 2.612199326945015
+  V09374A:
+    n_events: 38538
+    n_primaries: 857764
+    ratio: 0.044928972387542045
+    ratio_sigma: 0.00022366429703660903
+    ratio_sigma_freq: 0.00022366329936501813
+    ratio_syst_fwhm: 5.829102376515849e-07
+    expo: 1.7096153775952545
+  V09724A:
+    n_events: 36512
+    n_primaries: 821249
+    ratio: 0.04445966514459665
+    ratio_sigma: 0.00022744146811612778
+    ratio_sigma_freq: 0.00022744039225632112
+    ratio_syst_fwhm: 6.088280060899398e-07
+    expo: 1.7063872518822722
+  V02162B:
+    n_events: 30380
+    n_primaries: 755644
+    ratio: 0.04020472576408234
+    ratio_sigma: 0.00022597930145456748
+    ratio_sigma_freq: 0.00022597796208239184
+    ratio_syst_fwhm: 0.0
+    expo: 1.6011503536390599
+  V02166B:
+    n_events: 30272
+    n_primaries: 847339
+    ratio: 0.035726508839426914
+    ratio_sigma: 0.0002016351734186525
+    ratio_sigma_freq: 0.00020163392247136096
+    ratio_syst_fwhm: 0.0
+    expo: 1.7005766255989048
+  V04199A:
+    n_events: 31501
+    n_primaries: 961206
+    ratio: 0.03277285745942341
+    ratio_sigma: 0.00018159868686720338
+    ratio_sigma_freq: 0.00018159757469167332
+    ratio_syst_fwhm: 0.0
+    expo: 1.9284823009354324
+  V04545A:
+    n_events: 39215
+    n_primaries: 992058
+    ratio: 0.039529402989136736
+    ratio_sigma: 0.0001956289820952561
+    ratio_sigma_freq: 0.00019562807801093017
+    ratio_syst_fwhm: 1.0080045642450741e-06
+    expo: 1.968767453798768
+  V07646A:
+    n_events: 28342
+    n_primaries: 827286
+    ratio: 0.03425957376339771
+    ratio_sigma: 0.0001999828811928504
+    ratio_sigma_freq: 0.0001999815380873372
+    ratio_syst_fwhm: 0.0
+    expo: 1.6979941250285193
+  V07302B:
+    n_events: 16590
+    n_primaries: 502097
+    ratio: 0.0330423542814351
+    ratio_sigma: 0.0002522577625507017
+    ratio_sigma_freq: 0.00025225483619372373
+    ratio_syst_fwhm: 0.0
+    expo: 1.0278352270134612
+  B00089C:
+    n_events: 4686
+    n_primaries: 198798
+    ratio: 0.023574062243773862
+    ratio_sigma: 0.00034027392972279944
+    ratio_sigma_freq: 0.0003402587623339026
+    ratio_syst_fwhm: 0.0
+    expo: 0.3841469598448551
+  C00ANG4:
+    n_events: 0
+    n_primaries: 775194
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5333597136664388
+  V00048B:
+    n_events: 16496
+    n_primaries: 614167
+    ratio: 0.02685991455106746
+    ratio_sigma: 0.00020629848974594684
+    ratio_sigma_freq: 0.00020629594882222874
+    ratio_syst_fwhm: 0.0
+    expo: 1.172326133926534
+  V00050A:
+    n_events: 24534
+    n_primaries: 641232
+    ratio: 0.03826144318835743
+    ratio_sigma: 0.00023955261524562005
+    ratio_sigma_freq: 0.00023955082430210194
+    ratio_syst_fwhm: 0.0
+    expo: 1.2144854557380789
+  V00050B:
+    n_events: 26049
+    n_primaries: 643826
+    ratio: 0.040460403182842594
+    ratio_sigma: 0.0002455622610796675
+    ratio_sigma_freq: 0.00024556056782170434
+    ratio_syst_fwhm: 0.0
+    expo: 1.210057931211499
+  V05261A:
+    n_events: 0
+    n_primaries: 599222
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4258519183968362
+  V05268A:
+    n_events: 0
+    n_primaries: 738722
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4836465776865162
+  V07302A:
+    n_events: 20899
+    n_primaries: 550731
+    ratio: 0.037948584792603296
+    ratio_sigma: 0.00025746985208726866
+    ratio_sigma_freq: 0.00025746758572732525
+    ratio_syst_fwhm: 0.0
+    expo: 1.1640621321013003
+  B00002A:
+    n_events: 0
+    n_primaries: 183342
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.18030268144599085
+  B00089A:
+    n_events: 5029
+    n_primaries: 191634
+    ratio: 0.026245205729642288
+    ratio_sigma: 0.0003651835839687572
+    ratio_sigma_freq: 0.00036516875328549705
+    ratio_syst_fwhm: 2.6091267252854183e-06
+    expo: 0.33830757472051104
+  B00091A:
+    n_events: 0
+    n_primaries: 234044
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00538A:
+    n_events: 0
+    n_primaries: 369310
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6700943355007986
+  P00573A:
+    n_events: 0
+    n_primaries: 372032
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6790039624686288
+  P00662C:
+    n_events: 0
+    n_primaries: 270722
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4837023568332193
+  P00664A:
+    n_events: 0
+    n_primaries: 290923
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43365160924785146
+  P00909B:
+    n_events: 0
+    n_primaries: 292074
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5327053051562858
+  B00000D:
+    n_events: 5328
+    n_primaries: 265004
+    ratio: 0.020107167789286996
+    ratio_sigma: 0.00027266970481734995
+    ratio_sigma_freq: 0.00027265870679124256
+    ratio_syst_fwhm: 1.886756853643548e-06
+    expo: 0.4356342003194159
+  B00002C:
+    n_events: 0
+    n_primaries: 280804
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5087526123659595
+  B00032C:
+    n_events: 4731
+    n_primaries: 269668
+    ratio: 0.01754558365996833
+    ratio_sigma: 0.0002528272011260819
+    ratio_sigma_freq: 0.0002528154784902851
+    ratio_syst_fwhm: 0.0
+    expo: 0.35805717545060456
+  B00032D:
+    n_events: 26014
+    n_primaries: 265808
+    ratio: 0.09786914664289019
+    ratio_sigma: 0.0005763310409712792
+    ratio_sigma_freq: 0.0005763292379390402
+    ratio_syst_fwhm: 0.0
+    expo: 0.4648501026694045
+  B00035A:
+    n_events: 7003
+    n_primaries: 280679
+    ratio: 0.02495190252244549
+    ratio_sigma: 0.000294413923291455
+    ratio_sigma_freq: 0.0002944052424360931
+    ratio_syst_fwhm: 0.0
+    expo: 0.4958401095140315
+  B00035B:
+    n_events: 6663
+    n_primaries: 295898
+    ratio: 0.02251950834575311
+    ratio_sigma: 0.0002727476510274453
+    ratio_sigma_freq: 0.0002727390256535158
+    ratio_syst_fwhm: 0.0
+    expo: 0.5229563655030801
+  B00061B:
+    n_events: 0
+    n_primaries: 276220
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4848644820898928
+  B00089B:
+    n_events: 6276
+    n_primaries: 234410
+    ratio: 0.02677562059800948
+    ratio_sigma: 0.0003334159274158599
+    ratio_sigma_freq: 0.00033340512607615234
+    ratio_syst_fwhm: 0.0
+    expo: 0.40028758840976497
+  V00048A:
+    n_events: 24636
+    n_primaries: 636528
+    ratio: 0.03870444237418876
+    ratio_sigma: 0.0002417683444437092
+    ratio_sigma_freq: 0.0002417665519375262
+    ratio_syst_fwhm: 0.0
+    expo: 1.2388900861282228
+  V01240A:
+    n_events: 0
+    n_primaries: 704108
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.35581279945243
+  V05267A:
+    n_events: 0
+    n_primaries: 711438
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4093996862879306
+  V05612B:
+    n_events: 0
+    n_primaries: 653773
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3506477983116585
+  B00000A:
+    n_events: 12243
+    n_primaries: 158252
+    ratio: 0.07736662180179839
+    ratio_sigma: 0.0006716051998825702
+    ratio_sigma_freq: 0.0006715988239455647
+    ratio_syst_fwhm: 0.0
+    expo: 0.320230070727812
+  B00002B:
+    n_events: 0
+    n_primaries: 210325
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40351571412274695
+  B00032A:
+    n_events: 3729
+    n_primaries: 163679
+    ratio: 0.022785312805474096
+    ratio_sigma: 0.0003688275515487579
+    ratio_sigma_freq: 0.0003688067570431836
+    ratio_syst_fwhm: 0.0
+    expo: 0.295696315309149
+  P00573B:
+    n_events: 0
+    n_primaries: 347023
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6893985272644307
+  P00575A:
+    n_events: 0
+    n_primaries: 344464
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6813927754962354
+  P00574C:
+    n_events: 0
+    n_primaries: 266567
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5183078644763861
+  P00662A:
+    n_events: 0
+    n_primaries: 210904
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.33955890866225574
+  P00662B:
+    n_events: 0
+    n_primaries: 206918
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.3930476029229093
+  P00909C:
+    n_events: 0
+    n_primaries: 319713
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4577266991786447
+  P00661C:
+    n_events: 0
+    n_primaries: 326242
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4653995445154258
+  P00665C:
+    n_events: 0
+    n_primaries: 306714
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43807799389053664
+  V01389A:
+    n_events: 0
+    n_primaries: 702743
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0851373361092096
+  P00748A:
+    n_events: 0
+    n_primaries: 329626
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5195242102694755
+600:
+  V02160A:
+    n_events: 13754
+    n_primaries: 541098
+    ratio: 0.025419562778715172
+    ratio_sigma: 0.00021397060565155754
+    ratio_sigma_freq: 0.00021396740593963533
+    ratio_syst_fwhm: 0.0
+    expo: 1.1298439995436915
+  V02160B:
+    n_events: 17226
+    n_primaries: 559180
+    ratio: 0.03080666188586522
+    ratio_sigma: 0.00023107392412113158
+    ratio_sigma_freq: 0.0002310712905017205
+    ratio_syst_fwhm: 0.0
+    expo: 1.1098296201232034
+  V05261B:
+    n_events: 0
+    n_primaries: 770900
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5449809662331735
+  V05266A:
+    n_events: 0
+    n_primaries: 674705
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3383809206023272
+  V05266B:
+    n_events: 0
+    n_primaries: 647415
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2835027834816337
+  V05268B:
+    n_events: 0
+    n_primaries: 587518
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.1563146303901437
+  V05612A:
+    n_events: 0
+    n_primaries: 712406
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.421020938854666
+  V07647A:
+    n_events: 13444
+    n_primaries: 610066
+    ratio: 0.022037743395397554
+    ratio_sigma: 0.0001879556932536363
+    ratio_sigma_freq: 0.000187952735604975
+    ratio_syst_fwhm: 0.0
+    expo: 1.2221683949349762
+  V07647B:
+    n_events: 17437
+    n_primaries: 547678
+    ratio: 0.031838905636330773
+    ratio_sigma: 0.00023724083190178232
+    ratio_sigma_freq: 0.0002372381850607217
+    ratio_syst_fwhm: 0.0
+    expo: 1.148567128678987
+  B00035C:
+    n_events: 2901
+    n_primaries: 221062
+    ratio: 0.013125217698122254
+    ratio_sigma: 0.00024206124991481886
+    ratio_sigma_freq: 0.0002420423048874508
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  C000RG1:
+    n_events: 0
+    n_primaries: 683398
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.364205926306183
+  C000RG2:
+    n_events: 0
+    n_primaries: 714948
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.399715309148985
+  C00ANG3:
+    n_events: 0
+    n_primaries: 797654
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.9815468939336325
+  C00ANG5:
+    n_events: 0
+    n_primaries: 906217
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0763801125560877
+  C00ANG2:
+    n_events: 0
+    n_primaries: 932290
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.161163020001521
+  V04549A:
+    n_events: 0
+    n_primaries: 630463
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2544496520647956
+  B00032B:
+    n_events: 3123
+    n_primaries: 244135
+    ratio: 0.012794098371399549
+    ratio_sigma: 0.00022745312734137474
+    ratio_sigma_freq: 0.00022743654889773848
+    ratio_syst_fwhm: 0.0
+    expo: 0.46226760209901896
+  B00091C:
+    n_events: 0
+    n_primaries: 234534
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00574B:
+    n_events: 0
+    n_primaries: 284033
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5028774235683321
+  P00698A:
+    n_events: 0
+    n_primaries: 359638
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6210913871777322
+  P00661B:
+    n_events: 0
+    n_primaries: 280940
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4840897319187771
+  P00574A:
+    n_events: 0
+    n_primaries: 273426
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.49325760894364595
+  B00000B:
+    n_events: 5221
+    n_primaries: 238220
+    ratio: 0.021918722530759254
+    ratio_sigma: 0.00029998819098822475
+    ratio_sigma_freq: 0.0002999760241203959
+    ratio_syst_fwhm: 0.0
+    expo: 0.45000072438968736
+  B00000C:
+    n_events: 4319
+    n_primaries: 303036
+    ratio: 0.014254034985826813
+    ratio_sigma: 0.00021532917114530574
+    ratio_sigma_freq: 0.00021531794902583247
+    ratio_syst_fwhm: 0.0
+    expo: 0.526184491216062
+  B00061A:
+    n_events: 0
+    n_primaries: 275742
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4719519792379649
+  B00061C:
+    n_events: 0
+    n_primaries: 247399
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  B00076C:
+    n_events: 0
+    n_primaries: 312805
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5166376809389813
+  B00079B:
+    n_events: 0
+    n_primaries: 286166
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4751801049509468
+  B00079C:
+    n_events: 0
+    n_primaries: 306593
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5242476157882728
+  V08682B:
+    n_events: 13631
+    n_primaries: 485519
+    ratio: 0.02807608337452628
+    ratio_sigma: 0.00023707206728835648
+    ratio_sigma_freq: 0.0002370685703350946
+    ratio_syst_fwhm: 0.0
+    expo: 0.9794133413187314
+  V08682A:
+    n_events: 24363
+    n_primaries: 1068593
+    ratio: 0.022799585249402485
+    ratio_sigma: 0.0001443938598354526
+    ratio_sigma_freq: 0.0001443926138447118
+    ratio_syst_fwhm: 0.0
+    expo: 2.0894199051892413
+  V09372A:
+    n_events: 31625
+    n_primaries: 1297650
+    ratio: 0.024371344837710602
+    ratio_sigma: 0.0001353639132285054
+    ratio_sigma_freq: 0.00013536302506851158
+    ratio_syst_fwhm: 0.0
+    expo: 2.612199326945015
+  V09374A:
+    n_events: 25015
+    n_primaries: 871472
+    ratio: 0.028704847998733178
+    ratio_sigma: 0.00017886526855237652
+    ratio_sigma_freq: 0.00017886383865784705
+    ratio_syst_fwhm: 0.0
+    expo: 1.7096153775952545
+  V09724A:
+    n_events: 23609
+    n_primaries: 833866
+    ratio: 0.02831326818305557
+    ratio_sigma: 0.00018163915949771616
+    ratio_sigma_freq: 0.00018163761572595875
+    ratio_syst_fwhm: 5.996160059099087e-07
+    expo: 1.7063872518822722
+  V02162B:
+    n_events: 19330
+    n_primaries: 762939
+    ratio: 0.02533685479854248
+    ratio_sigma: 0.00017991117766754712
+    ratio_sigma_freq: 0.0001799092620093998
+    ratio_syst_fwhm: 0.0
+    expo: 1.6011503536390599
+  V02166B:
+    n_events: 19139
+    n_primaries: 861040
+    ratio: 0.022228325944989843
+    ratio_sigma: 0.00015887659955568094
+    ratio_sigma_freq: 0.00015887484614929135
+    ratio_syst_fwhm: 0.0
+    expo: 1.7005766255989048
+  V04199A:
+    n_events: 19798
+    n_primaries: 974957
+    ratio: 0.02030702861046322
+    ratio_sigma: 0.0001428482782367773
+    ratio_sigma_freq: 0.00014284673009206785
+    ratio_syst_fwhm: 5.128426045029194e-07
+    expo: 1.9284823009354324
+  V04545A:
+    n_events: 25405
+    n_primaries: 1007606
+    ratio: 0.02521369938874978
+    ratio_sigma: 0.00015618063720520726
+    ratio_sigma_freq: 0.00015617937056746243
+    ratio_syst_fwhm: 0.0
+    expo: 1.968767453798768
+  V07646A:
+    n_events: 17737
+    n_primaries: 840147
+    ratio: 0.02111235163328366
+    ratio_sigma: 0.00015683990558753777
+    ratio_sigma_freq: 0.00015683802068398165
+    ratio_syst_fwhm: 0.0
+    expo: 1.6979941250285193
+  V07302B:
+    n_events: 10791
+    n_primaries: 507553
+    ratio: 0.02126177707199628
+    ratio_sigma: 0.00020248436739362817
+    ratio_sigma_freq: 0.00020248037247576863
+    ratio_syst_fwhm: 0.0
+    expo: 1.0278352270134612
+  B00089C:
+    n_events: 2633
+    n_primaries: 202491
+    ratio: 0.013005452067242162
+    ratio_sigma: 0.0002517764442782583
+    ratio_sigma_freq: 0.0002517547134710744
+    ratio_syst_fwhm: 0.0
+    expo: 0.3841469598448551
+  C00ANG4:
+    n_events: 0
+    n_primaries: 787830
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5333597136664388
+  V00048B:
+    n_events: 9728
+    n_primaries: 626422
+    ratio: 0.01553024074786526
+    ratio_sigma: 0.00015622699884432017
+    ratio_sigma_freq: 0.00015622341956731038
+    ratio_syst_fwhm: 0.0
+    expo: 1.172326133926534
+  V00050A:
+    n_events: 14091
+    n_primaries: 655064
+    ratio: 0.021511605718516482
+    ratio_sigma: 0.00017925518420915573
+    ratio_sigma_freq: 0.00017925248134729676
+    ratio_syst_fwhm: 0.0
+    expo: 1.2144854557380789
+  V00050B:
+    n_events: 16333
+    n_primaries: 657344
+    ratio: 0.02484768272368391
+    ratio_sigma: 0.00019199157120485165
+    ratio_sigma_freq: 0.00019198914182304484
+    ratio_syst_fwhm: 0.0
+    expo: 1.210057931211499
+  V05261A:
+    n_events: 0
+    n_primaries: 611223
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4258519183968362
+  V05268A:
+    n_events: 0
+    n_primaries: 747250
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4836465776865162
+  V07302A:
+    n_events: 13252
+    n_primaries: 556052
+    ratio: 0.023833159788725175
+    ratio_sigma: 0.00020454758350674996
+    ratio_sigma_freq: 0.00020454436630239496
+    ratio_syst_fwhm: 0.0
+    expo: 1.1640621321013003
+  B00002A:
+    n_events: 0
+    n_primaries: 186190
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.18030268144599085
+  B00089A:
+    n_events: 2725
+    n_primaries: 194011
+    ratio: 0.014048100117518504
+    ratio_sigma: 0.000267190643159923
+    ratio_sigma_freq: 0.00026716853859315985
+    ratio_syst_fwhm: 0.0
+    expo: 0.33830757472051104
+  B00091A:
+    n_events: 0
+    n_primaries: 237710
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00538A:
+    n_events: 0
+    n_primaries: 377726
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6700943355007986
+  P00573A:
+    n_events: 0
+    n_primaries: 381225
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6790039624686288
+  P00662C:
+    n_events: 0
+    n_primaries: 276768
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4837023568332193
+  P00664A:
+    n_events: 0
+    n_primaries: 297507
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43365160924785146
+  P00909B:
+    n_events: 0
+    n_primaries: 297120
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5327053051562858
+  B00000D:
+    n_events: 3345
+    n_primaries: 269953
+    ratio: 0.01239285211554561
+    ratio_sigma: 0.00021292764855563117
+    ratio_sigma_freq: 0.00021291311421454162
+    ratio_syst_fwhm: 0.0
+    expo: 0.4356342003194159
+  B00002C:
+    n_events: 0
+    n_primaries: 285212
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5087526123659595
+  B00032C:
+    n_events: 2726
+    n_primaries: 274819
+    ratio: 0.009921039225674987
+    ratio_sigma: 0.0001890551626889517
+    ratio_sigma_freq: 0.0001890390289636278
+    ratio_syst_fwhm: 0.0
+    expo: 0.35805717545060456
+  B00032D:
+    n_events: 8203
+    n_primaries: 271256
+    ratio: 0.030242537519769075
+    ratio_sigma: 0.0003288133194883768
+    ratio_sigma_freq: 0.00032880541063159003
+    ratio_syst_fwhm: 0.0
+    expo: 0.4648501026694045
+  B00035A:
+    n_events: 4153
+    n_primaries: 285712
+    ratio: 0.01453731541791938
+    ratio_sigma: 0.0002239218317075052
+    ratio_sigma_freq: 0.00022390972196183252
+    ratio_syst_fwhm: 0.0
+    expo: 0.4958401095140315
+  B00035B:
+    n_events: 3812
+    n_primaries: 302028
+    ratio: 0.012622960046882915
+    ratio_sigma: 0.0002031407607556603
+    ratio_sigma_freq: 0.0002031286144180879
+    ratio_syst_fwhm: 0.0
+    expo: 0.5229563655030801
+  B00061B:
+    n_events: 0
+    n_primaries: 281175
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4848644820898928
+  B00089B:
+    n_events: 3050
+    n_primaries: 238647
+    ratio: 0.01278242432369012
+    ratio_sigma: 0.0002299499105502782
+    ratio_sigma_freq: 0.00022993274748215313
+    ratio_syst_fwhm: 0.0
+    expo: 0.40028758840976497
+  V00048A:
+    n_events: 15967
+    n_primaries: 648032
+    ratio: 0.024639948891491636
+    ratio_sigma: 0.00019257658767808417
+    ratio_sigma_freq: 0.00019257409068595396
+    ratio_syst_fwhm: 7.715656455756226e-07
+    expo: 1.2388900861282228
+  V01240A:
+    n_events: 0
+    n_primaries: 718254
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.35581279945243
+  V05267A:
+    n_events: 0
+    n_primaries: 720810
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4093996862879306
+  V05612B:
+    n_events: 0
+    n_primaries: 660361
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3506477983116585
+  B00000A:
+    n_events: 4729
+    n_primaries: 159572
+    ratio: 0.0296384726739486
+    ratio_sigma: 0.00042453512533158677
+    ratio_sigma_freq: 0.00042451731918525544
+    ratio_syst_fwhm: 0.0
+    expo: 0.320230070727812
+  B00002B:
+    n_events: 0
+    n_primaries: 213722
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40351571412274695
+  B00032A:
+    n_events: 2206
+    n_primaries: 166444
+    ratio: 0.01325663131965514
+    ratio_sigma: 0.00028033802926817673
+    ratio_sigma_freq: 0.0002803092062178718
+    ratio_syst_fwhm: 0.0
+    expo: 0.295696315309149
+  P00573B:
+    n_events: 0
+    n_primaries: 352504
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6893985272644307
+  P00575A:
+    n_events: 0
+    n_primaries: 350803
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6813927754962354
+  P00574C:
+    n_events: 0
+    n_primaries: 271301
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5183078644763861
+  P00662A:
+    n_events: 0
+    n_primaries: 215444
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.33955890866225574
+  P00662B:
+    n_events: 0
+    n_primaries: 211332
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.3930476029229093
+  P00909C:
+    n_events: 0
+    n_primaries: 325980
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4577266991786447
+  P00661C:
+    n_events: 0
+    n_primaries: 333471
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4653995445154258
+  P00665C:
+    n_events: 0
+    n_primaries: 313024
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43807799389053664
+  V01389A:
+    n_events: 0
+    n_primaries: 713912
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0851373361092096
+  P00748A:
+    n_events: 0
+    n_primaries: 332938
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5195242102694755
+700:
+  V02160A:
+    n_events: 9516
+    n_primaries: 546703
+    ratio: 0.017407042933653312
+    ratio_sigma: 0.0001768775853325759
+    ratio_sigma_freq: 0.00017687350340740517
+    ratio_syst_fwhm: 0.0
+    expo: 1.1298439995436915
+  V02160B:
+    n_events: 12208
+    n_primaries: 564826
+    ratio: 0.021614582872277705
+    ratio_sigma: 0.00019349524898831238
+    ratio_sigma_freq: 0.00019349188424382322
+    ratio_syst_fwhm: 0.0
+    expo: 1.1098296201232034
+  V05261B:
+    n_events: 0
+    n_primaries: 778703
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5449809662331735
+  V05266A:
+    n_events: 0
+    n_primaries: 683282
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3383809206023272
+  V05266B:
+    n_events: 0
+    n_primaries: 653755
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2835027834816337
+  V05268B:
+    n_events: 0
+    n_primaries: 595281
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.1563146303901437
+  V05612A:
+    n_events: 0
+    n_primaries: 719210
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.421020938854666
+  V07647A:
+    n_events: 9308
+    n_primaries: 617478
+    ratio: 0.015075006599414718
+    ratio_sigma: 0.00015506682216307756
+    ratio_sigma_freq: 0.00015506309595426237
+    ratio_syst_fwhm: 0.0
+    expo: 1.2221683949349762
+  V07647B:
+    n_events: 12384
+    n_primaries: 550751
+    ratio: 0.02248652751147522
+    ratio_sigma: 0.00019977637911564343
+    ratio_sigma_freq: 0.0001997729789710153
+    ratio_syst_fwhm: 0.0
+    expo: 1.148567128678987
+  B00035C:
+    n_events: 1809
+    n_primaries: 222869
+    ratio: 0.00811908287342397
+    ratio_sigma: 0.0001900887758087101
+    ratio_sigma_freq: 0.0001900640020379247
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  C000RG1:
+    n_events: 0
+    n_primaries: 688523
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.364205926306183
+  C000RG2:
+    n_events: 0
+    n_primaries: 721542
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.399715309148985
+  C00ANG3:
+    n_events: 0
+    n_primaries: 807567
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.9815468939336325
+  C00ANG5:
+    n_events: 0
+    n_primaries: 916535
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0763801125560877
+  C00ANG2:
+    n_events: 0
+    n_primaries: 942190
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.161163020001521
+  V04549A:
+    n_events: 0
+    n_primaries: 640583
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2544496520647956
+  B00032B:
+    n_events: 2043
+    n_primaries: 246243
+    ratio: 0.008298679358684882
+    ratio_sigma: 0.00018281474782778605
+    ratio_sigma_freq: 0.000182793678580186
+    ratio_syst_fwhm: 0.0
+    expo: 0.46226760209901896
+  B00091C:
+    n_events: 0
+    n_primaries: 238794
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00574B:
+    n_events: 0
+    n_primaries: 287956
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5028774235683321
+  P00698A:
+    n_events: 0
+    n_primaries: 366989
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6210913871777322
+  P00661B:
+    n_events: 0
+    n_primaries: 285661
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4840897319187771
+  P00574A:
+    n_events: 0
+    n_primaries: 278583
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.49325760894364595
+  B00000B:
+    n_events: 2638
+    n_primaries: 240957
+    ratio: 0.01095004108599839
+    ratio_sigma: 0.00021200466282424803
+    ratio_sigma_freq: 0.00021198611140749114
+    ratio_syst_fwhm: 0.0
+    expo: 0.45000072438968736
+  B00000C:
+    n_events: 2605
+    n_primaries: 306409
+    ratio: 0.008503312555073268
+    ratio_sigma: 0.00016587751821832002
+    ratio_sigma_freq: 0.0001658625474905034
+    ratio_syst_fwhm: 0.0
+    expo: 0.526184491216062
+  B00061A:
+    n_events: 0
+    n_primaries: 279030
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4719519792379649
+  B00061C:
+    n_events: 0
+    n_primaries: 252103
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  B00076C:
+    n_events: 0
+    n_primaries: 317242
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5166376809389813
+  B00079B:
+    n_events: 0
+    n_primaries: 291830
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4751801049509468
+  B00079C:
+    n_events: 0
+    n_primaries: 312529
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5242476157882728
+  V08682B:
+    n_events: 9512
+    n_primaries: 489629
+    ratio: 0.019427935379776565
+    ratio_sigma: 0.0001972507349988253
+    ratio_sigma_freq: 0.0001972462539298795
+    ratio_syst_fwhm: 2.0423585156137403e-06
+    expo: 0.9794133413187314
+  V08682A:
+    n_events: 16696
+    n_primaries: 1082482
+    ratio: 0.015424260704325149
+    ratio_sigma: 0.00011844480049666618
+    ratio_sigma_freq: 0.00011844321803894893
+    ratio_syst_fwhm: 9.23802036614102e-07
+    expo: 2.0894199051892413
+  V09372A:
+    n_events: 21882
+    n_primaries: 1312555
+    ratio: 0.016671669627810165
+    ratio_sigma: 0.00011175828725036386
+    ratio_sigma_freq: 0.00011175715908548633
+    ratio_syst_fwhm: 7.618722553549145e-07
+    expo: 2.612199326945015
+  V09374A:
+    n_events: 17602
+    n_primaries: 883672
+    ratio: 0.019919698802611373
+    ratio_sigma: 0.0001486367412899506
+    ratio_sigma_freq: 0.00014863492375483917
+    ratio_syst_fwhm: 1.1316403239654271e-06
+    expo: 1.7096153775952545
+  V09724A:
+    n_events: 16743
+    n_primaries: 842231
+    ratio: 0.019879914322894404
+    ratio_sigma: 0.00015210054561926896
+    ratio_sigma_freq: 0.0001520985896799712
+    ratio_syst_fwhm: 0.0
+    expo: 1.7063872518822722
+  V02162B:
+    n_events: 13165
+    n_primaries: 768777
+    ratio: 0.017125229910325217
+    ratio_sigma: 0.00014796757048874697
+    ratio_sigma_freq: 0.00014796509668247348
+    ratio_syst_fwhm: 0.0
+    expo: 1.6011503536390599
+  V02166B:
+    n_events: 12916
+    n_primaries: 870398
+    ratio: 0.014839745909634546
+    ratio_sigma: 0.00012960066569802194
+    ratio_sigma_freq: 0.0001295984172474683
+    ratio_syst_fwhm: 0.0
+    expo: 1.7005766255989048
+  V04199A:
+    n_events: 13513
+    n_primaries: 988825
+    ratio: 0.013666206187944088
+    ratio_sigma: 0.00011675507921549226
+    ratio_sigma_freq: 0.00011675312544208417
+    ratio_syst_fwhm: 0.0
+    expo: 1.9284823009354324
+  V04545A:
+    n_events: 17441
+    n_primaries: 1019739
+    ratio: 0.017103869613823132
+    ratio_sigma: 0.0001283973500919586
+    ratio_sigma_freq: 0.000128395729473781
+    ratio_syst_fwhm: 0.0
+    expo: 1.968767453798768
+  V07646A:
+    n_events: 11837
+    n_primaries: 847399
+    ratio: 0.013969199905593581
+    ratio_sigma: 0.00012749305286396132
+    ratio_sigma_freq: 0.00012749062302140312
+    ratio_syst_fwhm: 0.0
+    expo: 1.6979941250285193
+  V07302B:
+    n_events: 7297
+    n_primaries: 513656
+    ratio: 0.014206951331335892
+    ratio_sigma: 0.00016512251463438526
+    ratio_sigma_freq: 0.0001651174191063189
+    ratio_syst_fwhm: 0.0
+    expo: 1.0278352270134612
+  B00089C:
+    n_events: 1616
+    n_primaries: 204921
+    ratio: 0.007888367281209436
+    ratio_sigma: 0.00019542426169727705
+    ratio_sigma_freq: 0.0001953957027439049
+    ratio_syst_fwhm: 2.43995276251463e-06
+    expo: 0.3841469598448551
+  C00ANG4:
+    n_events: 0
+    n_primaries: 795679
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5333597136664388
+  V00048B:
+    n_events: 6354
+    n_primaries: 636520
+    ratio: 0.009983174160789667
+    ratio_sigma: 0.00012460885411480347
+    ratio_sigma_freq: 0.00012460429371535694
+    ratio_syst_fwhm: 0.0
+    expo: 1.172326133926534
+  V00050A:
+    n_events: 9060
+    n_primaries: 663940
+    ratio: 0.013646543894713536
+    ratio_sigma: 0.00014238444684814796
+    ratio_sigma_freq: 0.00014238089262220882
+    ratio_syst_fwhm: 0.0
+    expo: 1.2144854557380789
+  V00050B:
+    n_events: 11016
+    n_primaries: 666844
+    ratio: 0.016520330811507923
+    ratio_sigma: 0.0001560915121183647
+    ratio_sigma_freq: 0.00015608837849620706
+    ratio_syst_fwhm: 0.0
+    expo: 1.210057931211499
+  V05261A:
+    n_events: 0
+    n_primaries: 618878
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4258519183968362
+  V05268A:
+    n_events: 0
+    n_primaries: 757407
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4836465776865162
+  V07302A:
+    n_events: 9247
+    n_primaries: 559898
+    ratio: 0.01651637170275353
+    ratio_sigma: 0.0001703278473482843
+    ratio_sigma_freq: 0.0001703237736662258
+    ratio_syst_fwhm: 8.93018205067736e-07
+    expo: 1.1640621321013003
+  B00002A:
+    n_events: 0
+    n_primaries: 187622
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.18030268144599085
+  B00089A:
+    n_events: 1701
+    n_primaries: 197561
+    ratio: 0.008612486206861643
+    ratio_sigma: 0.00020788980215608887
+    ratio_sigma_freq: 0.00020786109377188595
+    ratio_syst_fwhm: 0.0
+    expo: 0.33830757472051104
+  B00091A:
+    n_events: 0
+    n_primaries: 241352
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00538A:
+    n_events: 0
+    n_primaries: 384149
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6700943355007986
+  P00573A:
+    n_events: 0
+    n_primaries: 387144
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6790039624686288
+  P00662C:
+    n_events: 0
+    n_primaries: 281355
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4837023568332193
+  P00664A:
+    n_events: 0
+    n_primaries: 301814
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43365160924785146
+  P00909B:
+    n_events: 0
+    n_primaries: 303286
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5327053051562858
+  B00000D:
+    n_events: 2380
+    n_primaries: 272326
+    ratio: 0.008741329357720682
+    ratio_sigma: 0.00017837586546415896
+    ratio_sigma_freq: 0.00017835827615649428
+    ratio_syst_fwhm: 0.0
+    expo: 0.4356342003194159
+  B00002C:
+    n_events: 0
+    n_primaries: 287757
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5087526123659595
+  B00032C:
+    n_events: 1778
+    n_primaries: 277740
+    ratio: 0.006403447816490903
+    ratio_sigma: 0.00015135305658987324
+    ratio_sigma_freq: 0.00015133273235632102
+    ratio_syst_fwhm: 0.0
+    expo: 0.35805717545060456
+  B00032D:
+    n_events: 3336
+    n_primaries: 276426
+    ratio: 0.012070094455317317
+    ratio_sigma: 0.00020769564230519556
+    ratio_sigma_freq: 0.00020768139182177845
+    ratio_syst_fwhm: 0.0
+    expo: 0.4648501026694045
+  B00035A:
+    n_events: 2776
+    n_primaries: 290787
+    ratio: 0.009548193185413428
+    ratio_sigma: 0.00018033843064045452
+    ratio_sigma_freq: 0.0001803232756932136
+    ratio_syst_fwhm: 0.0
+    expo: 0.4958401095140315
+  B00035B:
+    n_events: 2515
+    n_primaries: 306364
+    ratio: 0.008210794313971896
+    ratio_sigma: 0.00016303542949631182
+    ratio_sigma_freq: 0.00016302015569811263
+    ratio_syst_fwhm: 0.0
+    expo: 0.5229563655030801
+  B00061B:
+    n_events: 0
+    n_primaries: 286617
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4848644820898928
+  B00089B:
+    n_events: 1815
+    n_primaries: 243469
+    ratio: 0.007456770854725428
+    ratio_sigma: 0.00017435182374993951
+    ratio_sigma_freq: 0.00017432906499257413
+    ratio_syst_fwhm: 0.0
+    expo: 0.40028758840976497
+  V00048A:
+    n_events: 10986
+    n_primaries: 655859
+    ratio: 0.01675128838471625
+    ratio_sigma: 0.00015847103604904546
+    ratio_sigma_freq: 0.00015846785177069282
+    ratio_syst_fwhm: 0.0
+    expo: 1.2388900861282228
+  V01240A:
+    n_events: 0
+    n_primaries: 726201
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.35581279945243
+  V05267A:
+    n_events: 0
+    n_primaries: 730289
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4093996862879306
+  V05612B:
+    n_events: 0
+    n_primaries: 665696
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3506477983116585
+  B00000A:
+    n_events: 1876
+    n_primaries: 161404
+    ratio: 0.011626033889904278
+    ratio_sigma: 0.00026681890874042155
+    ratio_sigma_freq: 0.0002667862466579231
+    ratio_syst_fwhm: 0.0
+    expo: 0.320230070727812
+  B00002B:
+    n_events: 0
+    n_primaries: 215851
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40351571412274695
+  B00032A:
+    n_events: 1472
+    n_primaries: 168338
+    ratio: 0.008747230291257522
+    ratio_sigma: 0.0002269519014648852
+    ratio_sigma_freq: 0.00022691572242431767
+    ratio_syst_fwhm: 0.0
+    expo: 0.295696315309149
+  P00573B:
+    n_events: 0
+    n_primaries: 357811
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6893985272644307
+  P00575A:
+    n_events: 0
+    n_primaries: 354418
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6813927754962354
+  P00574C:
+    n_events: 0
+    n_primaries: 274886
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5183078644763861
+  P00662A:
+    n_events: 0
+    n_primaries: 218155
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.33955890866225574
+  P00662B:
+    n_events: 0
+    n_primaries: 214005
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.3930476029229093
+  P00909C:
+    n_events: 0
+    n_primaries: 331705
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4577266991786447
+  P00661C:
+    n_events: 0
+    n_primaries: 338794
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4653995445154258
+  P00665C:
+    n_events: 0
+    n_primaries: 317963
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43807799389053664
+  V01389A:
+    n_events: 0
+    n_primaries: 725330
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0851373361092096
+  P00748A:
+    n_events: 0
+    n_primaries: 336415
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5195242102694755
+800:
+  V02160A:
+    n_events: 6990
+    n_primaries: 549525
+    ratio: 0.012720963157339234
+    ratio_sigma: 0.00015117690065881184
+    ratio_sigma_freq: 0.00015117197457964284
+    ratio_syst_fwhm: 0.0
+    expo: 1.1298439995436915
+  V02160B:
+    n_events: 9258
+    n_primaries: 572082
+    ratio: 0.016183840456716943
+    ratio_sigma: 0.00016682758741347627
+    ratio_sigma_freq: 0.00016682359175142846
+    ratio_syst_fwhm: 0.0
+    expo: 1.1098296201232034
+  V05261B:
+    n_events: 0
+    n_primaries: 785686
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5449809662331735
+  V05266A:
+    n_events: 0
+    n_primaries: 691097
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3383809206023272
+  V05266B:
+    n_events: 0
+    n_primaries: 659840
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2835027834816337
+  V05268B:
+    n_events: 0
+    n_primaries: 601132
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.1563146303901437
+  V05612A:
+    n_events: 0
+    n_primaries: 725552
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.421020938854666
+  V07647A:
+    n_events: 6620
+    n_primaries: 622595
+    ratio: 0.010633701469331637
+    ratio_sigma: 0.00012999219475632543
+    ratio_sigma_freq: 0.00012998765077300913
+    ratio_syst_fwhm: 0.0
+    expo: 1.2221683949349762
+  V07647B:
+    n_events: 9323
+    n_primaries: 555375
+    ratio: 0.01678772579297629
+    ratio_sigma: 0.00017239538439991074
+    ratio_sigma_freq: 0.0001723913036167522
+    ratio_syst_fwhm: 0.0
+    expo: 1.148567128678987
+  B00035C:
+    n_events: 1294
+    n_primaries: 224418
+    ratio: 0.005768228180323413
+    ratio_sigma: 0.00015985795600846083
+    ratio_sigma_freq: 0.0001598283257886536
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  C000RG1:
+    n_events: 0
+    n_primaries: 695826
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.364205926306183
+  C000RG2:
+    n_events: 0
+    n_primaries: 730114
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.399715309148985
+  C00ANG3:
+    n_events: 0
+    n_primaries: 815895
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.9815468939336325
+  C00ANG5:
+    n_events: 0
+    n_primaries: 927072
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0763801125560877
+  C00ANG2:
+    n_events: 0
+    n_primaries: 952151
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.161163020001521
+  V04549A:
+    n_events: 0
+    n_primaries: 643118
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2544496520647956
+  B00032B:
+    n_events: 1448
+    n_primaries: 248408
+    ratio: 0.005831109178813972
+    ratio_sigma: 0.0001527640394706792
+    ratio_sigma_freq: 0.00015273874640715264
+    ratio_syst_fwhm: 0.0
+    expo: 0.46226760209901896
+  B00091C:
+    n_events: 0
+    n_primaries: 240026
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00574B:
+    n_events: 0
+    n_primaries: 292353
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5028774235683321
+  P00698A:
+    n_events: 0
+    n_primaries: 370989
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6210913871777322
+  P00661B:
+    n_events: 0
+    n_primaries: 288941
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4840897319187771
+  P00574A:
+    n_events: 0
+    n_primaries: 282203
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.49325760894364595
+  B00000B:
+    n_events: 1467
+    n_primaries: 243190
+    ratio: 0.006034351600182572
+    ratio_sigma: 0.00015704580903360863
+    ratio_sigma_freq: 0.0001570201817162711
+    ratio_syst_fwhm: 0.0
+    expo: 0.45000072438968736
+  B00000C:
+    n_events: 1876
+    n_primaries: 310152
+    ratio: 0.006050239720396063
+    ratio_sigma: 0.0001392450657574598
+    ratio_sigma_freq: 0.0001392272982418426
+    ratio_syst_fwhm: 0.0
+    expo: 0.526184491216062
+  B00061A:
+    n_events: 0
+    n_primaries: 283533
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4719519792379649
+  B00061C:
+    n_events: 0
+    n_primaries: 254755
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  B00076C:
+    n_events: 0
+    n_primaries: 322247
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5166376809389813
+  B00079B:
+    n_events: 0
+    n_primaries: 295478
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4751801049509468
+  B00079C:
+    n_events: 0
+    n_primaries: 316567
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5242476157882728
+  V08682B:
+    n_events: 7258
+    n_primaries: 494812
+    ratio: 0.0146691780531231
+    ratio_sigma: 0.0001709121488989382
+    ratio_sigma_freq: 0.000170906865334986
+    ratio_syst_fwhm: 0.0
+    expo: 0.9794133413187314
+  V08682A:
+    n_events: 12025
+    n_primaries: 1090890
+    ratio: 0.011023557807333639
+    ratio_sigma: 9.996845652536877e-05
+    ratio_sigma_freq: 9.996653835408891e-05
+    ratio_syst_fwhm: 0.0
+    expo: 2.0894199051892413
+  V09372A:
+    n_events: 16212
+    n_primaries: 1326135
+    ratio: 0.012225367533948253
+    ratio_sigma: 9.542577600080878e-05
+    ratio_sigma_freq: 9.542443020646663e-05
+    ratio_syst_fwhm: 7.540704724095376e-07
+    expo: 2.612199326945015
+  V09374A:
+    n_events: 13226
+    n_primaries: 892302
+    ratio: 0.014822879672039655
+    ratio_sigma: 0.00012792841828812343
+    ratio_sigma_freq: 0.000127926250584664
+    ratio_syst_fwhm: 0.0
+    expo: 1.7096153775952545
+  V09724A:
+    n_events: 12167
+    n_primaries: 848905
+    ratio: 0.014333153494026429
+    ratio_sigma: 0.0001290048069030817
+    ratio_sigma_freq: 0.00012900242165655006
+    ratio_syst_fwhm: 5.889933632225591e-07
+    expo: 1.7063872518822722
+  V02162B:
+    n_events: 9677
+    n_primaries: 774052
+    ratio: 0.012502373868456035
+    ratio_sigma: 0.00012629281438362617
+    ratio_sigma_freq: 0.00012628983680714706
+    ratio_syst_fwhm: 0.0
+    expo: 1.6011503536390599
+  V02166B:
+    n_events: 9291
+    n_primaries: 877792
+    ratio: 0.010585069600691735
+    ratio_sigma: 0.00010922945954879151
+    ratio_sigma_freq: 0.00010922673797273965
+    ratio_syst_fwhm: 0.0
+    expo: 1.7005766255989048
+  V04199A:
+    n_events: 9850
+    n_primaries: 999014
+    ratio: 0.009860212309124488
+    ratio_sigma: 9.885648570241946e-05
+    ratio_sigma_freq: 9.885414966894877e-05
+    ratio_syst_fwhm: 0.0
+    expo: 1.9284823009354324
+  V04545A:
+    n_events: 12895
+    n_primaries: 1030083
+    ratio: 0.012518881955258018
+    ratio_sigma: 0.00010954956078315471
+    ratio_sigma_freq: 0.00010954762274045716
+    ratio_syst_fwhm: 4.853973074045795e-07
+    expo: 1.968767453798768
+  V07646A:
+    n_events: 8541
+    n_primaries: 853965
+    ratio: 0.01000215465252715
+    ratio_sigma: 0.00010768206196147899
+    ratio_sigma_freq: 0.00010767913052784462
+    ratio_syst_fwhm: 0.0
+    expo: 1.6979941250285193
+  V07302B:
+    n_events: 5367
+    n_primaries: 516369
+    ratio: 0.010394678234599221
+    ratio_sigma: 0.0001411417878446784
+    ratio_sigma_freq: 0.00014113569138094078
+    ratio_syst_fwhm: 9.682979259057964e-07
+    expo: 1.0278352270134612
+  B00089C:
+    n_events: 1150
+    n_primaries: 206315
+    ratio: 0.005576397371023091
+    ratio_sigma: 0.0001639438243137364
+    ratio_sigma_freq: 0.00016390958515457446
+    ratio_syst_fwhm: 0.0
+    expo: 0.3841469598448551
+  C00ANG4:
+    n_events: 0
+    n_primaries: 805171
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5333597136664388
+  V00048B:
+    n_events: 4451
+    n_primaries: 643130
+    ratio: 0.006921606950994432
+    ratio_sigma: 0.00010338205811904833
+    ratio_sigma_freq: 0.0001033765329460057
+    ratio_syst_fwhm: 0.0
+    expo: 1.172326133926534
+  V00050A:
+    n_events: 6373
+    n_primaries: 670504
+    ratio: 0.009505521957330669
+    ratio_sigma: 0.00011849845276838178
+    ratio_sigma_freq: 0.00011849411342756697
+    ratio_syst_fwhm: 0.0
+    expo: 1.2144854557380789
+  V00050B:
+    n_events: 7862
+    n_primaries: 673285
+    ratio: 0.01167780111275149
+    ratio_sigma: 0.00013092714501250282
+    ratio_sigma_freq: 0.00013092332164124607
+    ratio_syst_fwhm: 0.0
+    expo: 1.210057931211499
+  V05261A:
+    n_events: 0
+    n_primaries: 625077
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4258519183968362
+  V05268A:
+    n_events: 0
+    n_primaries: 762392
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4836465776865162
+  V07302A:
+    n_events: 6826
+    n_primaries: 562557
+    ratio: 0.012134748772571006
+    ratio_sigma: 0.00014597558043248326
+    ratio_sigma_freq: 0.00014597068770552289
+    ratio_syst_fwhm: 0.0
+    expo: 1.1640621321013003
+  B00002A:
+    n_events: 0
+    n_primaries: 189980
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.18030268144599085
+  B00089A:
+    n_events: 1143
+    n_primaries: 198960
+    ratio: 0.005747357522328496
+    ratio_sigma: 0.00016947178935366292
+    ratio_sigma_freq: 0.0001694362232636622
+    ratio_syst_fwhm: 0.0
+    expo: 0.33830757472051104
+  B00091A:
+    n_events: 0
+    n_primaries: 244637
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00538A:
+    n_events: 0
+    n_primaries: 389946
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6700943355007986
+  P00573A:
+    n_events: 0
+    n_primaries: 391018
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6790039624686288
+  P00662C:
+    n_events: 0
+    n_primaries: 285249
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4837023568332193
+  P00664A:
+    n_events: 0
+    n_primaries: 306646
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43365160924785146
+  P00909B:
+    n_events: 0
+    n_primaries: 304164
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5327053051562858
+  B00000D:
+    n_events: 1670
+    n_primaries: 273203
+    ratio: 0.006114478558147026
+    ratio_sigma: 0.00014914324002552126
+    ratio_sigma_freq: 0.00014912187255943383
+    ratio_syst_fwhm: 0.0
+    expo: 0.4356342003194159
+  B00002C:
+    n_events: 0
+    n_primaries: 290447
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5087526123659595
+  B00032C:
+    n_events: 1277
+    n_primaries: 279674
+    ratio: 0.0045678019129346565
+    ratio_sigma: 0.000127506367484047
+    ratio_sigma_freq: 0.00012748220988465216
+    ratio_syst_fwhm: 0.0
+    expo: 0.35805717545060456
+  B00032D:
+    n_events: 1768
+    n_primaries: 277700
+    ratio: 0.006368360214763361
+    ratio_sigma: 0.00015095135387363515
+    ratio_sigma_freq: 0.00015093096372363187
+    ratio_syst_fwhm: 0.0
+    expo: 0.4648501026694045
+  B00035A:
+    n_events: 1838
+    n_primaries: 293470
+    ratio: 0.006264673511181684
+    ratio_sigma: 0.00014564690145356014
+    ratio_sigma_freq: 0.00014562796259187582
+    ratio_syst_fwhm: 0.0
+    expo: 0.4958401095140315
+  B00035B:
+    n_events: 1821
+    n_primaries: 310274
+    ratio: 0.005870598662476835
+    ratio_sigma: 0.0001371477107322806
+    ratio_sigma_freq: 0.000137129658761833
+    ratio_syst_fwhm: 1.6114736926921627e-06
+    expo: 0.5229563655030801
+  B00061B:
+    n_events: 0
+    n_primaries: 290428
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4848644820898928
+  B00089B:
+    n_events: 1138
+    n_primaries: 247488
+    ratio: 0.004600204453531268
+    ratio_sigma: 0.00013602179848793872
+    ratio_sigma_freq: 0.00013599288753653535
+    ratio_syst_fwhm: 0.0
+    expo: 0.40028758840976497
+  V00048A:
+    n_events: 8188
+    n_primaries: 662882
+    ratio: 0.012352858649263897
+    ratio_sigma: 0.00013566439211789877
+    ratio_sigma_freq: 0.0001356606076378421
+    ratio_syst_fwhm: 0.0
+    expo: 1.2388900861282228
+  V01240A:
+    n_events: 0
+    n_primaries: 733776
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.35581279945243
+  V05267A:
+    n_events: 0
+    n_primaries: 735565
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4093996862879306
+  V05612B:
+    n_events: 0
+    n_primaries: 669479
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3506477983116585
+  B00000A:
+    n_events: 1015
+    n_primaries: 162040
+    ratio: 0.00626693244302368
+    ratio_sigma: 0.00019604175420179657
+    ratio_sigma_freq: 0.00019599560067341736
+    ratio_syst_fwhm: 0.0
+    expo: 0.320230070727812
+  B00002B:
+    n_events: 0
+    n_primaries: 216490
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40351571412274695
+  B00032A:
+    n_events: 1093
+    n_primaries: 170038
+    ratio: 0.006430877622192556
+    ratio_sigma: 0.00019384679171743994
+    ratio_sigma_freq: 0.000193804461419029
+    ratio_syst_fwhm: 0.0
+    expo: 0.295696315309149
+  P00573B:
+    n_events: 0
+    n_primaries: 362043
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6893985272644307
+  P00575A:
+    n_events: 0
+    n_primaries: 358565
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6813927754962354
+  P00574C:
+    n_events: 0
+    n_primaries: 278264
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5183078644763861
+  P00662A:
+    n_events: 0
+    n_primaries: 220368
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.33955890866225574
+  P00662B:
+    n_events: 0
+    n_primaries: 216838
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.3930476029229093
+  P00909C:
+    n_events: 0
+    n_primaries: 337235
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4577266991786447
+  P00661C:
+    n_events: 0
+    n_primaries: 343928
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4653995445154258
+  P00665C:
+    n_events: 0
+    n_primaries: 321572
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43807799389053664
+  V01389A:
+    n_events: 0
+    n_primaries: 729832
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0851373361092096
+  P00748A:
+    n_events: 0
+    n_primaries: 338293
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5195242102694755
+900:
+  V02160A:
+    n_events: 5500
+    n_primaries: 552141
+    ratio: 0.009962111196032904
+    ratio_sigma: 0.0001336521085884333
+    ratio_sigma_freq: 0.00013364645688642928
+    ratio_syst_fwhm: 0.0
+    expo: 1.1298439995436915
+  V02160B:
+    n_events: 7081
+    n_primaries: 574187
+    ratio: 0.012333068611674226
+    ratio_sigma: 0.00014565097502194945
+    ratio_sigma_freq: 0.00014564627608347548
+    ratio_syst_fwhm: 0.0
+    expo: 1.1098296201232034
+  V05261B:
+    n_events: 0
+    n_primaries: 791752
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5449809662331735
+  V05266A:
+    n_events: 0
+    n_primaries: 697171
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3383809206023272
+  V05266B:
+    n_events: 0
+    n_primaries: 667151
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2835027834816337
+  V05268B:
+    n_events: 0
+    n_primaries: 606284
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.1563146303901437
+  V05612A:
+    n_events: 0
+    n_primaries: 730204
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.421020938854666
+  V07647A:
+    n_events: 5227
+    n_primaries: 626130
+    ratio: 0.008348891845316715
+    ratio_sigma: 0.00011499022355354786
+    ratio_sigma_freq: 0.00011498504511842206
+    ratio_syst_fwhm: 0.0
+    expo: 1.2221683949349762
+  V07647B:
+    n_events: 7287
+    n_primaries: 556859
+    ratio: 0.013086772258736487
+    ratio_sigma: 0.0001522938465036601
+    ratio_sigma_freq: 0.00015228909960511743
+    ratio_syst_fwhm: 0.0
+    expo: 1.148567128678987
+  B00035C:
+    n_events: 957
+    n_primaries: 226827
+    ratio: 0.0042212601618847765
+    ratio_sigma: 0.00013612979651799487
+    ratio_sigma_freq: 0.00013609529819854716
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  C000RG1:
+    n_events: 0
+    n_primaries: 700690
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.364205926306183
+  C000RG2:
+    n_events: 0
+    n_primaries: 737641
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.399715309148985
+  C00ANG3:
+    n_events: 0
+    n_primaries: 822581
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.9815468939336325
+  C00ANG5:
+    n_events: 0
+    n_primaries: 934161
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0763801125560877
+  C00ANG2:
+    n_events: 0
+    n_primaries: 959104
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.161163020001521
+  V04549A:
+    n_events: 0
+    n_primaries: 647430
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2544496520647956
+  B00032B:
+    n_events: 1134
+    n_primaries: 250178
+    ratio: 0.0045347531167683934
+    ratio_sigma: 0.00013432708220215345
+    ratio_sigma_freq: 0.00013429841723972937
+    ratio_syst_fwhm: 0.0
+    expo: 0.46226760209901896
+  B00091C:
+    n_events: 0
+    n_primaries: 242603
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00574B:
+    n_events: 0
+    n_primaries: 294389
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5028774235683321
+  P00698A:
+    n_events: 0
+    n_primaries: 374800
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6210913871777322
+  P00661B:
+    n_events: 0
+    n_primaries: 292387
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4840897319187771
+  P00574A:
+    n_events: 0
+    n_primaries: 284571
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.49325760894364595
+  B00000B:
+    n_events: 971
+    n_primaries: 244396
+    ratio: 0.003975089710593829
+    ratio_sigma: 0.0001272798759734787
+    ratio_sigma_freq: 0.00012724802895125678
+    ratio_syst_fwhm: 0.0
+    expo: 0.45000072438968736
+  B00000C:
+    n_events: 1338
+    n_primaries: 311443
+    ratio: 0.004297722865105765
+    ratio_sigma: 0.00011721772066701852
+    ratio_sigma_freq: 0.00011719648325489811
+    ratio_syst_fwhm: 0.0
+    expo: 0.526184491216062
+  B00061A:
+    n_events: 0
+    n_primaries: 285366
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4719519792379649
+  B00061C:
+    n_events: 0
+    n_primaries: 257769
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  B00076C:
+    n_events: 0
+    n_primaries: 324516
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5166376809389813
+  B00079B:
+    n_events: 0
+    n_primaries: 299131
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4751801049509468
+  B00079C:
+    n_events: 0
+    n_primaries: 319571
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5242476157882728
+  V08682B:
+    n_events: 5680
+    n_primaries: 497096
+    ratio: 0.011427347177713806
+    ratio_sigma: 0.00015074954126095583
+    ratio_sigma_freq: 0.0001507434364020981
+    ratio_syst_fwhm: 2.011679812993772e-06
+    expo: 0.9794133413187314
+  V08682A:
+    n_events: 9321
+    n_primaries: 1098369
+    ratio: 0.008486666605970666
+    ratio_sigma: 8.752725756638126e-05
+    ratio_sigma_freq: 8.752504935899242e-05
+    ratio_syst_fwhm: 0.0
+    expo: 2.0894199051892413
+  V09372A:
+    n_events: 12445
+    n_primaries: 1332054
+    ratio: 0.009343082680519949
+    ratio_sigma: 8.335765577759971e-05
+    ratio_sigma_freq: 8.335609066931382e-05
+    ratio_syst_fwhm: 3.753598762810603e-07
+    expo: 2.612199326945015
+  V09374A:
+    n_events: 10149
+    n_primaries: 900124
+    ratio: 0.011275656158866824
+    ratio_sigma: 0.00011129018706532219
+    ratio_sigma_freq: 0.00011128766176889197
+    ratio_syst_fwhm: 1.666435217330918e-06
+    expo: 1.7096153775952545
+  V09724A:
+    n_events: 9530
+    n_primaries: 855219
+    ratio: 0.011143916185309043
+    ratio_sigma: 0.00011351317866114149
+    ratio_sigma_freq: 0.0001135104328903509
+    ratio_syst_fwhm: 0.0
+    expo: 1.7063872518822722
+  V02162B:
+    n_events: 7386
+    n_primaries: 779040
+    ratio: 0.009481529213481703
+    ratio_sigma: 0.00010979689203099978
+    ratio_sigma_freq: 0.0001097934221313836
+    ratio_syst_fwhm: 0.0
+    expo: 1.6011503536390599
+  V02166B:
+    n_events: 7280
+    n_primaries: 887295
+    ratio: 0.008205266337276399
+    ratio_sigma: 9.576851067620957e-05
+    ratio_sigma_freq: 9.576541074506349e-05
+    ratio_syst_fwhm: 0.0
+    expo: 1.7005766255989048
+  V04199A:
+    n_events: 7660
+    n_primaries: 1005621
+    ratio: 0.007617673439920766
+    ratio_sigma: 8.670279289399635e-05
+    ratio_sigma_freq: 8.670011401832822e-05
+    ratio_syst_fwhm: 0.0
+    expo: 1.9284823009354324
+  V04545A:
+    n_events: 9844
+    n_primaries: 1035280
+    ratio: 0.009509012528965567
+    ratio_sigma: 9.538138894133289e-05
+    ratio_sigma_freq: 9.537912771471513e-05
+    ratio_syst_fwhm: 0.0
+    expo: 1.968767453798768
+  V07646A:
+    n_events: 6529
+    n_primaries: 860461
+    ratio: 0.007588365320025754
+    ratio_sigma: 9.355218572572678e-05
+    ratio_sigma_freq: 9.354879380324317e-05
+    ratio_syst_fwhm: 0.0
+    expo: 1.6979941250285193
+  V07302B:
+    n_events: 4036
+    n_primaries: 521184
+    ratio: 0.007744850676823009
+    ratio_sigma: 0.00012142883670495646
+    ratio_sigma_freq: 0.00012142172304253808
+    ratio_syst_fwhm: 0.0
+    expo: 1.0278352270134612
+  B00089C:
+    n_events: 870
+    n_primaries: 208066
+    ratio: 0.004183748504087626
+    ratio_sigma: 0.00014150433460549187
+    ratio_sigma_freq: 0.00014146487906714788
+    ratio_syst_fwhm: 0.0
+    expo: 0.3841469598448551
+  C00ANG4:
+    n_events: 0
+    n_primaries: 812038
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5333597136664388
+  V00048B:
+    n_events: 3419
+    n_primaries: 649225
+    ratio: 0.005267041061202109
+    ratio_sigma: 8.983349978411803e-05
+    ratio_sigma_freq: 8.982717375484891e-05
+    ratio_syst_fwhm: 0.0
+    expo: 1.172326133926534
+  V00050A:
+    n_events: 4797
+    n_primaries: 677464
+    ratio: 0.007081546648166326
+    ratio_sigma: 0.00010187722319250331
+    ratio_sigma_freq: 0.00010187217706746165
+    ratio_syst_fwhm: 0.0
+    expo: 1.2144854557380789
+  V00050B:
+    n_events: 5912
+    n_primaries: 679584
+    ratio: 0.008700162599233357
+    ratio_sigma: 0.0001126533187211915
+    ratio_sigma_freq: 0.00011264884498480836
+    ratio_syst_fwhm: 0.0
+    expo: 1.210057931211499
+  V05261A:
+    n_events: 0
+    n_primaries: 631245
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4258519183968362
+  V05268A:
+    n_events: 0
+    n_primaries: 767783
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4836465776865162
+  V07302A:
+    n_events: 5238
+    n_primaries: 567722
+    ratio: 0.009227211157553948
+    ratio_sigma: 0.000126897667022217
+    ratio_sigma_freq: 0.00012689200148849976
+    ratio_syst_fwhm: 0.0
+    expo: 1.1640621321013003
+  B00002A:
+    n_events: 0
+    n_primaries: 191682
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.18030268144599085
+  B00089A:
+    n_events: 896
+    n_primaries: 201281
+    ratio: 0.004453950179350364
+    ratio_sigma: 0.00014842252163849065
+    ratio_sigma_freq: 0.00014838241567697392
+    ratio_syst_fwhm: 0.0
+    expo: 0.33830757472051104
+  B00091A:
+    n_events: 0
+    n_primaries: 246082
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00538A:
+    n_events: 0
+    n_primaries: 391026
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6700943355007986
+  P00573A:
+    n_events: 0
+    n_primaries: 395471
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6790039624686288
+  P00662C:
+    n_events: 0
+    n_primaries: 288074
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4837023568332193
+  P00664A:
+    n_events: 0
+    n_primaries: 309480
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43365160924785146
+  P00909B:
+    n_events: 0
+    n_primaries: 308344
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5327053051562858
+  B00000D:
+    n_events: 1281
+    n_primaries: 274451
+    ratio: 0.004669304650722166
+    ratio_sigma: 0.00013012951553497242
+    ratio_sigma_freq: 0.00013010495592261456
+    ratio_syst_fwhm: 0.0
+    expo: 0.4356342003194159
+  B00002C:
+    n_events: 0
+    n_primaries: 292844
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5087526123659595
+  B00032C:
+    n_events: 952
+    n_primaries: 282762
+    ratio: 0.0033685453896018925
+    ratio_sigma: 0.00010896234430096922
+    ratio_sigma_freq: 0.00010893441536662368
+    ratio_syst_fwhm: 0.0
+    expo: 0.35805717545060456
+  B00032D:
+    n_events: 1181
+    n_primaries: 280714
+    ratio: 0.004208895142760451
+    ratio_sigma: 0.00012218969786035336
+    ratio_sigma_freq: 0.00012216460146524641
+    ratio_syst_fwhm: 0.0
+    expo: 0.4648501026694045
+  B00035A:
+    n_events: 1399
+    n_primaries: 296442
+    ratio: 0.004720975027239638
+    ratio_sigma: 0.00012589745327146366
+    ratio_sigma_freq: 0.00012587570412260968
+    ratio_syst_fwhm: 0.0
+    expo: 0.4958401095140315
+  B00035B:
+    n_events: 1404
+    n_primaries: 313466
+    ratio: 0.004480535431161813
+    ratio_sigma: 0.00011928703102424499
+    ratio_sigma_freq: 0.00011926646152999549
+    ratio_syst_fwhm: 0.0
+    expo: 0.5229563655030801
+  B00061B:
+    n_events: 0
+    n_primaries: 292128
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4848644820898928
+  B00089B:
+    n_events: 863
+    n_primaries: 250085
+    ratio: 0.003452812232591988
+    ratio_sigma: 0.00011729779720024776
+    ratio_sigma_freq: 0.00011726465245726409
+    ratio_syst_fwhm: 0.0
+    expo: 0.40028758840976497
+  V00048A:
+    n_events: 6512
+    n_primaries: 668620
+    ratio: 0.009740196613627152
+    ratio_sigma: 0.00012010694094812959
+    ratio_sigma_freq: 0.00012010264413443302
+    ratio_syst_fwhm: 0.0
+    expo: 1.2388900861282228
+  V01240A:
+    n_events: 0
+    n_primaries: 740355
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.35581279945243
+  V05267A:
+    n_events: 0
+    n_primaries: 741395
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4093996862879306
+  V05612B:
+    n_events: 0
+    n_primaries: 674355
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3506477983116585
+  B00000A:
+    n_events: 699
+    n_primaries: 163030
+    ratio: 0.004290595040207078
+    ratio_sigma: 0.0001618783017798376
+    ratio_sigma_freq: 0.0001618221723816184
+    ratio_syst_fwhm: 0.0
+    expo: 0.320230070727812
+  B00002B:
+    n_events: 0
+    n_primaries: 218258
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40351571412274695
+  B00032A:
+    n_events: 755
+    n_primaries: 171714
+    ratio: 0.004399732114259092
+    ratio_sigma: 0.000159716666738429
+    ratio_sigma_freq: 0.00015966543284448584
+    ratio_syst_fwhm: 0.0
+    expo: 0.295696315309149
+  P00573B:
+    n_events: 0
+    n_primaries: 364416
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6893985272644307
+  P00575A:
+    n_events: 0
+    n_primaries: 362341
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6813927754962354
+  P00574C:
+    n_events: 0
+    n_primaries: 281467
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5183078644763861
+  P00662A:
+    n_events: 0
+    n_primaries: 222919
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.33955890866225574
+  P00662B:
+    n_events: 0
+    n_primaries: 219261
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.3930476029229093
+  P00909C:
+    n_events: 0
+    n_primaries: 339778
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4577266991786447
+  P00661C:
+    n_events: 0
+    n_primaries: 346463
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4653995445154258
+  P00665C:
+    n_events: 0
+    n_primaries: 325626
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43807799389053664
+  V01389A:
+    n_events: 0
+    n_primaries: 736868
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0851373361092096
+  P00748A:
+    n_events: 0
+    n_primaries: 340223
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5195242102694755
+1000:
+  V02160A:
+    n_events: 1073
+    n_primaries: 138567
+    ratio: 0.007747098897292304
+    ratio_sigma: 0.0002355307946303191
+    ratio_sigma_freq: 0.00023547890767676414
+    ratio_syst_fwhm: 0.0
+    expo: 1.1298439995436915
+  V02160B:
+    n_events: 1409
+    n_primaries: 144828
+    ratio: 0.009732166900275497
+    ratio_sigma: 0.0002579596890708557
+    ratio_sigma_freq: 0.00025791704333258907
+    ratio_syst_fwhm: 0.0
+    expo: 1.1098296201232034
+  V05261B:
+    n_events: 0
+    n_primaries: 199724
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5449809662331735
+  V05266A:
+    n_events: 0
+    n_primaries: 175175
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3383809206023272
+  V05266B:
+    n_events: 0
+    n_primaries: 167194
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2835027834816337
+  V05268B:
+    n_events: 0
+    n_primaries: 152743
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.1563146303901437
+  V05612A:
+    n_events: 0
+    n_primaries: 183116
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.421020938854666
+  V07647A:
+    n_events: 1053
+    n_primaries: 157371
+    ratio: 0.0066943293597336246
+    ratio_sigma: 0.0002055558700177036
+    ratio_sigma_freq: 0.0002055093680377275
+    ratio_syst_fwhm: 0.0
+    expo: 1.2221683949349762
+  V07647B:
+    n_events: 1458
+    n_primaries: 139847
+    ratio: 0.010429180252845947
+    ratio_sigma: 0.00027165571400170963
+    ratio_sigma_freq: 0.0002716125394954398
+    ratio_syst_fwhm: 0.0
+    expo: 1.148567128678987
+  B00035C:
+    n_events: 185
+    n_primaries: 57151
+    ratio: 0.0032457306830907056
+    ratio_sigma: 0.00023791990453940349
+    ratio_sigma_freq: 0.00023760631347214892
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  C000RG1:
+    n_events: 0
+    n_primaries: 175580
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.364205926306183
+  C000RG2:
+    n_events: 0
+    n_primaries: 185760
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.399715309148985
+  C00ANG3:
+    n_events: 0
+    n_primaries: 207122
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.9815468939336325
+  C00ANG5:
+    n_events: 0
+    n_primaries: 235533
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0763801125560877
+  C00ANG2:
+    n_events: 0
+    n_primaries: 242159
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.161163020001521
+  V04549A:
+    n_events: 0
+    n_primaries: 163026
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.2544496520647956
+  B00032B:
+    n_events: 228
+    n_primaries: 62577
+    ratio: 0.003651442999137077
+    ratio_sigma: 0.0002411146514809446
+    ratio_sigma_freq: 0.000240857437431809
+    ratio_syst_fwhm: 0.0
+    expo: 0.46226760209901896
+  B00091C:
+    n_events: 0
+    n_primaries: 60691
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00574B:
+    n_events: 0
+    n_primaries: 74474
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5028774235683321
+  P00698A:
+    n_events: 0
+    n_primaries: 94076
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6210913871777322
+  P00661B:
+    n_events: 0
+    n_primaries: 73539
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4840897319187771
+  P00574A:
+    n_events: 0
+    n_primaries: 71272
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.49325760894364595
+  B00000B:
+    n_events: 171
+    n_primaries: 61718
+    ratio: 0.0027787229216286718
+    ratio_sigma: 0.00021188754600999903
+    ratio_sigma_freq: 0.00021158444346388184
+    ratio_syst_fwhm: 0.0
+    expo: 0.45000072438968736
+  B00000C:
+    n_events: 279
+    n_primaries: 78207
+    ratio: 0.0035738031914893617
+    ratio_sigma: 0.00021338285333630003
+    ratio_sigma_freq: 0.00021319667472805692
+    ratio_syst_fwhm: 0.0
+    expo: 0.526184491216062
+  B00061A:
+    n_events: 0
+    n_primaries: 71711
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4719519792379649
+  B00061C:
+    n_events: 0
+    n_primaries: 65222
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40932634040611454
+  B00076C:
+    n_events: 0
+    n_primaries: 82430
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5166376809389813
+  B00079B:
+    n_events: 0
+    n_primaries: 75557
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4751801049509468
+  B00079C:
+    n_events: 0
+    n_primaries: 81144
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5242476157882728
+  V08682B:
+    n_events: 1165
+    n_primaries: 124795
+    ratio: 0.009339241642360331
+    ratio_sigma: 0.00027228029571706283
+    ratio_sigma_freq: 0.00027222569749961803
+    ratio_syst_fwhm: 0.0
+    expo: 0.9794133413187314
+  V08682A:
+    n_events: 1845
+    n_primaries: 275353
+    ratio: 0.0067022814268178415
+    ratio_sigma: 0.00015549075251873148
+    ratio_sigma_freq: 0.000155470674724683
+    ratio_syst_fwhm: 0.0
+    expo: 2.0894199051892413
+  V09372A:
+    n_events: 2560
+    n_primaries: 335258
+    ratio: 0.007637378862312421
+    ratio_sigma: 0.00015035452254825145
+    ratio_sigma_freq: 0.00015034062553039417
+    ratio_syst_fwhm: 0.0
+    expo: 2.612199326945015
+  V09374A:
+    n_events: 2053
+    n_primaries: 225349
+    ratio: 0.009112491679609496
+    ratio_sigma: 0.00020017092880656945
+    ratio_sigma_freq: 0.00020014811008401375
+    ratio_syst_fwhm: 0.0
+    expo: 1.7096153775952545
+  V09724A:
+    n_events: 1955
+    n_primaries: 215482
+    ratio: 0.00907496182993554
+    ratio_sigma: 0.00020428444084066383
+    ratio_sigma_freq: 0.00020425997919995271
+    ratio_syst_fwhm: 0.0
+    expo: 1.7063872518822722
+  V02162B:
+    n_events: 1516
+    n_primaries: 196455
+    ratio: 0.007719285743372562
+    ratio_sigma: 0.0001974567934309109
+    ratio_sigma_freq: 0.00019742599602775305
+    ratio_syst_fwhm: 0.0
+    expo: 1.6011503536390599
+  V02166B:
+    n_events: 1355
+    n_primaries: 223637
+    ratio: 0.006061134512023896
+    ratio_sigma: 0.00016412813203185389
+    ratio_sigma_freq: 0.00016409914144421505
+    ratio_syst_fwhm: 0.0
+    expo: 1.7005766255989048
+  V04199A:
+    n_events: 1509
+    n_primaries: 253144
+    ratio: 0.00596298564064074
+    ratio_sigma: 0.00015301979830472016
+    ratio_sigma_freq: 0.00015299551016459835
+    ratio_syst_fwhm: 0.0
+    expo: 1.9284823009354324
+  V04545A:
+    n_events: 1973
+    n_primaries: 260678
+    ratio: 0.007570613666616797
+    ratio_sigma: 0.0001697702130953508
+    ratio_sigma_freq: 0.00016974984382514874
+    ratio_syst_fwhm: 0.0
+    expo: 1.968767453798768
+  V07646A:
+    n_events: 1327
+    n_primaries: 216785
+    ratio: 0.006123550413772107
+    ratio_sigma: 0.00016755262301320107
+    ratio_sigma_freq: 0.00016752241700182443
+    ratio_syst_fwhm: 0.0
+    expo: 1.6979941250285193
+  V07302B:
+    n_events: 852
+    n_primaries: 130576
+    ratio: 0.0065287148578999366
+    ratio_sigma: 0.00022287250985259972
+    ratio_sigma_freq: 0.0002228101250548229
+    ratio_syst_fwhm: 0.0
+    expo: 1.0278352270134612
+  B00089C:
+    n_events: 171
+    n_primaries: 51814
+    ratio: 0.003309852359355399
+    ratio_sigma: 0.00025232045059177325
+    ratio_sigma_freq: 0.0002519608736341455
+    ratio_syst_fwhm: 0.0
+    expo: 0.3841469598448551
+  C00ANG4:
+    n_events: 0
+    n_primaries: 204490
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.5333597136664388
+  V00048B:
+    n_events: 690
+    n_primaries: 163810
+    ratio: 0.004215223641879972
+    ratio_sigma: 0.00016007377816995284
+    ratio_sigma_freq: 0.00016001752035954976
+    ratio_syst_fwhm: 0.0
+    expo: 1.172326133926534
+  V00050A:
+    n_events: 970
+    n_primaries: 170567
+    ratio: 0.005689812860560011
+    ratio_sigma: 0.00018212094037886226
+    ratio_sigma_freq: 0.00018207588666576245
+    ratio_syst_fwhm: 0.0
+    expo: 1.2144854557380789
+  V00050B:
+    n_events: 1125
+    n_primaries: 170589
+    ratio: 0.006597690368720323
+    ratio_sigma: 0.00019601102071740455
+    ratio_sigma_freq: 0.0001959694856678326
+    ratio_syst_fwhm: 0.0
+    expo: 1.210057931211499
+  V05261A:
+    n_events: 0
+    n_primaries: 158893
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4258519183968362
+  V05268A:
+    n_events: 0
+    n_primaries: 193498
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4836465776865162
+  V07302A:
+    n_events: 999
+    n_primaries: 142729
+    ratio: 0.00700273243186436
+    ratio_sigma: 0.00022072353286794026
+    ratio_sigma_freq: 0.00022067102036465145
+    ratio_syst_fwhm: 0.0
+    expo: 1.1640621321013003
+  B00002A:
+    n_events: 0
+    n_primaries: 47879
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.18030268144599085
+  B00089A:
+    n_events: 174
+    n_primaries: 50873
+    ratio: 0.0034300428509651294
+    ratio_sigma: 0.0002592098239184548
+    ratio_sigma_freq: 0.0002588470962586784
+    ratio_syst_fwhm: 0.0
+    expo: 0.33830757472051104
+  B00091A:
+    n_events: 0
+    n_primaries: 61692
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4048069644079398
+  P00538A:
+    n_events: 0
+    n_primaries: 99047
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6700943355007986
+  P00573A:
+    n_events: 0
+    n_primaries: 99436
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6790039624686288
+  P00662C:
+    n_events: 0
+    n_primaries: 72739
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4837023568332193
+  P00664A:
+    n_events: 0
+    n_primaries: 78233
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43365160924785146
+  P00909B:
+    n_events: 0
+    n_primaries: 77170
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5327053051562858
+  B00000D:
+    n_events: 234
+    n_primaries: 68935
+    ratio: 0.003401705930138099
+    ratio_sigma: 0.00022175951512037968
+    ratio_sigma_freq: 0.00022152859247209655
+    ratio_syst_fwhm: 0.0
+    expo: 0.4356342003194159
+  B00002C:
+    n_events: 0
+    n_primaries: 73613
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5087526123659595
+  B00032C:
+    n_events: 164
+    n_primaries: 70499
+    ratio: 0.0023333333333333335
+    ratio_sigma: 0.00018171194840657008
+    ratio_sigma_freq: 0.00018144008255140638
+    ratio_syst_fwhm: 0.0
+    expo: 0.35805717545060456
+  B00032D:
+    n_events: 249
+    n_primaries: 70129
+    ratio: 0.003557678596891487
+    ratio_sigma: 0.0002248300837037415
+    ratio_sigma_freq: 0.00022461029201907887
+    ratio_syst_fwhm: 0.0
+    expo: 0.4648501026694045
+  B00035A:
+    n_events: 282
+    n_primaries: 75154
+    ratio: 0.003758898276894418
+    ratio_sigma: 0.00022321875694602918
+    ratio_sigma_freq: 0.00022302632111162208
+    ratio_syst_fwhm: 0.0
+    expo: 0.4958401095140315
+  B00035B:
+    n_events: 270
+    n_primaries: 79084
+    ratio: 0.003420370487450212
+    ratio_sigma: 0.00020760737293763266
+    ratio_sigma_freq: 0.0002074199979838227
+    ratio_syst_fwhm: 0.0
+    expo: 0.5229563655030801
+  B00061B:
+    n_events: 0
+    n_primaries: 73760
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4848644820898928
+  B00089B:
+    n_events: 169
+    n_primaries: 62694
+    ratio: 0.0027035648775819445
+    ratio_sigma: 0.00020737701281857911
+    ratio_sigma_freq: 0.0002070766989374778
+    ratio_syst_fwhm: 0.0
+    expo: 0.40028758840976497
+  V00048A:
+    n_events: 1240
+    n_primaries: 168081
+    ratio: 0.007380326269320927
+    ratio_sigma: 0.000208769631504599
+    ratio_sigma_freq: 0.0002087297244686865
+    ratio_syst_fwhm: 0.0
+    expo: 1.2388900861282228
+  V01240A:
+    n_events: 0
+    n_primaries: 186155
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.35581279945243
+  V05267A:
+    n_events: 0
+    n_primaries: 185750
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.4093996862879306
+  V05612B:
+    n_events: 0
+    n_primaries: 168644
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.3506477983116585
+  B00000A:
+    n_events: 134
+    n_primaries: 40923
+    ratio: 0.0032865800019548433
+    ratio_sigma: 0.00028291952027106854
+    ratio_sigma_freq: 0.0002824052283110623
+    ratio_syst_fwhm: 0.0
+    expo: 0.320230070727812
+  B00002B:
+    n_events: 0
+    n_primaries: 54614
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.40351571412274695
+  B00032A:
+    n_events: 154
+    n_primaries: 42954
+    ratio: 0.0035967873355837506
+    ratio_sigma: 0.0002888437820556598
+    ratio_sigma_freq: 0.00028838776131609136
+    ratio_syst_fwhm: 0.0
+    expo: 0.295696315309149
+  P00573B:
+    n_events: 0
+    n_primaries: 91896
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6893985272644307
+  P00575A:
+    n_events: 0
+    n_primaries: 91176
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.6813927754962354
+  P00574C:
+    n_events: 0
+    n_primaries: 70652
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5183078644763861
+  P00662A:
+    n_events: 0
+    n_primaries: 56195
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.33955890866225574
+  P00662B:
+    n_events: 0
+    n_primaries: 55223
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.3930476029229093
+  P00909C:
+    n_events: 0
+    n_primaries: 85844
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4577266991786447
+  P00661C:
+    n_events: 0
+    n_primaries: 87832
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.4653995445154258
+  P00665C:
+    n_events: 0
+    n_primaries: 82724
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.43807799389053664
+  V01389A:
+    n_events: 0
+    n_primaries: 185591
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 1.0851373361092096
+  P00748A:
+    n_events: 0
+    n_primaries: 85442
+    ratio: 0.0
+    ratio_sigma: 0.0
+    ratio_sigma_freq: 0.0
+    ratio_syst_fwhm: 0.0
+    expo: 0.5195242102694755
