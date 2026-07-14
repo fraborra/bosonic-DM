@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 import polars as pl
 from lgdo import lh5
+from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.colors import LogNorm
 from tqdm.notebook import tqdm
 
 logger = logging.getLogger(__name__)
@@ -242,13 +244,18 @@ def get_mean_fcc_det_type(
                 continue
 
             mean = weighted_mean(vals_arr, w_arr)
+            exposure_total = float(np.sum(w_arr))
 
             if unc_key is not None:
                 s_arr = np.array(d["unc"], dtype=float)[mask]
                 s_arr = np.where(np.isfinite(s_arr), s_arr, 0.0)
 
                 unc_total = compute_weighted_uncertainty(w_arr, vals_arr, mean, s_arr)
-                ratio_dict_means[ene][det_type] = {"value": mean, "unc": unc_total}
+                ratio_dict_means[ene][det_type] = {
+                    "value": mean,
+                    "unc": unc_total,
+                    "exposure": exposure_total,
+                }
             else:
                 ratio_dict_means[ene][det_type] = mean
 
@@ -586,6 +593,9 @@ def compute_efficiency_from_lazyframe(
     chmap: object,
     scratch_folder: str | Path,
     job_base: str,
+    *,
+    single_site: bool | None = None,
+    has_aoe: bool | None = None,
 ) -> dict:
     """Compute per-detector efficiencies from a Polars lazy scan.
 
@@ -623,6 +633,13 @@ def compute_efficiency_from_lazyframe(
         Base scratch directory containing the generated LH5 STP files.
     job_base
         Job string template containing the ``{ene}`` placeholder.
+    single_site
+        If True, keep only rows where ``has_aoe`` and ``is_single_site`` are True.
+        If False, keep only rows where ``has_aoe`` is True and ``is_single_site`` is False.
+        If None (default), no filtering is applied.
+    has_aoe
+        If True, keep only rows where ``has_aoe`` is True.
+        If None (default), no filtering is applied. Automatically set to True if ``single_site`` is used.
 
     Returns
     -------
@@ -645,6 +662,9 @@ def compute_efficiency_from_lazyframe(
                 ...
             }
     """
+    if single_site is not None:
+        has_aoe = True
+
     ratio_dict: dict = {}
 
     for ene in tqdm(simulated_energies):
@@ -711,15 +731,20 @@ def compute_efficiency_from_lazyframe(
         known_rawids = det_df["rawid"].to_list()
 
         # --- Phase 2: single collect per energy -----------------------------
-        df_ene = (
-            lf.filter(
-                (pl.col("is_good_channel"))
-                & (pl.col("sim_e") == ene)
-                & (pl.col("rawid").is_in(known_rawids))
-            )
-            .select("rawid", "energy")
-            .collect()
+        filter_expr = (
+            (pl.col("is_good_channel"))
+            & (pl.col("sim_e") == ene)
+            & (pl.col("rawid").is_in(known_rawids))
         )
+        if has_aoe is True:
+            filter_expr &= pl.col("has_aoe")
+
+        if single_site is True:
+            filter_expr &= pl.col("is_single_site")
+        elif single_site is False:
+            filter_expr &= ~pl.col("is_single_site")
+
+        df_ene = lf.filter(filter_expr).select("rawid", "energy").collect()
 
         # --- Phase 3: vectorised FEP counting via join + group_by -----------
         df_joined = df_ene.join(det_df, on="rawid")
@@ -745,6 +770,21 @@ def compute_efficiency_from_lazyframe(
         # --- Phase 4: compute efficiencies ----------------------------------
         for det_name, n_primaries in n_prim_map.items():
             row = counts_map.get(det_name)
+
+            # When has_aoe filtering is active, detectors with no surviving
+            # events lack AoE information entirely — set everything to zero.
+            if has_aoe is True and row is None:
+                ratio_dict[ene_key][det_name] = {
+                    "n_events": 0,
+                    "n_primaries": n_primaries,
+                    "ratio": 0.0,
+                    "ratio_sigma": 0.0,
+                    "ratio_sigma_freq": 0.0,
+                    "ratio_syst_fwhm": 0.0,
+                    "expo": expo_map[det_name],
+                }
+                continue
+
             n_events = row["n_events"] if row else 0
             n_events_up = row["n_events_up"] if row else 0
             n_events_down = row["n_events_down"] if row else 0
@@ -772,6 +812,32 @@ def compute_efficiency_from_lazyframe(
             }
 
     return ratio_dict
+
+
+def filter_non_zero_efficiency(ratio_dict: Mapping) -> dict:
+    """Filter ratio_dict to keep only entries where ratio (efficiency) is not zero.
+
+    Parameters
+    ----------
+    ratio_dict
+        Nested dictionary of efficiencies, structured as:
+        ``{energy: {detector_name: {"ratio": float, ...}, ...}, ...}``.
+
+    Returns
+    -------
+    dict
+        A new nested dictionary containing only the detectors (and energies)
+        with a non-zero ratio.
+    """
+    filtered: dict = {}
+    for ene, det_dict in ratio_dict.items():
+        filtered_dets = {}
+        for det_name, info in det_dict.items():
+            if info.get("ratio", 0.0) != 0.0:
+                filtered_dets[det_name] = info
+        if filtered_dets:
+            filtered[ene] = filtered_dets
+    return filtered
 
 
 _FEP_COLORS = {
@@ -1075,6 +1141,13 @@ def plot_aoe_by_detector(
         save_path = Path(save_dir)
         save_path.mkdir(parents=True, exist_ok=True)
 
+        if energy_range is not None:
+            pdf_name = f"aoe_hist_all_dets_{energy_range[0]:0.0f}_{energy_range[1]:0.0f}keV.pdf"
+        else:
+            pdf_name = f"aoe_hist_all_dets_{sim_e}keV.pdf"
+
+        pdf_pages = PdfPages(save_path / pdf_name)
+
     unique_dets = df_filtered["det_name"].unique().to_list()
 
     for det_name in unique_dets:
@@ -1111,7 +1184,7 @@ def plot_aoe_by_detector(
 
         plt.figure(figsize=(10, 6))
 
-        # M1 (coincident_spms == True): step style
+        # M1 : step style
         if plot_m1:
             plt.hist(
                 aoe_coincident_clean,
@@ -1123,7 +1196,7 @@ def plot_aoe_by_detector(
                 color="tab:blue",
             )
 
-        # M1 + LAr (coincident_spms == False): filled but with alpha = 0.4
+        # M1 + LAr cut (coincident_spms == False): filled but with alpha = 0.4
         plt.hist(
             aoe_anticoincident_clean,
             bins=bin_edges,
@@ -1139,10 +1212,9 @@ def plot_aoe_by_detector(
 
         if energy_range is not None:
             title_str = f"AoE distribution - {det_name} ({energy_range[0]:0.0f} - {energy_range[1]:0.0f} keV)"
-            save_name = f"aoe_hist_{det_name}_{energy_range[0]:0.0f}_{energy_range[1]:0.0f}keV.png"
         else:
+            fwhm = float(det_eres[det_name]["fwhm"])
             title_str = f"AoE distribution - {det_name} ({sim_e}+-{2 * fwhm:0.1f} keV)"
-            save_name = f"aoe_hist_{det_name}_{sim_e}keV.png"
 
         plt.yscale("log")
 
@@ -1155,11 +1227,13 @@ def plot_aoe_by_detector(
 
         plt.tight_layout()
         if save_plot:
-            plot_file = save_path / save_name
-            plt.savefig(plot_file, dpi=300, bbox_inches="tight")
+            pdf_pages.savefig(bbox_inches="tight")
         if show_plot:
             plt.show()
         plt.close()
+
+    if save_plot:
+        pdf_pages.close()
 
 
 def plot_aoe_by_detector_type(
@@ -1340,3 +1414,189 @@ def plot_aoe_by_detector_type(
         if show_plot:
             plt.show()
         plt.close(fig)
+
+
+def plot_aoe_vs_energy_2d(
+    lf: pl.LazyFrame,
+    chmap: object = None,
+    group_by: str | None = None,
+    save_plot: bool = True,
+    show_plot: bool = True,
+    bins: tuple[int, int] | int = (150, 150),
+    energy_range: tuple[float, float] | None = None,
+    aoe_range: tuple[float, float] | None = None,
+    title_string: str | None = None,
+    filename_string: str | None = None,
+    save_dir: str | Path = "plots",
+) -> None:
+    """Plot 2D histogram of AoE vs Energy.
+
+    Filters by `has_aoe` == True before plotting.
+
+    Parameters
+    ----------
+    lf
+        Polars LazyFrame containing the data.
+    chmap
+        LEGEND channel-map object. Required if group_by is not None.
+    group_by
+        How to group the plots. Valid options: None (all together), "det_type", or "det_name".
+    save_plot
+        Whether to save the generated plots to files.
+    show_plot
+        Whether to display the generated plots.
+    bins
+        Number of histogram bins (int or tuple of ints).
+    energy_range
+        Optional range for the energy (x) axis.
+    aoe_range
+        Optional range for the AoE (y) axis.
+    title_string
+        Optional string to prepend to the plot title.
+    filename_string
+        Optional string to append to the plot filename.
+    save_dir
+        Directory where the generated plots will be saved if save_plot is True.
+    """
+    if save_plot:
+        save_path = Path(save_dir)
+        save_path.mkdir(parents=True, exist_ok=True)
+        pdf_name = f"aoe_vs_energy_2d{'_' + group_by if group_by else ''}{'_' + filename_string if filename_string else ''}.pdf"
+        pdf_pages = PdfPages(save_path / pdf_name)
+
+    lf_valid = lf.filter(pl.col("has_aoe"))
+
+    if energy_range is not None:
+        lf_valid = lf_valid.filter(pl.col("energy").is_between(*energy_range))
+    if aoe_range is not None:
+        lf_valid = lf_valid.filter(pl.col("aoe").is_between(*aoe_range))
+
+    def _get_h_range(energy_arr, aoe_arr):
+        if energy_range is not None and aoe_range is not None:
+            return [energy_range, aoe_range]
+        if energy_range is not None or aoe_range is not None:
+            xmin, xmax = (
+                energy_range
+                if energy_range is not None
+                else (np.nanmin(energy_arr), np.nanmax(energy_arr))
+            )
+            ymin, ymax = (
+                aoe_range
+                if aoe_range is not None
+                else (np.nanmin(aoe_arr), np.nanmax(aoe_arr))
+            )
+            if np.isnan(xmin):
+                xmin, xmax = 0, 1
+            if np.isnan(ymin):
+                ymin, ymax = 0, 1
+            return [[xmin, xmax], [ymin, ymax]]
+        return None
+
+    if group_by is None:
+        df = lf_valid.select("energy", "aoe").collect()
+        if df.is_empty():
+            logger.warning("No data found for AoE vs Energy plot")
+            if save_plot:
+                pdf_pages.close()
+            return
+
+        energy = df["energy"].to_numpy()
+        aoe = df["aoe"].to_numpy()
+
+        plt.figure(figsize=(10, 6))
+
+        plt.hist2d(
+            energy,
+            aoe,
+            bins=bins,
+            range=_get_h_range(energy, aoe),
+            cmap="viridis",
+            cmin=1,
+            norm=LogNorm(),
+        )
+        plt.colorbar(label="Counts")
+        plt.xlabel("Energy [keV]", fontsize=12)
+        plt.ylabel("AoE [a.u.]", fontsize=12)
+        base_title = "AoE vs Energy (All Detectors)"
+        plt.title(
+            f"{base_title} - {title_string}" if title_string else base_title,
+            fontsize=13,
+        )
+        plt.tight_layout()
+
+        if save_plot:
+            pdf_pages.savefig(bbox_inches="tight")
+        if show_plot:
+            plt.show()
+        plt.close()
+
+    elif group_by in ("det_type", "det_name"):
+        if chmap is None:
+            logger.error("chmap must be provided when group_by is not None.")
+            if save_plot:
+                pdf_pages.close()
+            return
+
+        unique_rawids = (
+            lf_valid.select("rawid").unique().collect().drop_nulls()["rawid"].to_list()
+        )
+
+        groups = {}
+        if group_by == "det_type":
+            groups = get_rawid_lists(chmap, unique_rawids)
+        elif group_by == "det_name":
+            for rid in unique_rawids:
+                try:
+                    ge = chmap.map("daq.rawid")[rid]["name"]
+                    groups[ge] = [rid]
+                except KeyError:
+                    pass
+
+        for g, rawids_list in groups.items():
+            if not rawids_list:
+                continue
+
+            df = (
+                lf_valid.filter(pl.col("rawid").is_in(rawids_list))
+                .select("energy", "aoe")
+                .collect()
+            )
+            if df.is_empty():
+                continue
+
+            energy = df["energy"].to_numpy()
+            aoe = df["aoe"].to_numpy()
+
+            plt.figure(figsize=(10, 6))
+
+            plt.hist2d(
+                energy,
+                aoe,
+                bins=bins,
+                range=_get_h_range(energy, aoe),
+                cmap="viridis",
+                cmin=1,
+                norm=LogNorm(),
+            )
+            plt.colorbar(label="Counts")
+            plt.xlabel("Energy [keV]", fontsize=12)
+            plt.ylabel("AoE [a.u.]", fontsize=12)
+            base_title = f"AoE vs Energy - {g}"
+            plt.title(
+                f"{base_title} - {title_string}" if title_string else base_title,
+                fontsize=13,
+            )
+            plt.tight_layout()
+
+            if save_plot:
+                pdf_pages.savefig(bbox_inches="tight")
+            if show_plot:
+                plt.show()
+            plt.close()
+    else:
+        logger.error(
+            "Invalid group_by: %s. Use None, 'det_type', or 'det_name'.", group_by
+        )
+
+    if save_plot:
+        pdf_pages.close()
