@@ -30,6 +30,7 @@ def compute_efficiency_from_lazyframe(
     *,
     single_site: bool | None = None,
     has_aoe: bool | None = None,
+    vertex_counts: Mapping[int, Mapping[str, int]] | None = None,
 ) -> dict:
     """Compute per-detector efficiencies from a Polars lazy scan.
 
@@ -74,6 +75,12 @@ def compute_efficiency_from_lazyframe(
     has_aoe
         If True, keep only rows where ``has_aoe`` is True.
         If None (default), no filtering is applied. Automatically set to True if ``single_site`` is used.
+    vertex_counts
+        Optional pre-computed vertex counts, structured as
+        ``{energy: {detector_name: n_vertices, ...}, ...}``.
+        When provided for a given energy, the function uses these counts
+        as ``n_primaries`` instead of reading STP files.  Produced by
+        :func:`~bosonic_dm.geometry.aggregate_vertex_counts`.
 
     Returns
     -------
@@ -112,14 +119,21 @@ def compute_efficiency_from_lazyframe(
 
         det_eres = eres_dict[ene_key]
 
-        # Format the job string and find STP files once per energy
-        job_string = job_base.format(ene=ene)
-        stp_files = [
-            str(p)
-            for p in Path(f"{scratch_folder}/generated/tier/stp/{job_string}/").glob(
-                f"l200cfg01-{job_string}-job_*-tier_stp.lh5"
-            )
-        ]
+        # Determine whether we have pre-computed vertex counts for this energy.
+        vtx_counts_for_ene = (
+            vertex_counts.get(ene_key) if vertex_counts is not None else None
+        )
+
+        # Fall back to STP reading only when vertex counts are unavailable.
+        stp_files: list[str] = []
+        if vtx_counts_for_ene is None:
+            job_string = job_base.format(ene=ene)
+            stp_files = [
+                str(p)
+                for p in Path(
+                    f"{scratch_folder}/generated/tier/stp/{job_string}/"
+                ).glob(f"l200cfg01-{job_string}-job_*-tier_stp.lh5")
+            ]
 
         # --- Phase 1: build per-detector info and read n_primaries ----------
         det_rows: list[dict] = []
@@ -133,10 +147,14 @@ def compute_efficiency_from_lazyframe(
                 logger.warning("Cannot resolve rawid for %s, skipping", det_name)
                 continue
 
-            n_primaries = 0
-            for stp_file in stp_files:
-                stp_ge = lh5.read_as(f"/stp/{det_name}", stp_file, library="ak")
-                n_primaries += len(np.unique(ak.to_numpy(stp_ge.evtid)))
+            # Use pre-computed vertex counts when available.
+            if vtx_counts_for_ene is not None:
+                n_primaries = vtx_counts_for_ene.get(det_name, 0)
+            else:
+                n_primaries = 0
+                for stp_file in stp_files:
+                    stp_ge = lh5.read_as(f"/stp/{det_name}", stp_file, library="ak")
+                    n_primaries += len(np.unique(ak.to_numpy(stp_ge.evtid)))
             n_prim_map[det_name] = n_primaries
             expo_map[det_name] = float(eres_info.get("expo", 0.0))
 
@@ -206,17 +224,8 @@ def compute_efficiency_from_lazyframe(
             row = counts_map.get(det_name)
 
             # When has_aoe filtering is active, detectors with no surviving
-            # events lack AoE information entirely — set everything to zero.
+            # events likely lack AoE information entirely. We skip saving them.
             if has_aoe is True and row is None:
-                ratio_dict[ene_key][det_name] = {
-                    "n_events": 0,
-                    "n_primaries": n_primaries,
-                    "ratio": 0.0,
-                    "ratio_sigma": 0.0,
-                    "ratio_sigma_freq": 0.0,
-                    "ratio_syst_fwhm": 0.0,
-                    "expo": expo_map[det_name],
-                }
                 continue
 
             n_events = row["n_events"] if row else 0

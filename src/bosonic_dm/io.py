@@ -232,7 +232,7 @@ def build_parquet_dataset(
     scratch_folder: str | Path,
     job_base: str,
     outdir_name: str | Path,
-    datasets_outdir: str | Path = "./v1/parquet",
+    datasets_outdir: str | Path = "./data/v1/parquet",
     overwrite: bool = False,
 ) -> None:
     """Build a parquet dataset partitioned by simulated energy.
