@@ -15,46 +15,6 @@
     ratio_sigma_freq: 0.00013863218878628144
     ratio_syst_fwhm: 0.0
     expo: 1.1098296201232034
-  V05261B:
-    n_events: 0
-    n_primaries: 668901
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5449809662331735
-  V05266A:
-    n_events: 0
-    n_primaries: 578531
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3383809206023272
-  V05266B:
-    n_events: 0
-    n_primaries: 555951
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2835027834816337
-  V05268B:
-    n_events: 0
-    n_primaries: 498953
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.1563146303901437
-  V05612A:
-    n_events: 0
-    n_primaries: 614265
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.421020938854666
   V07647A:
     n_events: 5048
     n_primaries: 532855
@@ -79,54 +39,6 @@
     ratio_sigma_freq: 3.643335056019206e-05
     ratio_syst_fwhm: 0.0
     expo: 0.40932634040611454
-  C000RG1:
-    n_events: 0
-    n_primaries: 577356
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.364205926306183
-  C000RG2:
-    n_events: 0
-    n_primaries: 595367
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.399715309148985
-  C00ANG3:
-    n_events: 0
-    n_primaries: 664644
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.9815468939336325
-  C00ANG5:
-    n_events: 0
-    n_primaries: 764654
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0763801125560877
-  C00ANG2:
-    n_events: 0
-    n_primaries: 793964
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.161163020001521
-  V04549A:
-    n_events: 0
-    n_primaries: 544744
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2544496520647956
   B00032B:
     n_events: 297
     n_primaries: 202632
@@ -135,54 +47,6 @@
     ratio_sigma_freq: 8.498684069271887e-05
     ratio_syst_fwhm: 0.0
     expo: 0.46226760209901896
-  B00091C:
-    n_events: 0
-    n_primaries: 177234
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00574B:
-    n_events: 0
-    n_primaries: 218918
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5028774235683321
-  P00698A:
-    n_events: 0
-    n_primaries: 277695
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6210913871777322
-  P00661B:
-    n_events: 0
-    n_primaries: 213564
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4840897319187771
-  P00574A:
-    n_events: 0
-    n_primaries: 216276
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.49325760894364595
-  B00000B:
-    n_events: 0
-    n_primaries: 195860
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.45000072438968736
   B00000C:
     n_events: 45
     n_primaries: 233544
@@ -191,46 +55,6 @@
     ratio_sigma_freq: 2.87207447947289e-05
     ratio_syst_fwhm: 0.0
     expo: 0.526184491216062
-  B00061A:
-    n_events: 0
-    n_primaries: 206183
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4719519792379649
-  B00061C:
-    n_events: 0
-    n_primaries: 179115
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40932634040611454
-  B00076C:
-    n_events: 0
-    n_primaries: 231954
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5166376809389813
-  B00079B:
-    n_events: 0
-    n_primaries: 208930
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4751801049509468
-  B00079C:
-    n_events: 0
-    n_primaries: 230146
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5242476157882728
   V08682B:
     n_events: 7148
     n_primaries: 425865
@@ -327,14 +151,6 @@
     ratio_sigma_freq: 3.57359819445647e-05
     ratio_syst_fwhm: 0.0
     expo: 0.3841469598448551
-  C00ANG4:
-    n_events: 0
-    n_primaries: 660307
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5333597136664388
   V00048B:
     n_events: 212
     n_primaries: 509633
@@ -359,22 +175,6 @@
     ratio_sigma_freq: 2.43226549312563e-05
     ratio_syst_fwhm: 0.0
     expo: 1.210057931211499
-  V05261A:
-    n_events: 0
-    n_primaries: 501969
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4258519183968362
-  V05268A:
-    n_events: 0
-    n_primaries: 640730
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4836465776865162
   V07302A:
     n_events: 2752
     n_primaries: 503535
@@ -383,14 +183,6 @@
     ratio_sigma_freq: 0.0001038973591492588
     ratio_syst_fwhm: 0.0
     expo: 1.1640621321013003
-  B00002A:
-    n_events: 0
-    n_primaries: 153071
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.18030268144599085
   B00089A:
     n_events: 21
     n_primaries: 145881
@@ -399,54 +191,6 @@
     ratio_sigma_freq: 3.141084750889055e-05
     ratio_syst_fwhm: 0.0
     expo: 0.33830757472051104
-  B00091A:
-    n_events: 0
-    n_primaries: 175340
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00538A:
-    n_events: 0
-    n_primaries: 293766
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6700943355007986
-  P00573A:
-    n_events: 0
-    n_primaries: 294805
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6790039624686288
-  P00662C:
-    n_events: 0
-    n_primaries: 210859
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4837023568332193
-  P00664A:
-    n_events: 0
-    n_primaries: 228192
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43365160924785146
-  P00909B:
-    n_events: 0
-    n_primaries: 232480
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5327053051562858
   B00000D:
     n_events: 174
     n_primaries: 229503
@@ -455,14 +199,6 @@
     ratio_sigma_freq: 5.7454170975310376e-05
     ratio_syst_fwhm: 0.0
     expo: 0.4356342003194159
-  B00002C:
-    n_events: 0
-    n_primaries: 223362
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5087526123659595
   B00032C:
     n_events: 59
     n_primaries: 209134
@@ -471,14 +207,6 @@
     ratio_sigma_freq: 3.6723164025251254e-05
     ratio_syst_fwhm: 0.0
     expo: 0.35805717545060456
-  B00032D:
-    n_events: 0
-    n_primaries: 203695
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4648501026694045
   B00035A:
     n_events: 93
     n_primaries: 216211
@@ -495,14 +223,6 @@
     ratio_sigma_freq: 5.100358640892313e-05
     ratio_syst_fwhm: 0.0
     expo: 0.5229563655030801
-  B00061B:
-    n_events: 0
-    n_primaries: 213518
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4848644820898928
   B00089B:
     n_events: 17
     n_primaries: 173910
@@ -519,30 +239,6 @@
     ratio_sigma_freq: 3.8868011290080945e-05
     ratio_syst_fwhm: 0.0
     expo: 1.2388900861282228
-  V01240A:
-    n_events: 0
-    n_primaries: 598917
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.35581279945243
-  V05267A:
-    n_events: 0
-    n_primaries: 607027
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4093996862879306
-  V05612B:
-    n_events: 0
-    n_primaries: 584344
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3506477983116585
   B00000A:
     n_events: 19612
     n_primaries: 137133
@@ -551,14 +247,6 @@
     ratio_sigma_freq: 0.0009453784884080641
     ratio_syst_fwhm: 0.0
     expo: 0.320230070727812
-  B00002B:
-    n_events: 0
-    n_primaries: 175219
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40351571412274695
   B00032A:
     n_events: 42
     n_primaries: 130072
@@ -567,86 +255,6 @@
     ratio_sigma_freq: 4.9816211825325786e-05
     ratio_syst_fwhm: 0.0
     expo: 0.295696315309149
-  P00573B:
-    n_events: 0
-    n_primaries: 295888
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6893985272644307
-  P00575A:
-    n_events: 0
-    n_primaries: 295819
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6813927754962354
-  P00574C:
-    n_events: 0
-    n_primaries: 227068
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5183078644763861
-  P00662A:
-    n_events: 0
-    n_primaries: 177779
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.33955890866225574
-  P00662B:
-    n_events: 0
-    n_primaries: 176650
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.3930476029229093
-  P00909C:
-    n_events: 0
-    n_primaries: 251119
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4577266991786447
-  P00661C:
-    n_events: 0
-    n_primaries: 253840
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4653995445154258
-  P00665C:
-    n_events: 0
-    n_primaries: 238104
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43807799389053664
-  V01389A:
-    n_events: 0
-    n_primaries: 596885
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0851373361092096
-  P00748A:
-    n_events: 0
-    n_primaries: 282719
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5195242102694755
 300:
   V02160A:
     n_events: 8747
@@ -664,46 +272,6 @@
     ratio_sigma_freq: 0.0001823190478598085
     ratio_syst_fwhm: 0.0
     expo: 1.1098296201232034
-  V05261B:
-    n_events: 0
-    n_primaries: 669311
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5449809662331735
-  V05266A:
-    n_events: 0
-    n_primaries: 579668
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3383809206023272
-  V05266B:
-    n_events: 0
-    n_primaries: 555453
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2835027834816337
-  V05268B:
-    n_events: 0
-    n_primaries: 498216
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.1563146303901437
-  V05612A:
-    n_events: 0
-    n_primaries: 614922
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.421020938854666
   V07647A:
     n_events: 9489
     n_primaries: 533592
@@ -728,54 +296,6 @@
     ratio_sigma_freq: 9.922657783047874e-05
     ratio_syst_fwhm: 0.0
     expo: 0.40932634040611454
-  C000RG1:
-    n_events: 0
-    n_primaries: 578069
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.364205926306183
-  C000RG2:
-    n_events: 0
-    n_primaries: 594829
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.399715309148985
-  C00ANG3:
-    n_events: 0
-    n_primaries: 664173
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.9815468939336325
-  C00ANG5:
-    n_events: 0
-    n_primaries: 764427
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0763801125560877
-  C00ANG2:
-    n_events: 0
-    n_primaries: 796161
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.161163020001521
-  V04549A:
-    n_events: 0
-    n_primaries: 545633
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2544496520647956
   B00032B:
     n_events: 841
     n_primaries: 202072
@@ -784,54 +304,6 @@
     ratio_sigma_freq: 0.00014321424926484104
     ratio_syst_fwhm: 0.0
     expo: 0.46226760209901896
-  B00091C:
-    n_events: 0
-    n_primaries: 176784
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00574B:
-    n_events: 0
-    n_primaries: 218011
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5028774235683321
-  P00698A:
-    n_events: 0
-    n_primaries: 277996
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6210913871777322
-  P00661B:
-    n_events: 0
-    n_primaries: 214725
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4840897319187771
-  P00574A:
-    n_events: 0
-    n_primaries: 216495
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.49325760894364595
-  B00000B:
-    n_events: 0
-    n_primaries: 195397
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.45000072438968736
   B00000C:
     n_events: 381
     n_primaries: 234037
@@ -840,46 +312,6 @@
     ratio_sigma_freq: 8.333437314839563e-05
     ratio_syst_fwhm: 0.0
     expo: 0.526184491216062
-  B00061A:
-    n_events: 0
-    n_primaries: 206814
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4719519792379649
-  B00061C:
-    n_events: 0
-    n_primaries: 178222
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40932634040611454
-  B00076C:
-    n_events: 0
-    n_primaries: 232565
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5166376809389813
-  B00079B:
-    n_events: 0
-    n_primaries: 209077
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4751801049509468
-  B00079C:
-    n_events: 0
-    n_primaries: 228879
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5242476157882728
   V08682B:
     n_events: 10160
     n_primaries: 425015
@@ -976,14 +408,6 @@
     ratio_sigma_freq: 9.593463152559102e-05
     ratio_syst_fwhm: 0.0
     expo: 0.3841469598448551
-  C00ANG4:
-    n_events: 0
-    n_primaries: 662324
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5333597136664388
   V00048B:
     n_events: 1257
     n_primaries: 509183
@@ -1008,22 +432,6 @@
     ratio_sigma_freq: 5.984605274368559e-05
     ratio_syst_fwhm: 0.0
     expo: 1.210057931211499
-  V05261A:
-    n_events: 0
-    n_primaries: 503271
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4258519183968362
-  V05268A:
-    n_events: 0
-    n_primaries: 639905
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4836465776865162
   V07302A:
     n_events: 5812
     n_primaries: 504613
@@ -1032,14 +440,6 @@
     ratio_sigma_freq: 0.00015020652828768056
     ratio_syst_fwhm: 9.908563773494347e-07
     expo: 1.1640621321013003
-  B00002A:
-    n_events: 0
-    n_primaries: 153235
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.18030268144599085
   B00089A:
     n_events: 187
     n_primaries: 145905
@@ -1048,54 +448,6 @@
     ratio_sigma_freq: 9.366387945102444e-05
     ratio_syst_fwhm: 0.0
     expo: 0.33830757472051104
-  B00091A:
-    n_events: 0
-    n_primaries: 174941
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00538A:
-    n_events: 0
-    n_primaries: 292994
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6700943355007986
-  P00573A:
-    n_events: 0
-    n_primaries: 295251
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6790039624686288
-  P00662C:
-    n_events: 0
-    n_primaries: 210324
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4837023568332193
-  P00664A:
-    n_events: 0
-    n_primaries: 227169
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43365160924785146
-  P00909B:
-    n_events: 0
-    n_primaries: 232330
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5327053051562858
   B00000D:
     n_events: 870
     n_primaries: 229532
@@ -1104,14 +456,6 @@
     ratio_sigma_freq: 0.00012826015601954767
     ratio_syst_fwhm: 0.0
     expo: 0.4356342003194159
-  B00002C:
-    n_events: 0
-    n_primaries: 222487
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5087526123659595
   B00032C:
     n_events: 290
     n_primaries: 208746
@@ -1144,14 +488,6 @@
     ratio_sigma_freq: 0.00010360772510755023
     ratio_syst_fwhm: 4.387504387504213e-06
     expo: 0.5229563655030801
-  B00061B:
-    n_events: 0
-    n_primaries: 211881
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4848644820898928
   B00089B:
     n_events: 138
     n_primaries: 174999
@@ -1168,30 +504,6 @@
     ratio_sigma_freq: 7.501463699901079e-05
     ratio_syst_fwhm: 0.0
     expo: 1.2388900861282228
-  V01240A:
-    n_events: 0
-    n_primaries: 599432
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.35581279945243
-  V05267A:
-    n_events: 0
-    n_primaries: 607303
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4093996862879306
-  V05612B:
-    n_events: 0
-    n_primaries: 584254
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3506477983116585
   B00000A:
     n_events: 13245
     n_primaries: 137245
@@ -1200,14 +512,6 @@
     ratio_sigma_freq: 0.0007970618568268403
     ratio_syst_fwhm: 0.0
     expo: 0.320230070727812
-  B00002B:
-    n_events: 0
-    n_primaries: 176597
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40351571412274695
   B00032A:
     n_events: 253
     n_primaries: 130028
@@ -1216,86 +520,6 @@
     ratio_sigma_freq: 0.00012220823040395688
     ratio_syst_fwhm: 0.0
     expo: 0.295696315309149
-  P00573B:
-    n_events: 0
-    n_primaries: 295885
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6893985272644307
-  P00575A:
-    n_events: 0
-    n_primaries: 295795
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6813927754962354
-  P00574C:
-    n_events: 0
-    n_primaries: 227135
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5183078644763861
-  P00662A:
-    n_events: 0
-    n_primaries: 178881
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.33955890866225574
-  P00662B:
-    n_events: 0
-    n_primaries: 177266
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.3930476029229093
-  P00909C:
-    n_events: 0
-    n_primaries: 251252
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4577266991786447
-  P00661C:
-    n_events: 0
-    n_primaries: 255519
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4653995445154258
-  P00665C:
-    n_events: 0
-    n_primaries: 238136
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43807799389053664
-  V01389A:
-    n_events: 0
-    n_primaries: 597851
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0851373361092096
-  P00748A:
-    n_events: 0
-    n_primaries: 282626
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5195242102694755
 400:
   V02160A:
     n_events: 14093
@@ -1313,46 +537,6 @@
     ratio_sigma_freq: 0.00021763863100501284
     ratio_syst_fwhm: 0.0
     expo: 1.1098296201232034
-  V05261B:
-    n_events: 0
-    n_primaries: 670100
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5449809662331735
-  V05266A:
-    n_events: 0
-    n_primaries: 580530
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3383809206023272
-  V05266B:
-    n_events: 0
-    n_primaries: 556028
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2835027834816337
-  V05268B:
-    n_events: 0
-    n_primaries: 498259
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.1563146303901437
-  V05612A:
-    n_events: 0
-    n_primaries: 616871
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.421020938854666
   V07647A:
     n_events: 13994
     n_primaries: 533320
@@ -1377,54 +561,6 @@
     ratio_sigma_freq: 0.00015137153843848856
     ratio_syst_fwhm: 0.0
     expo: 0.40932634040611454
-  C000RG1:
-    n_events: 0
-    n_primaries: 576431
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.364205926306183
-  C000RG2:
-    n_events: 0
-    n_primaries: 595520
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.399715309148985
-  C00ANG3:
-    n_events: 0
-    n_primaries: 665762
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.9815468939336325
-  C00ANG5:
-    n_events: 0
-    n_primaries: 763616
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0763801125560877
-  C00ANG2:
-    n_events: 0
-    n_primaries: 795018
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.161163020001521
-  V04549A:
-    n_events: 0
-    n_primaries: 545636
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2544496520647956
   B00032B:
     n_events: 1724
     n_primaries: 202452
@@ -1433,46 +569,6 @@
     ratio_sigma_freq: 0.00020421587627599076
     ratio_syst_fwhm: 0.0
     expo: 0.46226760209901896
-  B00091C:
-    n_events: 0
-    n_primaries: 177106
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00574B:
-    n_events: 0
-    n_primaries: 218565
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5028774235683321
-  P00698A:
-    n_events: 0
-    n_primaries: 278439
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6210913871777322
-  P00661B:
-    n_events: 0
-    n_primaries: 213690
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4840897319187771
-  P00574A:
-    n_events: 0
-    n_primaries: 217070
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.49325760894364595
   B00000B:
     n_events: 123
     n_primaries: 197199
@@ -1489,46 +585,6 @@
     ratio_sigma_freq: 0.00013373639664835597
     ratio_syst_fwhm: 0.0
     expo: 0.526184491216062
-  B00061A:
-    n_events: 0
-    n_primaries: 207011
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4719519792379649
-  B00061C:
-    n_events: 0
-    n_primaries: 178548
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40932634040611454
-  B00076C:
-    n_events: 0
-    n_primaries: 232829
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5166376809389813
-  B00079B:
-    n_events: 0
-    n_primaries: 209299
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4751801049509468
-  B00079C:
-    n_events: 0
-    n_primaries: 229913
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5242476157882728
   V08682B:
     n_events: 13113
     n_primaries: 426597
@@ -1625,14 +681,6 @@
     ratio_sigma_freq: 0.0001600709105369269
     ratio_syst_fwhm: 0.0
     expo: 0.3841469598448551
-  C00ANG4:
-    n_events: 0
-    n_primaries: 661727
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5333597136664388
   V00048B:
     n_events: 2880
     n_primaries: 509551
@@ -1657,22 +705,6 @@
     ratio_sigma_freq: 8.885470122554577e-05
     ratio_syst_fwhm: 0.0
     expo: 1.210057931211499
-  V05261A:
-    n_events: 0
-    n_primaries: 501947
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4258519183968362
-  V05268A:
-    n_events: 0
-    n_primaries: 640389
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4836465776865162
   V07302A:
     n_events: 9655
     n_primaries: 503617
@@ -1681,14 +713,6 @@
     ratio_sigma_freq: 0.000193229013551208
     ratio_syst_fwhm: 9.92815983542894e-07
     expo: 1.1640621321013003
-  B00002A:
-    n_events: 0
-    n_primaries: 153976
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.18030268144599085
   B00089A:
     n_events: 532
     n_primaries: 145980
@@ -1697,54 +721,6 @@
     ratio_sigma_freq: 0.00015771378482152615
     ratio_syst_fwhm: 0.0
     expo: 0.33830757472051104
-  B00091A:
-    n_events: 0
-    n_primaries: 175897
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00538A:
-    n_events: 0
-    n_primaries: 293700
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6700943355007986
-  P00573A:
-    n_events: 0
-    n_primaries: 296186
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6790039624686288
-  P00662C:
-    n_events: 0
-    n_primaries: 210304
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4837023568332193
-  P00664A:
-    n_events: 0
-    n_primaries: 228616
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43365160924785146
-  P00909B:
-    n_events: 0
-    n_primaries: 232386
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5327053051562858
   B00000D:
     n_events: 1967
     n_primaries: 229959
@@ -1753,14 +729,6 @@
     ratio_sigma_freq: 0.00019203764302665584
     ratio_syst_fwhm: 0.0
     expo: 0.4356342003194159
-  B00002C:
-    n_events: 0
-    n_primaries: 221860
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5087526123659595
   B00032C:
     n_events: 757
     n_primaries: 209260
@@ -1793,14 +761,6 @@
     ratio_sigma_freq: 0.00015316800087195273
     ratio_syst_fwhm: 0.0
     expo: 0.5229563655030801
-  B00061B:
-    n_events: 0
-    n_primaries: 212057
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4848644820898928
   B00089B:
     n_events: 450
     n_primaries: 174143
@@ -1817,30 +777,6 @@
     ratio_sigma_freq: 0.0001093950330655267
     ratio_syst_fwhm: 9.281000863132355e-07
     expo: 1.2388900861282228
-  V01240A:
-    n_events: 0
-    n_primaries: 599606
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.35581279945243
-  V05267A:
-    n_events: 0
-    n_primaries: 608390
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4093996862879306
-  V05612B:
-    n_events: 0
-    n_primaries: 582394
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3506477983116585
   B00000A:
     n_events: 9236
     n_primaries: 137520
@@ -1849,14 +785,6 @@
     ratio_sigma_freq: 0.0006749621401762748
     ratio_syst_fwhm: 0.0
     expo: 0.320230070727812
-  B00002B:
-    n_events: 0
-    n_primaries: 176352
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40351571412274695
   B00032A:
     n_events: 827
     n_primaries: 130083
@@ -1865,86 +793,6 @@
     ratio_sigma_freq: 0.00022036737303409676
     ratio_syst_fwhm: 0.0
     expo: 0.295696315309149
-  P00573B:
-    n_events: 0
-    n_primaries: 295377
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6893985272644307
-  P00575A:
-    n_events: 0
-    n_primaries: 295622
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6813927754962354
-  P00574C:
-    n_events: 0
-    n_primaries: 228203
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5183078644763861
-  P00662A:
-    n_events: 0
-    n_primaries: 177728
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.33955890866225574
-  P00662B:
-    n_events: 0
-    n_primaries: 176011
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.3930476029229093
-  P00909C:
-    n_events: 0
-    n_primaries: 251683
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4577266991786447
-  P00661C:
-    n_events: 0
-    n_primaries: 253853
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4653995445154258
-  P00665C:
-    n_events: 0
-    n_primaries: 238014
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43807799389053664
-  V01389A:
-    n_events: 0
-    n_primaries: 597840
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0851373361092096
-  P00748A:
-    n_events: 0
-    n_primaries: 282721
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5195242102694755
 500:
   V02160A:
     n_events: 19276
@@ -1962,46 +810,6 @@
     ratio_sigma_freq: 0.00024958295145042174
     ratio_syst_fwhm: 0.0
     expo: 1.1098296201232034
-  V05261B:
-    n_events: 0
-    n_primaries: 668996
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5449809662331735
-  V05266A:
-    n_events: 0
-    n_primaries: 581915
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3383809206023272
-  V05266B:
-    n_events: 0
-    n_primaries: 556357
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2835027834816337
-  V05268B:
-    n_events: 0
-    n_primaries: 499330
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.1563146303901437
-  V05612A:
-    n_events: 0
-    n_primaries: 616230
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.421020938854666
   V07647A:
     n_events: 19046
     n_primaries: 534429
@@ -2026,54 +834,6 @@
     ratio_sigma_freq: 0.00021257111246349378
     ratio_syst_fwhm: 0.0
     expo: 0.40932634040611454
-  C000RG1:
-    n_events: 0
-    n_primaries: 578071
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.364205926306183
-  C000RG2:
-    n_events: 0
-    n_primaries: 595040
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.399715309148985
-  C00ANG3:
-    n_events: 0
-    n_primaries: 664201
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.9815468939336325
-  C00ANG5:
-    n_events: 0
-    n_primaries: 765480
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0763801125560877
-  C00ANG2:
-    n_events: 0
-    n_primaries: 794401
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.161163020001521
-  V04549A:
-    n_events: 0
-    n_primaries: 546351
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2544496520647956
   B00032B:
     n_events: 2822
     n_primaries: 201130
@@ -2082,46 +842,6 @@
     ratio_sigma_freq: 0.00026226077580581044
     ratio_syst_fwhm: 0.0
     expo: 0.46226760209901896
-  B00091C:
-    n_events: 0
-    n_primaries: 177332
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00574B:
-    n_events: 0
-    n_primaries: 219231
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5028774235683321
-  P00698A:
-    n_events: 0
-    n_primaries: 277805
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6210913871777322
-  P00661B:
-    n_events: 0
-    n_primaries: 214088
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4840897319187771
-  P00574A:
-    n_events: 0
-    n_primaries: 217102
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.49325760894364595
   B00000B:
     n_events: 658
     n_primaries: 196572
@@ -2138,46 +858,6 @@
     ratio_sigma_freq: 0.00017303110877361788
     ratio_syst_fwhm: 0.0
     expo: 0.526184491216062
-  B00061A:
-    n_events: 0
-    n_primaries: 207432
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4719519792379649
-  B00061C:
-    n_events: 0
-    n_primaries: 178816
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40932634040611454
-  B00076C:
-    n_events: 0
-    n_primaries: 232327
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5166376809389813
-  B00079B:
-    n_events: 0
-    n_primaries: 209243
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4751801049509468
-  B00079C:
-    n_events: 0
-    n_primaries: 229471
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5242476157882728
   V08682B:
     n_events: 15760
     n_primaries: 425206
@@ -2274,14 +954,6 @@
     ratio_sigma_freq: 0.00022772954734242868
     ratio_syst_fwhm: 0.0
     expo: 0.3841469598448551
-  C00ANG4:
-    n_events: 0
-    n_primaries: 662672
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5333597136664388
   V00048B:
     n_events: 5050
     n_primaries: 510084
@@ -2306,22 +978,6 @@
     ratio_sigma_freq: 0.00011693348671182941
     ratio_syst_fwhm: 0.0
     expo: 1.210057931211499
-  V05261A:
-    n_events: 0
-    n_primaries: 503077
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4258519183968362
-  V05268A:
-    n_events: 0
-    n_primaries: 641852
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4836465776865162
   V07302A:
     n_events: 13481
     n_primaries: 503485
@@ -2330,14 +986,6 @@
     ratio_sigma_freq: 0.0002274998226006656
     ratio_syst_fwhm: 9.930762722293318e-07
     expo: 1.1640621321013003
-  B00002A:
-    n_events: 0
-    n_primaries: 154032
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.18030268144599085
   B00089A:
     n_events: 1162
     n_primaries: 145771
@@ -2346,54 +994,6 @@
     ratio_sigma_freq: 0.00023291315904632972
     ratio_syst_fwhm: 0.0
     expo: 0.33830757472051104
-  B00091A:
-    n_events: 0
-    n_primaries: 175667
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00538A:
-    n_events: 0
-    n_primaries: 293817
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6700943355007986
-  P00573A:
-    n_events: 0
-    n_primaries: 296042
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6790039624686288
-  P00662C:
-    n_events: 0
-    n_primaries: 209950
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4837023568332193
-  P00664A:
-    n_events: 0
-    n_primaries: 227957
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43365160924785146
-  P00909B:
-    n_events: 0
-    n_primaries: 232719
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5327053051562858
   B00000D:
     n_events: 3510
     n_primaries: 229214
@@ -2402,14 +1002,6 @@
     ratio_sigma_freq: 0.0002564847074784105
     ratio_syst_fwhm: 0.0
     expo: 0.4356342003194159
-  B00002C:
-    n_events: 0
-    n_primaries: 222725
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5087526123659595
   B00032C:
     n_events: 1326
     n_primaries: 209322
@@ -2442,14 +1034,6 @@
     ratio_sigma_freq: 0.0002030704941073296
     ratio_syst_fwhm: 0.0
     expo: 0.5229563655030801
-  B00061B:
-    n_events: 0
-    n_primaries: 212821
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4848644820898928
   B00089B:
     n_events: 1082
     n_primaries: 175740
@@ -2466,30 +1050,6 @@
     ratio_sigma_freq: 0.00013945405214882626
     ratio_syst_fwhm: 0.0
     expo: 1.2388900861282228
-  V01240A:
-    n_events: 0
-    n_primaries: 601779
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.35581279945243
-  V05267A:
-    n_events: 0
-    n_primaries: 608600
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4093996862879306
-  V05612B:
-    n_events: 0
-    n_primaries: 583568
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3506477983116585
   B00000A:
     n_events: 6218
     n_primaries: 136880
@@ -2498,14 +1058,6 @@
     ratio_sigma_freq: 0.0005628465583033355
     ratio_syst_fwhm: 0.0
     expo: 0.320230070727812
-  B00002B:
-    n_events: 0
-    n_primaries: 176752
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40351571412274695
   B00032A:
     n_events: 1750
     n_primaries: 130349
@@ -2514,86 +1066,6 @@
     ratio_sigma_freq: 0.0003187691353869981
     ratio_syst_fwhm: 0.0
     expo: 0.295696315309149
-  P00573B:
-    n_events: 0
-    n_primaries: 296609
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6893985272644307
-  P00575A:
-    n_events: 0
-    n_primaries: 296170
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6813927754962354
-  P00574C:
-    n_events: 0
-    n_primaries: 227896
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5183078644763861
-  P00662A:
-    n_events: 0
-    n_primaries: 178422
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.33955890866225574
-  P00662B:
-    n_events: 0
-    n_primaries: 176597
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.3930476029229093
-  P00909C:
-    n_events: 0
-    n_primaries: 251824
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4577266991786447
-  P00661C:
-    n_events: 0
-    n_primaries: 254583
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4653995445154258
-  P00665C:
-    n_events: 0
-    n_primaries: 238471
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43807799389053664
-  V01389A:
-    n_events: 0
-    n_primaries: 597392
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0851373361092096
-  P00748A:
-    n_events: 0
-    n_primaries: 283169
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5195242102694755
 600:
   V02160A:
     n_events: 24244
@@ -2611,46 +1083,6 @@
     ratio_sigma_freq: 0.0002729116831125019
     ratio_syst_fwhm: 1.0362952031980899e-06
     expo: 1.1098296201232034
-  V05261B:
-    n_events: 0
-    n_primaries: 671963
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5449809662331735
-  V05266A:
-    n_events: 0
-    n_primaries: 578787
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3383809206023272
-  V05266B:
-    n_events: 0
-    n_primaries: 556495
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2835027834816337
-  V05268B:
-    n_events: 0
-    n_primaries: 500887
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.1563146303901437
-  V05612A:
-    n_events: 0
-    n_primaries: 616788
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.421020938854666
   V07647A:
     n_events: 23079
     n_primaries: 533296
@@ -2675,54 +1107,6 @@
     ratio_sigma_freq: 0.00028565379675879715
     ratio_syst_fwhm: 0.0
     expo: 0.40932634040611454
-  C000RG1:
-    n_events: 0
-    n_primaries: 578134
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.364205926306183
-  C000RG2:
-    n_events: 0
-    n_primaries: 596291
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.399715309148985
-  C00ANG3:
-    n_events: 0
-    n_primaries: 665254
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.9815468939336325
-  C00ANG5:
-    n_events: 0
-    n_primaries: 764307
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0763801125560877
-  C00ANG2:
-    n_events: 0
-    n_primaries: 795578
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.161163020001521
-  V04549A:
-    n_events: 0
-    n_primaries: 545601
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2544496520647956
   B00032B:
     n_events: 4424
     n_primaries: 202585
@@ -2731,46 +1115,6 @@
     ratio_sigma_freq: 0.00032471752126204663
     ratio_syst_fwhm: 0.0
     expo: 0.46226760209901896
-  B00091C:
-    n_events: 0
-    n_primaries: 177313
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00574B:
-    n_events: 0
-    n_primaries: 219306
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5028774235683321
-  P00698A:
-    n_events: 0
-    n_primaries: 278585
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6210913871777322
-  P00661B:
-    n_events: 0
-    n_primaries: 215043
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4840897319187771
-  P00574A:
-    n_events: 0
-    n_primaries: 216729
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.49325760894364595
   B00000B:
     n_events: 1515
     n_primaries: 197019
@@ -2787,46 +1131,6 @@
     ratio_sigma_freq: 0.00021311437337139316
     ratio_syst_fwhm: 0.0
     expo: 0.526184491216062
-  B00061A:
-    n_events: 0
-    n_primaries: 206895
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4719519792379649
-  B00061C:
-    n_events: 0
-    n_primaries: 179328
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40932634040611454
-  B00076C:
-    n_events: 0
-    n_primaries: 232898
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5166376809389813
-  B00079B:
-    n_events: 0
-    n_primaries: 209239
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4751801049509468
-  B00079C:
-    n_events: 0
-    n_primaries: 230789
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5242476157882728
   V08682B:
     n_events: 18015
     n_primaries: 426447
@@ -2923,14 +1227,6 @@
     ratio_sigma_freq: 0.0003217784336101378
     ratio_syst_fwhm: 0.0
     expo: 0.3841469598448551
-  C00ANG4:
-    n_events: 0
-    n_primaries: 662255
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5333597136664388
   V00048B:
     n_events: 8710
     n_primaries: 510298
@@ -2955,22 +1251,6 @@
     ratio_sigma_freq: 0.0001401745728762729
     ratio_syst_fwhm: 0.0
     expo: 1.210057931211499
-  V05261A:
-    n_events: 0
-    n_primaries: 502127
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4258519183968362
-  V05268A:
-    n_events: 0
-    n_primaries: 642261
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4836465776865162
   V07302A:
     n_events: 17465
     n_primaries: 504228
@@ -2979,14 +1259,6 @@
     ratio_sigma_freq: 0.00025751506244696333
     ratio_syst_fwhm: 0.0
     expo: 1.1640621321013003
-  B00002A:
-    n_events: 0
-    n_primaries: 154149
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.18030268144599085
   B00089A:
     n_events: 2519
     n_primaries: 145785
@@ -2995,54 +1267,6 @@
     ratio_sigma_freq: 0.00034128436264468156
     ratio_syst_fwhm: 0.0
     expo: 0.33830757472051104
-  B00091A:
-    n_events: 0
-    n_primaries: 176416
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00538A:
-    n_events: 0
-    n_primaries: 293746
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6700943355007986
-  P00573A:
-    n_events: 0
-    n_primaries: 296482
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6790039624686288
-  P00662C:
-    n_events: 0
-    n_primaries: 210655
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4837023568332193
-  P00664A:
-    n_events: 0
-    n_primaries: 227537
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43365160924785146
-  P00909B:
-    n_events: 0
-    n_primaries: 233182
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5327053051562858
   B00000D:
     n_events: 5276
     n_primaries: 230387
@@ -3051,14 +1275,6 @@
     ratio_sigma_freq: 0.00031164760783432624
     ratio_syst_fwhm: 0.0
     expo: 0.4356342003194159
-  B00002C:
-    n_events: 0
-    n_primaries: 222124
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5087526123659595
   B00032C:
     n_events: 2589
     n_primaries: 208892
@@ -3091,14 +1307,6 @@
     ratio_sigma_freq: 0.00026387893504258784
     ratio_syst_fwhm: 0.0
     expo: 0.5229563655030801
-  B00061B:
-    n_events: 0
-    n_primaries: 212384
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4848644820898928
   B00089B:
     n_events: 2302
     n_primaries: 175848
@@ -3115,30 +1323,6 @@
     ratio_sigma_freq: 0.00016846215226167682
     ratio_syst_fwhm: 0.0
     expo: 1.2388900861282228
-  V01240A:
-    n_events: 0
-    n_primaries: 600785
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.35581279945243
-  V05267A:
-    n_events: 0
-    n_primaries: 608488
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4093996862879306
-  V05612B:
-    n_events: 0
-    n_primaries: 582884
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3506477983116585
   B00000A:
     n_events: 4691
     n_primaries: 136843
@@ -3147,14 +1331,6 @@
     ratio_sigma_freq: 0.0004918534325785694
     ratio_syst_fwhm: 0.0
     expo: 0.320230070727812
-  B00002B:
-    n_events: 0
-    n_primaries: 176461
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40351571412274695
   B00032A:
     n_events: 3120
     n_primaries: 130631
@@ -3163,86 +1339,6 @@
     ratio_sigma_freq: 0.00042245625588052676
     ratio_syst_fwhm: 0.0
     expo: 0.295696315309149
-  P00573B:
-    n_events: 0
-    n_primaries: 295914
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6893985272644307
-  P00575A:
-    n_events: 0
-    n_primaries: 296547
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6813927754962354
-  P00574C:
-    n_events: 0
-    n_primaries: 228405
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5183078644763861
-  P00662A:
-    n_events: 0
-    n_primaries: 178246
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.33955890866225574
-  P00662B:
-    n_events: 0
-    n_primaries: 176704
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.3930476029229093
-  P00909C:
-    n_events: 0
-    n_primaries: 252141
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4577266991786447
-  P00661C:
-    n_events: 0
-    n_primaries: 255903
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4653995445154258
-  P00665C:
-    n_events: 0
-    n_primaries: 238103
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43807799389053664
-  V01389A:
-    n_events: 0
-    n_primaries: 598368
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0851373361092096
-  P00748A:
-    n_events: 0
-    n_primaries: 284247
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5195242102694755
 700:
   V02160A:
     n_events: 28586
@@ -3260,46 +1356,6 @@
     ratio_sigma_freq: 0.00029661853073932007
     ratio_syst_fwhm: 0.0
     expo: 1.1098296201232034
-  V05261B:
-    n_events: 0
-    n_primaries: 671852
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5449809662331735
-  V05266A:
-    n_events: 0
-    n_primaries: 580137
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3383809206023272
-  V05266B:
-    n_events: 0
-    n_primaries: 556053
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2835027834816337
-  V05268B:
-    n_events: 0
-    n_primaries: 499783
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.1563146303901437
-  V05612A:
-    n_events: 0
-    n_primaries: 617929
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.421020938854666
   V07647A:
     n_events: 27425
     n_primaries: 536106
@@ -3324,54 +1380,6 @@
     ratio_sigma_freq: 0.0003550511567244063
     ratio_syst_fwhm: 0.0
     expo: 0.40932634040611454
-  C000RG1:
-    n_events: 0
-    n_primaries: 577423
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.364205926306183
-  C000RG2:
-    n_events: 0
-    n_primaries: 595820
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.399715309148985
-  C00ANG3:
-    n_events: 0
-    n_primaries: 665118
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.9815468939336325
-  C00ANG5:
-    n_events: 0
-    n_primaries: 766910
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0763801125560877
-  C00ANG2:
-    n_events: 0
-    n_primaries: 795817
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.161163020001521
-  V04549A:
-    n_events: 0
-    n_primaries: 545389
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2544496520647956
   B00032B:
     n_events: 6069
     n_primaries: 203446
@@ -3380,46 +1388,6 @@
     ratio_sigma_freq: 0.0003771664962433676
     ratio_syst_fwhm: 0.0
     expo: 0.46226760209901896
-  B00091C:
-    n_events: 0
-    n_primaries: 177963
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00574B:
-    n_events: 0
-    n_primaries: 220039
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5028774235683321
-  P00698A:
-    n_events: 0
-    n_primaries: 278747
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6210913871777322
-  P00661B:
-    n_events: 0
-    n_primaries: 215127
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4840897319187771
-  P00574A:
-    n_events: 0
-    n_primaries: 217165
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.49325760894364595
   B00000B:
     n_events: 2538
     n_primaries: 196887
@@ -3436,46 +1404,6 @@
     ratio_sigma_freq: 0.00025470417596750507
     ratio_syst_fwhm: 0.0
     expo: 0.526184491216062
-  B00061A:
-    n_events: 0
-    n_primaries: 207960
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4719519792379649
-  B00061C:
-    n_events: 0
-    n_primaries: 179751
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40932634040611454
-  B00076C:
-    n_events: 0
-    n_primaries: 233183
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5166376809389813
-  B00079B:
-    n_events: 0
-    n_primaries: 209233
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4751801049509468
-  B00079C:
-    n_events: 0
-    n_primaries: 229950
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5242476157882728
   V08682B:
     n_events: 20448
     n_primaries: 426191
@@ -3572,14 +1500,6 @@
     ratio_sigma_freq: 0.00042354160283986184
     ratio_syst_fwhm: 0.0
     expo: 0.3841469598448551
-  C00ANG4:
-    n_events: 0
-    n_primaries: 661978
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5333597136664388
   V00048B:
     n_events: 13102
     n_primaries: 511061
@@ -3604,22 +1524,6 @@
     ratio_sigma_freq: 0.0001677985949212861
     ratio_syst_fwhm: 0.0
     expo: 1.210057931211499
-  V05261A:
-    n_events: 0
-    n_primaries: 503835
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4258519183968362
-  V05268A:
-    n_events: 0
-    n_primaries: 642228
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4836465776865162
   V07302A:
     n_events: 21030
     n_primaries: 503851
@@ -3628,14 +1532,6 @@
     ratio_sigma_freq: 0.0002817471454705465
     ratio_syst_fwhm: 0.0
     expo: 1.1640621321013003
-  B00002A:
-    n_events: 0
-    n_primaries: 153679
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.18030268144599085
   B00089A:
     n_events: 4733
     n_primaries: 145972
@@ -3644,54 +1540,6 @@
     ratio_sigma_freq: 0.00046359765612425145
     ratio_syst_fwhm: 0.0
     expo: 0.33830757472051104
-  B00091A:
-    n_events: 0
-    n_primaries: 176200
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00538A:
-    n_events: 0
-    n_primaries: 294713
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6700943355007986
-  P00573A:
-    n_events: 0
-    n_primaries: 296734
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6790039624686288
-  P00662C:
-    n_events: 0
-    n_primaries: 211797
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4837023568332193
-  P00664A:
-    n_events: 0
-    n_primaries: 228456
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43365160924785146
-  P00909B:
-    n_events: 0
-    n_primaries: 232330
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5327053051562858
   B00000D:
     n_events: 6829
     n_primaries: 229619
@@ -3700,14 +1548,6 @@
     ratio_sigma_freq: 0.00035449871987071167
     ratio_syst_fwhm: 0.0
     expo: 0.4356342003194159
-  B00002C:
-    n_events: 0
-    n_primaries: 222693
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5087526123659595
   B00032C:
     n_events: 4312
     n_primaries: 209772
@@ -3740,14 +1580,6 @@
     ratio_sigma_freq: 0.0003226515969403799
     ratio_syst_fwhm: 2.1759376115162987e-06
     expo: 0.5229563655030801
-  B00061B:
-    n_events: 0
-    n_primaries: 212619
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4848644820898928
   B00089B:
     n_events: 4851
     n_primaries: 175949
@@ -3764,30 +1596,6 @@
     ratio_sigma_freq: 0.0001962117895271681
     ratio_syst_fwhm: 0.0
     expo: 1.2388900861282228
-  V01240A:
-    n_events: 0
-    n_primaries: 600081
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.35581279945243
-  V05267A:
-    n_events: 0
-    n_primaries: 608167
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4093996862879306
-  V05612B:
-    n_events: 0
-    n_primaries: 584284
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3506477983116585
   B00000A:
     n_events: 4191
     n_primaries: 137040
@@ -3796,14 +1604,6 @@
     ratio_sigma_freq: 0.0004651220733029978
     ratio_syst_fwhm: 0.0
     expo: 0.320230070727812
-  B00002B:
-    n_events: 0
-    n_primaries: 176728
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40351571412274695
   B00032A:
     n_events: 4708
     n_primaries: 130607
@@ -3812,86 +1612,6 @@
     ratio_sigma_freq: 0.0005157980387037317
     ratio_syst_fwhm: 0.0
     expo: 0.295696315309149
-  P00573B:
-    n_events: 0
-    n_primaries: 297377
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6893985272644307
-  P00575A:
-    n_events: 0
-    n_primaries: 297674
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6813927754962354
-  P00574C:
-    n_events: 0
-    n_primaries: 227876
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5183078644763861
-  P00662A:
-    n_events: 0
-    n_primaries: 178423
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.33955890866225574
-  P00662B:
-    n_events: 0
-    n_primaries: 176295
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.3930476029229093
-  P00909C:
-    n_events: 0
-    n_primaries: 251682
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4577266991786447
-  P00661C:
-    n_events: 0
-    n_primaries: 255546
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4653995445154258
-  P00665C:
-    n_events: 0
-    n_primaries: 238928
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43807799389053664
-  V01389A:
-    n_events: 0
-    n_primaries: 598668
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0851373361092096
-  P00748A:
-    n_events: 0
-    n_primaries: 283504
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5195242102694755
 800:
   V02160A:
     n_events: 33180
@@ -3909,46 +1629,6 @@
     ratio_sigma_freq: 0.0003162431523734255
     ratio_syst_fwhm: 0.0
     expo: 1.1098296201232034
-  V05261B:
-    n_events: 0
-    n_primaries: 671193
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5449809662331735
-  V05266A:
-    n_events: 0
-    n_primaries: 581096
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3383809206023272
-  V05266B:
-    n_events: 0
-    n_primaries: 557788
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2835027834816337
-  V05268B:
-    n_events: 0
-    n_primaries: 501589
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.1563146303901437
-  V05612A:
-    n_events: 0
-    n_primaries: 617300
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.421020938854666
   V07647A:
     n_events: 30683
     n_primaries: 534628
@@ -3973,54 +1653,6 @@
     ratio_sigma_freq: 0.0004178724831499583
     ratio_syst_fwhm: 0.0
     expo: 0.40932634040611454
-  C000RG1:
-    n_events: 0
-    n_primaries: 578067
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.364205926306183
-  C000RG2:
-    n_events: 0
-    n_primaries: 595851
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.399715309148985
-  C00ANG3:
-    n_events: 0
-    n_primaries: 666174
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.9815468939336325
-  C00ANG5:
-    n_events: 0
-    n_primaries: 766390
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0763801125560877
-  C00ANG2:
-    n_events: 0
-    n_primaries: 797041
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.161163020001521
-  V04549A:
-    n_events: 0
-    n_primaries: 546258
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2544496520647956
   B00032B:
     n_events: 7771
     n_primaries: 202365
@@ -4029,46 +1661,6 @@
     ratio_sigma_freq: 0.0004271693413843593
     ratio_syst_fwhm: 0.0
     expo: 0.46226760209901896
-  B00091C:
-    n_events: 0
-    n_primaries: 178332
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00574B:
-    n_events: 0
-    n_primaries: 220688
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5028774235683321
-  P00698A:
-    n_events: 0
-    n_primaries: 279644
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6210913871777322
-  P00661B:
-    n_events: 0
-    n_primaries: 214163
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4840897319187771
-  P00574A:
-    n_events: 0
-    n_primaries: 217411
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.49325760894364595
   B00000B:
     n_events: 4056
     n_primaries: 196405
@@ -4085,46 +1677,6 @@
     ratio_sigma_freq: 0.0003073549006944817
     ratio_syst_fwhm: 0.0
     expo: 0.526184491216062
-  B00061A:
-    n_events: 0
-    n_primaries: 208234
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4719519792379649
-  B00061C:
-    n_events: 0
-    n_primaries: 179923
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40932634040611454
-  B00076C:
-    n_events: 0
-    n_primaries: 233110
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5166376809389813
-  B00079B:
-    n_events: 0
-    n_primaries: 210133
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4751801049509468
-  B00079C:
-    n_events: 0
-    n_primaries: 230654
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5242476157882728
   V08682B:
     n_events: 22449
     n_primaries: 427202
@@ -4221,14 +1773,6 @@
     ratio_sigma_freq: 0.0004910150511714676
     ratio_syst_fwhm: 0.0
     expo: 0.3841469598448551
-  C00ANG4:
-    n_events: 0
-    n_primaries: 663983
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5333597136664388
   V00048B:
     n_events: 17696
     n_primaries: 510720
@@ -4253,22 +1797,6 @@
     ratio_sigma_freq: 0.00019106119386918077
     ratio_syst_fwhm: 0.0
     expo: 1.210057931211499
-  V05261A:
-    n_events: 0
-    n_primaries: 504905
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4258519183968362
-  V05268A:
-    n_events: 0
-    n_primaries: 641581
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4836465776865162
   V07302A:
     n_events: 24401
     n_primaries: 504614
@@ -4277,14 +1805,6 @@
     ratio_sigma_freq: 0.0003019825344898976
     ratio_syst_fwhm: 1.9817088275191075e-06
     expo: 1.1640621321013003
-  B00002A:
-    n_events: 0
-    n_primaries: 154249
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.18030268144599085
   B00089A:
     n_events: 6738
     n_primaries: 145970
@@ -4293,54 +1813,6 @@
     ratio_sigma_freq: 0.0005492114996143273
     ratio_syst_fwhm: 3.4253379095836034e-06
     expo: 0.33830757472051104
-  B00091A:
-    n_events: 0
-    n_primaries: 176552
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00538A:
-    n_events: 0
-    n_primaries: 294277
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6700943355007986
-  P00573A:
-    n_events: 0
-    n_primaries: 298053
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6790039624686288
-  P00662C:
-    n_events: 0
-    n_primaries: 211055
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4837023568332193
-  P00664A:
-    n_events: 0
-    n_primaries: 228707
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43365160924785146
-  P00909B:
-    n_events: 0
-    n_primaries: 234044
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5327053051562858
   B00000D:
     n_events: 8398
     n_primaries: 229511
@@ -4349,14 +1821,6 @@
     ratio_sigma_freq: 0.0003919131319956152
     ratio_syst_fwhm: 2.178535327131831e-06
     expo: 0.4356342003194159
-  B00002C:
-    n_events: 0
-    n_primaries: 224060
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5087526123659595
   B00032C:
     n_events: 6041
     n_primaries: 210694
@@ -4389,14 +1853,6 @@
     ratio_sigma_freq: 0.0003667847480987653
     ratio_syst_fwhm: 0.0
     expo: 0.5229563655030801
-  B00061B:
-    n_events: 0
-    n_primaries: 212188
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4848644820898928
   B00089B:
     n_events: 7652
     n_primaries: 176114
@@ -4413,30 +1869,6 @@
     ratio_sigma_freq: 0.00021783298638832025
     ratio_syst_fwhm: 0.0
     expo: 1.2388900861282228
-  V01240A:
-    n_events: 0
-    n_primaries: 601216
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.35581279945243
-  V05267A:
-    n_events: 0
-    n_primaries: 609872
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4093996862879306
-  V05612B:
-    n_events: 0
-    n_primaries: 584754
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3506477983116585
   B00000A:
     n_events: 4401
     n_primaries: 137023
@@ -4445,14 +1877,6 @@
     ratio_sigma_freq: 0.0004763139083591588
     ratio_syst_fwhm: 0.0
     expo: 0.320230070727812
-  B00002B:
-    n_events: 0
-    n_primaries: 177121
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40351571412274695
   B00032A:
     n_events: 6150
     n_primaries: 131018
@@ -4461,86 +1885,6 @@
     ratio_sigma_freq: 0.0005843414411821611
     ratio_syst_fwhm: 0.0
     expo: 0.295696315309149
-  P00573B:
-    n_events: 0
-    n_primaries: 295999
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6893985272644307
-  P00575A:
-    n_events: 0
-    n_primaries: 297241
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6813927754962354
-  P00574C:
-    n_events: 0
-    n_primaries: 229301
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5183078644763861
-  P00662A:
-    n_events: 0
-    n_primaries: 178926
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.33955890866225574
-  P00662B:
-    n_events: 0
-    n_primaries: 176843
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.3930476029229093
-  P00909C:
-    n_events: 0
-    n_primaries: 252838
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4577266991786447
-  P00661C:
-    n_events: 0
-    n_primaries: 255155
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4653995445154258
-  P00665C:
-    n_events: 0
-    n_primaries: 238639
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43807799389053664
-  V01389A:
-    n_events: 0
-    n_primaries: 600053
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0851373361092096
-  P00748A:
-    n_events: 0
-    n_primaries: 283059
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5195242102694755
 900:
   V02160A:
     n_events: 36778
@@ -4558,46 +1902,6 @@
     ratio_sigma_freq: 0.0003319650267209715
     ratio_syst_fwhm: 0.0
     expo: 1.1098296201232034
-  V05261B:
-    n_events: 0
-    n_primaries: 670914
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5449809662331735
-  V05266A:
-    n_events: 0
-    n_primaries: 580453
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3383809206023272
-  V05266B:
-    n_events: 0
-    n_primaries: 558138
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2835027834816337
-  V05268B:
-    n_events: 0
-    n_primaries: 501063
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.1563146303901437
-  V05612A:
-    n_events: 0
-    n_primaries: 618387
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.421020938854666
   V07647A:
     n_events: 34633
     n_primaries: 535108
@@ -4622,54 +1926,6 @@
     ratio_sigma_freq: 0.0004606641680890135
     ratio_syst_fwhm: 0.0
     expo: 0.40932634040611454
-  C000RG1:
-    n_events: 0
-    n_primaries: 579746
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.364205926306183
-  C000RG2:
-    n_events: 0
-    n_primaries: 596826
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.399715309148985
-  C00ANG3:
-    n_events: 0
-    n_primaries: 666984
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.9815468939336325
-  C00ANG5:
-    n_events: 0
-    n_primaries: 767495
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0763801125560877
-  C00ANG2:
-    n_events: 0
-    n_primaries: 796505
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.161163020001521
-  V04549A:
-    n_events: 0
-    n_primaries: 548337
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2544496520647956
   B00032B:
     n_events: 9475
     n_primaries: 203217
@@ -4678,46 +1934,6 @@
     ratio_sigma_freq: 0.0004676936193627765
     ratio_syst_fwhm: 0.0
     expo: 0.46226760209901896
-  B00091C:
-    n_events: 0
-    n_primaries: 178593
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00574B:
-    n_events: 0
-    n_primaries: 220538
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5028774235683321
-  P00698A:
-    n_events: 0
-    n_primaries: 278612
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6210913871777322
-  P00661B:
-    n_events: 0
-    n_primaries: 214690
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4840897319187771
-  P00574A:
-    n_events: 0
-    n_primaries: 217433
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.49325760894364595
   B00000B:
     n_events: 5866
     n_primaries: 196476
@@ -4734,46 +1950,6 @@
     ratio_sigma_freq: 0.0003432674338010325
     ratio_syst_fwhm: 0.0
     expo: 0.526184491216062
-  B00061A:
-    n_events: 0
-    n_primaries: 209143
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4719519792379649
-  B00061C:
-    n_events: 0
-    n_primaries: 180219
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40932634040611454
-  B00076C:
-    n_events: 0
-    n_primaries: 233789
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5166376809389813
-  B00079B:
-    n_events: 0
-    n_primaries: 210645
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4751801049509468
-  B00079C:
-    n_events: 0
-    n_primaries: 231193
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5242476157882728
   V08682B:
     n_events: 24713
     n_primaries: 427181
@@ -4870,14 +2046,6 @@
     ratio_sigma_freq: 0.0005423733461268386
     ratio_syst_fwhm: 0.0
     expo: 0.3841469598448551
-  C00ANG4:
-    n_events: 0
-    n_primaries: 664930
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5333597136664388
   V00048B:
     n_events: 21873
     n_primaries: 511725
@@ -4902,22 +2070,6 @@
     ratio_sigma_freq: 0.00021252647757962254
     ratio_syst_fwhm: 0.0
     expo: 1.210057931211499
-  V05261A:
-    n_events: 0
-    n_primaries: 504776
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4258519183968362
-  V05268A:
-    n_events: 0
-    n_primaries: 642610
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4836465776865162
   V07302A:
     n_events: 27791
     n_primaries: 503964
@@ -4926,14 +2078,6 @@
     ratio_sigma_freq: 0.0003215401417161579
     ratio_syst_fwhm: 9.921323901491974e-07
     expo: 1.1640621321013003
-  B00002A:
-    n_events: 0
-    n_primaries: 154671
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.18030268144599085
   B00089A:
     n_events: 8236
     n_primaries: 146183
@@ -4942,54 +2086,6 @@
     ratio_sigma_freq: 0.0006030717617581073
     ratio_syst_fwhm: 0.0
     expo: 0.33830757472051104
-  B00091A:
-    n_events: 0
-    n_primaries: 176273
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00538A:
-    n_events: 0
-    n_primaries: 295177
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6700943355007986
-  P00573A:
-    n_events: 0
-    n_primaries: 298735
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6790039624686288
-  P00662C:
-    n_events: 0
-    n_primaries: 211071
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4837023568332193
-  P00664A:
-    n_events: 0
-    n_primaries: 229401
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43365160924785146
-  P00909B:
-    n_events: 0
-    n_primaries: 234766
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5327053051562858
   B00000D:
     n_events: 9726
     n_primaries: 230790
@@ -4998,14 +2094,6 @@
     ratio_sigma_freq: 0.00041821601922279925
     ratio_syst_fwhm: 0.0
     expo: 0.4356342003194159
-  B00002C:
-    n_events: 0
-    n_primaries: 224010
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5087526123659595
   B00032C:
     n_events: 7642
     n_primaries: 211983
@@ -5038,14 +2126,6 @@
     ratio_sigma_freq: 0.00041363647330345534
     ratio_syst_fwhm: 0.0
     expo: 0.5229563655030801
-  B00061B:
-    n_events: 0
-    n_primaries: 212997
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4848644820898928
   B00089B:
     n_events: 9186
     n_primaries: 176438
@@ -5062,30 +2142,6 @@
     ratio_sigma_freq: 0.00023803548064856752
     ratio_syst_fwhm: 0.0
     expo: 1.2388900861282228
-  V01240A:
-    n_events: 0
-    n_primaries: 602192
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.35581279945243
-  V05267A:
-    n_events: 0
-    n_primaries: 610939
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4093996862879306
-  V05612B:
-    n_events: 0
-    n_primaries: 584673
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3506477983116585
   B00000A:
     n_events: 5613
     n_primaries: 137450
@@ -5094,14 +2150,6 @@
     ratio_sigma_freq: 0.0005338251869275714
     ratio_syst_fwhm: 0.0
     expo: 0.320230070727812
-  B00002B:
-    n_events: 0
-    n_primaries: 176109
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40351571412274695
   B00032A:
     n_events: 7448
     n_primaries: 131504
@@ -5110,86 +2158,6 @@
     ratio_sigma_freq: 0.0006374120601358033
     ratio_syst_fwhm: 0.0
     expo: 0.295696315309149
-  P00573B:
-    n_events: 0
-    n_primaries: 295842
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6893985272644307
-  P00575A:
-    n_events: 0
-    n_primaries: 297120
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6813927754962354
-  P00574C:
-    n_events: 0
-    n_primaries: 228266
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5183078644763861
-  P00662A:
-    n_events: 0
-    n_primaries: 179155
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.33955890866225574
-  P00662B:
-    n_events: 0
-    n_primaries: 176857
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.3930476029229093
-  P00909C:
-    n_events: 0
-    n_primaries: 253212
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4577266991786447
-  P00661C:
-    n_events: 0
-    n_primaries: 257000
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4653995445154258
-  P00665C:
-    n_events: 0
-    n_primaries: 239735
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43807799389053664
-  V01389A:
-    n_events: 0
-    n_primaries: 599283
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0851373361092096
-  P00748A:
-    n_events: 0
-    n_primaries: 285386
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5195242102694755
 1000:
   V02160A:
     n_events: 40409
@@ -5207,46 +2175,6 @@
     ratio_sigma_freq: 0.00034951276452939195
     ratio_syst_fwhm: 1.0340705567032926e-06
     expo: 1.1098296201232034
-  V05261B:
-    n_events: 0
-    n_primaries: 671408
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5449809662331735
-  V05266A:
-    n_events: 0
-    n_primaries: 582672
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3383809206023272
-  V05266B:
-    n_events: 0
-    n_primaries: 558627
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2835027834816337
-  V05268B:
-    n_events: 0
-    n_primaries: 502040
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.1563146303901437
-  V05612A:
-    n_events: 0
-    n_primaries: 619100
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.421020938854666
   V07647A:
     n_events: 38101
     n_primaries: 534535
@@ -5271,54 +2199,6 @@
     ratio_sigma_freq: 0.0004904706631587663
     ratio_syst_fwhm: 0.0
     expo: 0.40932634040611454
-  C000RG1:
-    n_events: 0
-    n_primaries: 580520
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.364205926306183
-  C000RG2:
-    n_events: 0
-    n_primaries: 598679
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.399715309148985
-  C00ANG3:
-    n_events: 0
-    n_primaries: 667334
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.9815468939336325
-  C00ANG5:
-    n_events: 0
-    n_primaries: 767209
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0763801125560877
-  C00ANG2:
-    n_events: 0
-    n_primaries: 798932
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.161163020001521
-  V04549A:
-    n_events: 0
-    n_primaries: 548056
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.2544496520647956
   B00032B:
     n_events: 10832
     n_primaries: 203357
@@ -5327,46 +2207,6 @@
     ratio_sigma_freq: 0.000497976905533102
     ratio_syst_fwhm: 0.0
     expo: 0.46226760209901896
-  B00091C:
-    n_events: 0
-    n_primaries: 178688
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00574B:
-    n_events: 0
-    n_primaries: 221648
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5028774235683321
-  P00698A:
-    n_events: 0
-    n_primaries: 280012
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6210913871777322
-  P00661B:
-    n_events: 0
-    n_primaries: 215249
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4840897319187771
-  P00574A:
-    n_events: 0
-    n_primaries: 218119
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.49325760894364595
   B00000B:
     n_events: 7167
     n_primaries: 197948
@@ -5383,46 +2223,6 @@
     ratio_sigma_freq: 0.00037522324030474864
     ratio_syst_fwhm: 0.0
     expo: 0.526184491216062
-  B00061A:
-    n_events: 0
-    n_primaries: 209041
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4719519792379649
-  B00061C:
-    n_events: 0
-    n_primaries: 180994
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40932634040611454
-  B00076C:
-    n_events: 0
-    n_primaries: 233888
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5166376809389813
-  B00079B:
-    n_events: 0
-    n_primaries: 211111
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4751801049509468
-  B00079C:
-    n_events: 0
-    n_primaries: 231693
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5242476157882728
   V08682B:
     n_events: 26605
     n_primaries: 426926
@@ -5519,14 +2319,6 @@
     ratio_sigma_freq: 0.0005634603052759921
     ratio_syst_fwhm: 0.0
     expo: 0.3841469598448551
-  C00ANG4:
-    n_events: 0
-    n_primaries: 663415
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.5333597136664388
   V00048B:
     n_events: 25159
     n_primaries: 513390
@@ -5551,22 +2343,6 @@
     ratio_sigma_freq: 0.00023560779028977566
     ratio_syst_fwhm: 0.0
     expo: 1.210057931211499
-  V05261A:
-    n_events: 0
-    n_primaries: 505317
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4258519183968362
-  V05268A:
-    n_events: 0
-    n_primaries: 643418
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4836465776865162
   V07302A:
     n_events: 31264
     n_primaries: 504657
@@ -5575,14 +2351,6 @@
     ratio_sigma_freq: 0.00033934287458386097
     ratio_syst_fwhm: 0.0
     expo: 1.1640621321013003
-  B00002A:
-    n_events: 0
-    n_primaries: 154351
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.18030268144599085
   B00089A:
     n_events: 9046
     n_primaries: 146979
@@ -5591,54 +2359,6 @@
     ratio_sigma_freq: 0.0006268728348687649
     ratio_syst_fwhm: 3.4018233773282225e-06
     expo: 0.33830757472051104
-  B00091A:
-    n_events: 0
-    n_primaries: 177352
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4048069644079398
-  P00538A:
-    n_events: 0
-    n_primaries: 295586
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6700943355007986
-  P00573A:
-    n_events: 0
-    n_primaries: 298240
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6790039624686288
-  P00662C:
-    n_events: 0
-    n_primaries: 212321
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4837023568332193
-  P00664A:
-    n_events: 0
-    n_primaries: 228239
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43365160924785146
-  P00909B:
-    n_events: 0
-    n_primaries: 235064
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5327053051562858
   B00000D:
     n_events: 10899
     n_primaries: 229913
@@ -5647,14 +2367,6 @@
     ratio_sigma_freq: 0.00044318389733331333
     ratio_syst_fwhm: 0.0
     expo: 0.4356342003194159
-  B00002C:
-    n_events: 0
-    n_primaries: 224197
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5087526123659595
   B00032C:
     n_events: 8781
     n_primaries: 212258
@@ -5687,14 +2399,6 @@
     ratio_sigma_freq: 0.00044197541587059994
     ratio_syst_fwhm: 0.0
     expo: 0.5229563655030801
-  B00061B:
-    n_events: 0
-    n_primaries: 214345
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4848644820898928
   B00089B:
     n_events: 9699
     n_primaries: 177049
@@ -5711,30 +2415,6 @@
     ratio_sigma_freq: 0.00025601108679409513
     ratio_syst_fwhm: 0.0
     expo: 1.2388900861282228
-  V01240A:
-    n_events: 0
-    n_primaries: 603067
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.35581279945243
-  V05267A:
-    n_events: 0
-    n_primaries: 610963
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.4093996862879306
-  V05612B:
-    n_events: 0
-    n_primaries: 584218
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.3506477983116585
   B00000A:
     n_events: 6226
     n_primaries: 138111
@@ -5743,14 +2423,6 @@
     ratio_sigma_freq: 0.0005582900082126507
     ratio_syst_fwhm: 0.0
     expo: 0.320230070727812
-  B00002B:
-    n_events: 0
-    n_primaries: 176182
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.40351571412274695
   B00032A:
     n_events: 8215
     n_primaries: 130935
@@ -5759,83 +2431,3 @@
     ratio_sigma_freq: 0.0006701589598445371
     ratio_syst_fwhm: 0.0
     expo: 0.295696315309149
-  P00573B:
-    n_events: 0
-    n_primaries: 297620
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6893985272644307
-  P00575A:
-    n_events: 0
-    n_primaries: 298297
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.6813927754962354
-  P00574C:
-    n_events: 0
-    n_primaries: 229071
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5183078644763861
-  P00662A:
-    n_events: 0
-    n_primaries: 178709
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.33955890866225574
-  P00662B:
-    n_events: 0
-    n_primaries: 176955
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.3930476029229093
-  P00909C:
-    n_events: 0
-    n_primaries: 252630
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4577266991786447
-  P00661C:
-    n_events: 0
-    n_primaries: 256449
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.4653995445154258
-  P00665C:
-    n_events: 0
-    n_primaries: 240752
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.43807799389053664
-  V01389A:
-    n_events: 0
-    n_primaries: 601081
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 1.0851373361092096
-  P00748A:
-    n_events: 0
-    n_primaries: 284943
-    ratio: 0.0
-    ratio_sigma: 0.0
-    ratio_sigma_freq: 0.0
-    ratio_syst_fwhm: 0.0
-    expo: 0.5195242102694755

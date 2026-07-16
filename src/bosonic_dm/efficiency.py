@@ -7,12 +7,9 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping, Sequence
-from pathlib import Path
 
-import awkward as ak
 import numpy as np
 import polars as pl
-from lgdo import lh5
 from tqdm.notebook import tqdm
 
 from bosonic_dm.stats import bayesian_efficiency
@@ -25,62 +22,42 @@ def compute_efficiency_from_lazyframe(
     eres_dict: dict,
     simulated_energies: Sequence[int],
     chmap: object,
-    scratch_folder: str | Path = "",
-    job_base: str = "",
-    *,
-    single_site: bool | None = None,
-    has_aoe: bool | None = None,
-    vertex_counts: Mapping[int, Mapping[str, int]] | None = None,
+    vertex_counts: Mapping[int, Mapping[str, int]],
+    half_width_fwhm: float = 2.0,
 ) -> dict:
-    """Compute per-detector efficiencies from a Polars lazy scan.
+    """Compute per-detector efficiencies for all selections in one pass.
 
     For every combination of simulated energy and detector listed in
-    *eres_dict*, the function:
+    *eres_dict*, the function uses the pre-computed *vertex_counts* as
+    the number of generated primaries.
 
-    1. Looks up the detector-specific FWHM from *eres_dict*.
-    2. Defines the full-energy-peak integration window as
-       ``[e_value - 2·FWHM, e_value + 2·FWHM]``, where ``e_value`` is the
-       reconstructed energy corresponding to the simulated energy ``ene``.
-    3. Collects the lazy frame *lf* **once per energy** and uses a
-       vectorised join + group-by to count events inside the FEP window
-       for every detector simultaneously.
-    4. Reads ``n_primaries`` from the STP files for each detector.
-    5. Computes ``ratio = n_events / n_primaries``
-       (or ``nan`` when ``n_primaries == 0``).
+    It collects the lazy frame *lf* once per energy and uses a vectorised
+    join + group-by to count events inside the FEP window for every detector
+    simultaneously across four selections:
+    - all: events in FEP window
+    - valid-psd: events in FEP window with has_aoe == True
+    - sse: valid-psd with is_single_site == True
+    - mse: valid-psd with is_single_site == False
 
     Parameters
     ----------
     lf
         A Polars *lazy* scan of the parquet dataset partitioned by ``sim_e``.
-        Expected columns: ``rawid``, ``energy``, ``sim_e``, ``is_good_channel``.
+        Expected columns: ``rawid``, ``energy``, ``sim_e``, ``is_good_channel``,
+        ``has_aoe``, ``is_single_site``.
     eres_dict
         Nested dictionary with structure
         ``{energy: {detector_name: {"fwhm": float, ...}, ...}, ...}``
-        as produced by the resolution-extraction pipeline
-        (e.g. ``eres_per_det_tot.yaml``).
+        as produced by the resolution-extraction pipeline.
     simulated_energies
-        List of simulated energies (in keV) to iterate over. The ``ene``
-        in the loop corresponds to that simulated-energy partition.
+        List of simulated energies (in keV) to iterate over.
     chmap
         LEGEND channel-map object (``LegendMetadata.channelmap(...)``).
-        Must support ``chmap[det_name].daq.rawid``.
-    scratch_folder
-        Base scratch directory containing the generated LH5 STP files.
-    job_base
-        Job string template containing the ``{ene}`` placeholder.
-    single_site
-        If True, keep only rows where ``has_aoe`` and ``is_single_site`` are True.
-        If False, keep only rows where ``has_aoe`` is True and ``is_single_site`` is False.
-        If None (default), no filtering is applied.
-    has_aoe
-        If True, keep only rows where ``has_aoe`` is True.
-        If None (default), no filtering is applied. Automatically set to True if ``single_site`` is used.
     vertex_counts
-        Optional pre-computed vertex counts, structured as
+        Pre-computed vertex counts, structured as
         ``{energy: {detector_name: n_vertices, ...}, ...}``.
-        When provided for a given energy, the function uses these counts
-        as ``n_primaries`` instead of reading STP files.  Produced by
-        :func:`~bosonic_dm.geometry.aggregate_vertex_counts`.
+    half_width_fwhm
+        The multiplier for the FWHM to define the integration window. Defaults to 2.0.
 
     Returns
     -------
@@ -90,50 +67,38 @@ def compute_efficiency_from_lazyframe(
             {
                 energy: {
                     detector_name: {
-                        "n_events":         int,
                         "n_primaries":      int,
-                        "ratio":            float,
-                        "ratio_sigma":      float,
-                        "ratio_sigma_freq": float,
-                        "ratio_syst_fwhm":  float,
                         "expo":             float,   # from eres_dict
+                        "selections": {
+                            "all": {
+                                "n_events": int,
+                                "efficiency_mle": float,
+                                "efficiency": float,
+                                "efficiency_stat_unc": float,
+                                "efficiency_syst_fwhm": float,
+                            },
+                            "valid-psd": { ... },
+                            "sse": { ... },
+                            "mse": { ... }
+                        }
                     },
                     ...
                 },
                 ...
             }
     """
-    if single_site is not None:
-        has_aoe = True
-
     ratio_dict: dict = {}
 
     for ene in tqdm(simulated_energies):
         ene_key = int(ene)
         ratio_dict[ene_key] = {}
 
-        # Skip energies not present in the resolution dictionary
         if ene_key not in eres_dict:
             logger.warning("Energy %d keV not found in eres_dict, skipping", ene_key)
             continue
 
         det_eres = eres_dict[ene_key]
-
-        # Determine whether we have pre-computed vertex counts for this energy.
-        vtx_counts_for_ene = (
-            vertex_counts.get(ene_key) if vertex_counts is not None else None
-        )
-
-        # Fall back to STP reading only when vertex counts are unavailable.
-        stp_files: list[str] = []
-        if vtx_counts_for_ene is None:
-            job_string = job_base.format(ene=ene)
-            stp_files = [
-                str(p)
-                for p in Path(
-                    f"{scratch_folder}/generated/tier/stp/{job_string}/"
-                ).glob(f"l200cfg01-{job_string}-job_*-tier_stp.lh5")
-            ]
+        vtx_counts_for_ene = vertex_counts.get(ene_key, {})
 
         # --- Phase 1: build per-detector info and read n_primaries ----------
         det_rows: list[dict] = []
@@ -147,14 +112,7 @@ def compute_efficiency_from_lazyframe(
                 logger.warning("Cannot resolve rawid for %s, skipping", det_name)
                 continue
 
-            # Use pre-computed vertex counts when available.
-            if vtx_counts_for_ene is not None:
-                n_primaries = vtx_counts_for_ene.get(det_name, 0)
-            else:
-                n_primaries = 0
-                for stp_file in stp_files:
-                    stp_ge = lh5.read_as(f"/stp/{det_name}", stp_file, library="ak")
-                    n_primaries += len(np.unique(ak.to_numpy(stp_ge.evtid)))
+            n_primaries = vtx_counts_for_ene.get(det_name, 0)
             n_prim_map[det_name] = n_primaries
             expo_map[det_name] = float(eres_info.get("expo", 0.0))
 
@@ -167,12 +125,12 @@ def compute_efficiency_from_lazyframe(
                 {
                     "rawid": rawid,
                     "det_name": det_name,
-                    "low": ene - 2.0 * fwhm,
-                    "high": ene + 2.0 * fwhm,
-                    "low_up": ene - 2.0 * fwhm_up,
-                    "high_up": ene + 2.0 * fwhm_up,
-                    "low_down": ene - 2.0 * fwhm_down,
-                    "high_down": ene + 2.0 * fwhm_down,
+                    "low": ene - half_width_fwhm * fwhm,
+                    "high": ene + half_width_fwhm * fwhm,
+                    "low_up": ene - half_width_fwhm * fwhm_up,
+                    "high_up": ene + half_width_fwhm * fwhm_up,
+                    "low_down": ene - half_width_fwhm * fwhm_down,
+                    "high_down": ene + half_width_fwhm * fwhm_down,
                 }
             )
 
@@ -183,76 +141,106 @@ def compute_efficiency_from_lazyframe(
         known_rawids = det_df["rawid"].to_list()
 
         # --- Phase 2: single collect per energy -----------------------------
-        filter_expr = (
-            (pl.col("is_good_channel"))
-            & (pl.col("sim_e") == ene)
-            & (pl.col("rawid").is_in(known_rawids))
+        df_ene = (
+            lf.filter(
+                (pl.col("is_good_channel"))
+                & (pl.col("sim_e") == ene)
+                & (pl.col("rawid").is_in(known_rawids))
+            )
+            .select("rawid", "energy", "has_aoe", "is_single_site")
+            .collect()
         )
-        if has_aoe is True:
-            filter_expr &= pl.col("has_aoe")
 
-        if single_site is True:
-            filter_expr &= pl.col("is_single_site")
-        elif single_site is False:
-            filter_expr &= ~pl.col("is_single_site")
-
-        df_ene = lf.filter(filter_expr).select("rawid", "energy").collect()
+        # Fill nulls in booleans with False to allow safe aggregation
+        df_ene = df_ene.with_columns(
+            pl.col("has_aoe").fill_null(False),
+            pl.col("is_single_site").fill_null(False),
+        )
 
         # --- Phase 3: vectorised FEP counting via join + group_by -----------
         df_joined = df_ene.join(det_df, on="rawid")
 
-        counts = df_joined.group_by("det_name").agg(
-            pl.col("energy")
-            .is_between(pl.col("low"), pl.col("high"))
-            .sum()
-            .alias("n_events"),
-            pl.col("energy")
-            .is_between(pl.col("low_up"), pl.col("high_up"))
-            .sum()
-            .alias("n_events_up"),
-            pl.col("energy")
-            .is_between(pl.col("low_down"), pl.col("high_down"))
-            .sum()
-            .alias("n_events_down"),
-        )
+        # Define selection boolean expressions
+        sel_all = pl.lit(True)
+        sel_psd = pl.col("has_aoe")
+        sel_sse = pl.col("has_aoe") & pl.col("is_single_site")
+        sel_mse = pl.col("has_aoe") & ~pl.col("is_single_site")
 
-        # Index counts by detector name for fast lookup
+        # Create aggregations for each selection and variation
+        aggs = []
+        for prefix, condition in [
+            ("all", sel_all),
+            ("valid_psd", sel_psd),
+            ("sse", sel_sse),
+            ("mse", sel_mse),
+        ]:
+            aggs.extend(
+                [
+                    (
+                        pl.col("energy").is_between(pl.col("low"), pl.col("high"))
+                        & condition
+                    )
+                    .sum()
+                    .alias(f"{prefix}_events"),
+                    (
+                        pl.col("energy").is_between(pl.col("low_up"), pl.col("high_up"))
+                        & condition
+                    )
+                    .sum()
+                    .alias(f"{prefix}_events_up"),
+                    (
+                        pl.col("energy").is_between(
+                            pl.col("low_down"), pl.col("high_down")
+                        )
+                        & condition
+                    )
+                    .sum()
+                    .alias(f"{prefix}_events_down"),
+                ]
+            )
+
+        counts = df_joined.group_by("det_name").agg(*aggs)
         counts_map = {row["det_name"]: row for row in counts.iter_rows(named=True)}
 
         # --- Phase 4: compute efficiencies ----------------------------------
         for det_name, n_primaries in n_prim_map.items():
             row = counts_map.get(det_name)
 
-            # When has_aoe filtering is active, detectors with no surviving
-            # events likely lack AoE information entirely. We skip saving them.
-            if has_aoe is True and row is None:
-                continue
-
-            n_events = row["n_events"] if row else 0
-            n_events_up = row["n_events_up"] if row else 0
-            n_events_down = row["n_events_down"] if row else 0
-
-            if n_primaries > 0:
-                eff = n_events / n_primaries
-                ratio_sigma_freq = float(np.sqrt(eff * (1.0 - eff) / n_primaries))
-            else:
-                ratio_sigma_freq = 0.0
-
-            ratio, ratio_sigma = bayesian_efficiency(n_events, n_primaries)
-            ratio_up, _ = bayesian_efficiency(n_events_up, n_primaries)
-            ratio_down, _ = bayesian_efficiency(n_events_down, n_primaries)
-
-            ratio_syst_fwhm = abs(ratio_up - ratio_down) / 2.0
-
-            ratio_dict[ene_key][det_name] = {
-                "n_events": n_events,
+            det_out = {
                 "n_primaries": n_primaries,
-                "ratio": ratio,
-                "ratio_sigma": ratio_sigma,
-                "ratio_sigma_freq": ratio_sigma_freq,
-                "ratio_syst_fwhm": ratio_syst_fwhm,
                 "expo": expo_map[det_name],
+                "selections": {},
             }
+
+            for sel_name, prefix in [
+                ("all", "all"),
+                ("valid-psd", "valid_psd"),
+                ("sse", "sse"),
+                ("mse", "mse"),
+            ]:
+                n_events = row[f"{prefix}_events"] if row else 0
+                n_events_up = row[f"{prefix}_events_up"] if row else 0
+                n_events_down = row[f"{prefix}_events_down"] if row else 0
+
+                ratio, ratio_sigma = bayesian_efficiency(n_events, n_primaries)
+                ratio_up, _ = bayesian_efficiency(n_events_up, n_primaries)
+                ratio_down, _ = bayesian_efficiency(n_events_down, n_primaries)
+                ratio_syst_fwhm = abs(ratio_up - ratio_down) / 2.0
+
+                if n_primaries > 0:
+                    efficiency_mle = float(n_events / n_primaries)
+                else:
+                    efficiency_mle = np.nan
+
+                det_out["selections"][sel_name] = {
+                    "n_events": n_events,
+                    "efficiency_mle": efficiency_mle,
+                    "efficiency": ratio,
+                    "efficiency_stat_unc": ratio_sigma,
+                    "efficiency_syst_fwhm": ratio_syst_fwhm,
+                }
+
+            ratio_dict[ene_key][det_name] = det_out
 
     return ratio_dict
 

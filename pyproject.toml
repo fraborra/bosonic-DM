@@ -73,8 +73,10 @@ dependencies = [
 ]
 
 [project.scripts]
+bosonic-dm = "bosonic_dm.cli:main"
 generate-dark-compton = "bosonic_dm.dark_compton_generators:main"
 check-dark-compton-stats = "bosonic_dm.check_dark_compton_stats:main"
+assign-detectors = "bosonic_dm.geometry:main"
 
 
 

@@ -228,73 +228,44 @@ def get_mean_fcc_det_type(
 
 
 def build_parquet_dataset(
-    simulated_energies: list[int],
-    scratch_folder: str | Path,
-    job_base: str,
-    outdir_name: str | Path,
-    datasets_outdir: str | Path = "./data/v1/parquet",
+    *,
+    energies: Sequence[int],
+    cvt_files: Mapping[int, Sequence[Path]],
+    output_dir: Path,
     overwrite: bool = False,
 ) -> None:
     """Build a parquet dataset partitioned by simulated energy.
 
-    For each energy in `simulated_energies`, the function:
-      - locates the corresponding LH5 file,
-      - reads the event data,
-      - selects multiplicity-1 events,
-      - converts awkward arrays to a pandas DataFrame,
-      - appends a `sim_e` column and a `coincident_spms` column,
-      - concatenates all energies together,
-      - writes the final dataset as partitioned parquet.
+    For each energy, the function reads the event data from the
+    provided CVT files, selects multiplicity-1 events, appends
+    `sim_e` and `coincident_spms` columns, and concatenates the
+    results into a partitioned Parquet dataset.
 
     Parameters
     ----------
-    simulated_energies : list[int]
+    energies : Sequence[int]
         List of simulated energies in keV.
-        Example:
-            [500, 1000, 1500]
-
-    scratch_folder : str | Path
-        Base scratch directory containing the generated LH5 files.
-
-    job_base : str
-        Job string template containing the `{tag}` placeholder.
-        Example:
-            "fromfile_dark_compton_{tag}_hpge_bulk"
-
-        The placeholder is replaced with:
-            tag = f"{energy}keV"
-
-    outdir_name : str | Path
+    cvt_files : Mapping[int, Sequence[Path]]
+        Mapping from energy to a sequence of LH5 CVT file paths.
+    output_dir : Path
         Final name of the parquet output directory.
-
-    datasets_outdir : str | Path, default="./v1/parquet"
-        Base directory for the parquet dataset.
-        The output dataset will be written to:
-            {datasets_outdir}/{outdir_name}
-
     overwrite : bool, default=False
-        If True, remove the output directory if it already exists.
-        If False and the output directory exists, an exception
-        is raised.
-
-    Returns
-    -------
-    None
-        The function writes the parquet dataset to disk and
-        does not return any object.
+        If True, remove the output files if they already exist.
+        If False and an output file exists, an exception is raised.
     """
-    outdir = Path(f"{datasets_outdir}/{outdir_name}")
-    outdir.mkdir(parents=True, exist_ok=True)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    for ene in tqdm(simulated_energies):
-        tag = f"{ene}keV"
+    for ene in tqdm(energies):
+        files_for_ene = cvt_files.get(ene, [])
+        if not files_for_ene:
+            logger.warning("No CVT files provided for %d keV", ene)
+            continue
 
-        job_string = job_base.format(tag=tag)
-
-        # If outfile already exist and overwrite=False exit
-        partition_dir = outdir / f"sim_e={ene}"
+        partition_dir = output_dir / f"sim_e={ene}"
         partition_dir.mkdir(parents=True, exist_ok=True)
-        outfile = partition_dir / f"{job_string}.parquet"
+        # Using a deterministic output filename per energy
+        outfile = partition_dir / "data.parquet"
 
         if outfile.exists() and not overwrite:
             msg = f"File already exists: {outfile}"
@@ -303,34 +274,29 @@ def build_parquet_dataset(
         if overwrite and outfile.exists():
             outfile.unlink()
 
-        # Search for simulation output file
-        search_dir = Path(scratch_folder) / "generated" / "tier" / "cvt"
-        filename_pattern = f"l200cfg01-{job_string}-tier_cvt.lh5"
-        matches = list(search_dir.glob(filename_pattern))
+        dfs = []
+        for cvt_path in files_for_ene:
+            cvt_file = str(cvt_path)
+            data = lh5.read_as(
+                "evt",
+                cvt_file,
+                field_mask=["coincident", "geds", "trigger"],
+                library="ak",
+            )
 
-        if len(matches) == 0:
-            logger.warning("File not found for %d keV", ene)
-            continue
+            mult1_mask = data.geds.multiplicity == 1
+            tmp = data.geds[mult1_mask]
+            tmp2 = data.trigger[mult1_mask]
+            pl_df = ak_to_pandas(tmp, tmp2, library="polars")
 
-        cvt_file = str(matches[0])
+            # Store the SiPM coincidence flag instead of cutting on it
+            spms_col = ak.to_numpy(data.coincident.spms[mult1_mask])
+            pl_df = pl_df.with_columns(
+                pl.Series("coincident_spms", spms_col),
+                pl.lit(ene).alias("sim_e"),
+            )
+            dfs.append(pl_df)
 
-        data = lh5.read_as(
-            "evt",
-            cvt_file,
-            field_mask=["coincident", "geds", "trigger"],
-            library="ak",
-        )
-
-        mult1_mask = data.geds.multiplicity == 1
-        tmp = data.geds[mult1_mask]
-        tmp2 = data.trigger[mult1_mask]
-        pl_df = ak_to_pandas(tmp, tmp2, library="polars")
-
-        # Store the SiPM coincidence flag instead of cutting on it
-        spms_col = ak.to_numpy(data.coincident.spms[mult1_mask])
-        pl_df = pl_df.with_columns(
-            pl.Series("coincident_spms", spms_col),
-            pl.lit(ene).alias("sim_e"),
-        )
-
-        pl_df.write_parquet(outfile)
+        if dfs:
+            final_df = pl.concat(dfs)
+            final_df.write_parquet(outfile)
