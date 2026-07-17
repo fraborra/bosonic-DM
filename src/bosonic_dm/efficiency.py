@@ -8,13 +8,19 @@ from __future__ import annotations
 import logging
 from collections.abc import Mapping, Sequence
 
-import numpy as np
 import polars as pl
-from tqdm.notebook import tqdm
+from tqdm.auto import tqdm
 
 from bosonic_dm.stats import bayesian_efficiency
 
 logger = logging.getLogger(__name__)
+
+_SELECTION_PREFIXES = {
+    "all": "all",
+    "valid-psd": "valid_psd",
+    "sse": "sse",
+    "mse": "mse",
+}
 
 
 def compute_efficiency_from_lazyframe(
@@ -24,6 +30,7 @@ def compute_efficiency_from_lazyframe(
     chmap: object,
     vertex_counts: Mapping[int, Mapping[str, int]],
     half_width_fwhm: float = 2.0,
+    selections: Sequence[str] = ("all", "valid-psd", "sse", "mse"),
 ) -> dict:
     """Compute per-detector efficiencies for all selections in one pass.
 
@@ -58,6 +65,9 @@ def compute_efficiency_from_lazyframe(
         ``{energy: {detector_name: n_vertices, ...}, ...}``.
     half_width_fwhm
         The multiplier for the FWHM to define the integration window. Defaults to 2.0.
+    selections
+        Selection names to compute. Supported values are ``all``,
+        ``valid-psd``, ``sse``, and ``mse``.
 
     Returns
     -------
@@ -87,6 +97,11 @@ def compute_efficiency_from_lazyframe(
                 ...
             }
     """
+    unknown_selections = set(selections) - set(_SELECTION_PREFIXES)
+    if unknown_selections:
+        msg = f"Unknown efficiency selections: {sorted(unknown_selections)}"
+        raise ValueError(msg)
+
     ratio_dict: dict = {}
 
     for ene in tqdm(simulated_energies):
@@ -168,12 +183,15 @@ def compute_efficiency_from_lazyframe(
 
         # Create aggregations for each selection and variation
         aggs = []
-        for prefix, condition in [
-            ("all", sel_all),
-            ("valid_psd", sel_psd),
-            ("sse", sel_sse),
-            ("mse", sel_mse),
-        ]:
+        selection_conditions = {
+            "all": sel_all,
+            "valid-psd": sel_psd,
+            "sse": sel_sse,
+            "mse": sel_mse,
+        }
+        for sel_name in selections:
+            prefix = _SELECTION_PREFIXES[sel_name]
+            condition = selection_conditions[sel_name]
             aggs.extend(
                 [
                     (
@@ -199,7 +217,10 @@ def compute_efficiency_from_lazyframe(
                 ]
             )
 
-        counts = df_joined.group_by("det_name").agg(*aggs)
+        counts = df_joined.group_by("det_name").agg(
+            pl.col("has_aoe").sum().alias("psd_available_events"),
+            *aggs,
+        )
         counts_map = {row["det_name"]: row for row in counts.iter_rows(named=True)}
 
         # --- Phase 4: compute efficiencies ----------------------------------
@@ -207,38 +228,64 @@ def compute_efficiency_from_lazyframe(
             row = counts_map.get(det_name)
 
             det_out = {
+                "status": "valid" if n_primaries > 0 else "missing-primaries",
                 "n_primaries": n_primaries,
                 "expo": expo_map[det_name],
+                "psd_available": (
+                    None if row is None else bool(row["psd_available_events"] > 0)
+                ),
                 "selections": {},
             }
 
-            for sel_name, prefix in [
-                ("all", "all"),
-                ("valid-psd", "valid_psd"),
-                ("sse", "sse"),
-                ("mse", "mse"),
-            ]:
+            for sel_name in selections:
+                prefix = _SELECTION_PREFIXES[sel_name]
                 n_events = row[f"{prefix}_events"] if row else 0
                 n_events_up = row[f"{prefix}_events_up"] if row else 0
                 n_events_down = row[f"{prefix}_events_down"] if row else 0
 
-                ratio, ratio_sigma = bayesian_efficiency(n_events, n_primaries)
-                ratio_up, _ = bayesian_efficiency(n_events_up, n_primaries)
-                ratio_down, _ = bayesian_efficiency(n_events_down, n_primaries)
-                ratio_syst_fwhm = abs(ratio_up - ratio_down) / 2.0
-
-                if n_primaries > 0:
-                    efficiency_mle = float(n_events / n_primaries)
-                else:
-                    efficiency_mle = np.nan
-
-                det_out["selections"][sel_name] = {
+                selection_out = {
+                    "status": "valid",
                     "n_events": n_events,
-                    "efficiency_mle": efficiency_mle,
-                    "efficiency": ratio,
-                    "efficiency_stat_unc": ratio_sigma,
-                    "efficiency_syst_fwhm": ratio_syst_fwhm,
+                    "efficiency_mle": None,
+                    "efficiency": None,
+                    "efficiency_stat_unc": None,
+                    "efficiency_syst_fwhm": None,
                 }
+
+                if n_primaries <= 0:
+                    selection_out["status"] = "missing-primaries"
+                elif sel_name != "all" and det_out["psd_available"] is False:
+                    selection_out["status"] = "psd-unavailable"
+                elif any(
+                    count < 0 or count > n_primaries
+                    for count in (n_events, n_events_up, n_events_down)
+                ):
+                    selection_out["status"] = "invalid-counts"
+                    logger.warning(
+                        "Invalid counts for %s at %d keV (%s): "
+                        "nominal=%d, up=%d, down=%d, primaries=%d",
+                        det_name,
+                        ene_key,
+                        sel_name,
+                        n_events,
+                        n_events_up,
+                        n_events_down,
+                        n_primaries,
+                    )
+                else:
+                    ratio, ratio_sigma = bayesian_efficiency(n_events, n_primaries)
+                    ratio_up, _ = bayesian_efficiency(n_events_up, n_primaries)
+                    ratio_down, _ = bayesian_efficiency(n_events_down, n_primaries)
+                    selection_out.update(
+                        {
+                            "efficiency_mle": float(n_events / n_primaries),
+                            "efficiency": ratio,
+                            "efficiency_stat_unc": ratio_sigma,
+                            "efficiency_syst_fwhm": abs(ratio_up - ratio_down) / 2.0,
+                        }
+                    )
+
+                det_out["selections"][sel_name] = selection_out
 
             ratio_dict[ene_key][det_name] = det_out
 
@@ -268,4 +315,25 @@ def filter_non_zero_efficiency(ratio_dict: Mapping) -> dict:
                 filtered_dets[det_name] = info
         if filtered_dets:
             filtered[ene] = filtered_dets
+    return filtered
+
+
+def filter_valid_selection_efficiency(
+    ratio_dict: Mapping,
+    selection: str,
+) -> dict:
+    """Keep only detector entries with a valid result for ``selection``.
+
+    This excludes unavailable PSD detectors by status without confusing
+    unavailability with a measured zero efficiency.
+    """
+    filtered: dict = {}
+    for energy, detector_results in ratio_dict.items():
+        valid_detectors = {
+            detector: result
+            for detector, result in detector_results.items()
+            if result.get("selections", {}).get(selection, {}).get("status") == "valid"
+        }
+        if valid_detectors:
+            filtered[energy] = valid_detectors
     return filtered

@@ -1,3 +1,6 @@
+# Copyright (C) 2025 Francesco Borra
+#
+
 """Configuration layer for bosonic DM analysis."""
 
 from __future__ import annotations
@@ -24,6 +27,7 @@ class PathsConfig:
     data_root: Path
     parquet_root: Path
     dictionaries_root: Path
+    calibration_dictionaries_root: Path
     plots_root: Path
     temporary_root: Path
 
@@ -90,7 +94,11 @@ def load_analysis_config(path: str | Path) -> AnalysisConfig:
     production = ProductionConfig(
         version=raw_prod["version"],
         reference_root=_resolve_path(raw_prod["reference_root"]),
-        metadata_override=raw_prod.get("metadata_override"),
+        metadata_override=(
+            os.path.expandvars(raw_prod["metadata_override"])
+            if raw_prod.get("metadata_override")
+            else None
+        ),
     )
 
     raw_paths = raw_config["paths"]
@@ -100,6 +108,12 @@ def load_analysis_config(path: str | Path) -> AnalysisConfig:
         data_root=data_root_path,
         parquet_root=data_root_path / "parquet",
         dictionaries_root=data_root_path / "dictionaries",
+        calibration_dictionaries_root=_resolve_path(
+            raw_paths.get(
+                "calibration_dictionaries_root",
+                str(data_root_path / "dictionaries"),
+            )
+        ),
         plots_root=_resolve_path(raw_paths.get("plots_root", "plots")),
         temporary_root=_resolve_path(raw_paths.get("temporary_root", "tmp")),
     )

@@ -17,6 +17,36 @@ pixi run pip install -e .
 The package provides command-line interfaces for specific tasks without needing
 to run Jupyter notebooks.
 
+### Run the simulation pipeline
+
+The simulation command resolves stage dependencies automatically. Missing energy
+inputs are recorded as skipped or partial work in the manifest instead of
+producing efficiencies with missing denominators.
+
+```bash
+pixi run bosonic-dm simulation \
+  --config configs/nersc.yaml \
+  --interaction dark-compton
+```
+
+Calibration-derived resolution dictionaries are configured separately through
+`paths.calibration_dictionaries_root`; simulation products are written below
+`paths.data_root`.
+
+### Migrate legacy YAML files
+
+Rewrite legacy dictionaries containing NumPy/Python YAML tags:
+
+```bash
+pixi run migrate-yaml \
+  data/v1/dictionaries/eres_per_det_tot.yaml \
+  data/v1/dictionaries/rawid_by_det_type.yaml \
+  --in-place
+```
+
+The migration is atomic and verifies that the rewritten file can be read back
+using the safe YAML loader.
+
 ### Generate Dark Compton Macros
 
 Generates the `generators-dark_compton.yaml` and `simconfig-dark_compton.yaml`

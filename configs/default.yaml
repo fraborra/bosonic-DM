@@ -8,6 +8,8 @@ production:
 paths:
   simulation_root: "/path/to/simulation/root"
   data_root: "data/v1"
+  # Calibration-derived inputs are independent of a simulation production.
+  calibration_dictionaries_root: "data/v1/dictionaries"
   plots_root: "plots"
   temporary_root: "tmp"
 

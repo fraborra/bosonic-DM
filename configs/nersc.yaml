@@ -7,7 +7,9 @@ production:
 
 paths:
   simulation_root: "${BOSONIC_DM_SIM_ROOT}"
-  data_root: "data/v2" # Where the manifest goes
+  data_root: "data/v2"
+  # Shared resolution/exposure inputs computed from experimental calibration data.
+  calibration_dictionaries_root: "data/v1/dictionaries"
   plots_root: "plots"
   temporary_root: "tmp"
 

@@ -48,17 +48,34 @@ def bayesian_efficiency(
     k
         Number of successes (events in the FEP window).
     n
-        Number of trials (total good-channel events).
+        Number of originating vertices generated inside the detector.
     alpha0
-        First shape parameter of the Beta prior (default: Jeffrey's 0.5).
+        First shape parameter of the Beta prior (default: Jeffreys' 0.5).
     beta0
-        Second shape parameter of the Beta prior (default: Jeffrey's 0.5).
+        Second shape parameter of the Beta prior (default: Jeffreys' 0.5).
 
     Returns
     -------
     tuple[float, float]
         Posterior mean (ratio) and posterior standard deviation (ratio uncertainty).
+
+    Raises
+    ------
+    ValueError
+        If there are no trials, if either count is negative, or if successes
+        exceed trials. Missing denominators are an analysis-availability state,
+        not an efficiency measurement.
     """
+    if n <= 0:
+        msg = "The number of trials must be positive."
+        raise ValueError(msg)
+    if k < 0:
+        msg = "The number of successes cannot be negative."
+        raise ValueError(msg)
+    if k > n:
+        msg = f"The number of successes ({k}) cannot exceed trials ({n})."
+        raise ValueError(msg)
+
     alpha = alpha0 + k
     beta = beta0 + n - k
 

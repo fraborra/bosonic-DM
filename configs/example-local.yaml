@@ -8,6 +8,7 @@ production:
 paths:
   simulation_root: "/my/local/simulation/root"
   data_root: "data/v1"
+  calibration_dictionaries_root: "data/v1/dictionaries"
   plots_root: "plots"
   temporary_root: "tmp"
 

@@ -1,18 +1,23 @@
+# Copyright (C) 2025 Francesco Borra
+#
+
 """Command-line wrapper around the Python API."""
 
 from __future__ import annotations
 
 import argparse
 import logging
+from collections.abc import Sequence
 from pathlib import Path
 
 from bosonic_dm.config import load_analysis_config
 from bosonic_dm.pipeline import run_background_analysis, run_simulation_analysis
+from bosonic_dm.pipeline.simulation import SIMULATION_DEFAULT_STAGES
 
 logger = logging.getLogger(__name__)
 
 
-def main() -> None:
+def main(argv: Sequence[str] | None = None) -> int:
     """Entry point for the CLI."""
     logging.basicConfig(
         level=logging.INFO,
@@ -59,7 +64,7 @@ def main() -> None:
         help="Interactions to run",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # Load configuration
     try:
@@ -72,7 +77,7 @@ def main() -> None:
     overwrite = args.overwrite if args.overwrite else None
 
     if args.command == "simulation":
-        stages = args.stage or ("build-dataset", "efficiencies", "plots")
+        stages = args.stage or SIMULATION_DEFAULT_STAGES
         artifacts = run_simulation_analysis(
             config, interaction=args.interaction, stages=stages, overwrite=overwrite
         )
@@ -88,7 +93,7 @@ def main() -> None:
     elif args.command == "all":
         # Run simulation for requested interactions
         for interaction in args.interactions:
-            stages = args.stage or ("build-dataset", "efficiencies", "plots")
+            stages = args.stage or SIMULATION_DEFAULT_STAGES
             run_simulation_analysis(
                 config, interaction=interaction, stages=stages, overwrite=overwrite
             )
@@ -98,6 +103,8 @@ def main() -> None:
         run_background_analysis(config, stages=stages, overwrite=overwrite)
         logger.info("All analyses completed.")
 
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
