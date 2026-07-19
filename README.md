@@ -29,6 +29,36 @@ pixi run bosonic-dm simulation \
   --interaction dark-compton
 ```
 
+To run both simulation interactions, pass them to the `all` command:
+
+```bash
+pixi run bosonic-dm all \
+  --config configs/nersc.yaml \
+  --interactions axio-electric dark-compton
+```
+
+`simulation` currently runs one interaction at a time with `--interaction`,
+while `all` accepts one or more interactions with `--interactions` and also
+runs the background analysis. The planned CLI improvement is to make
+`simulation` accept multiple interactions as well.
+
+Run only the background pipeline with:
+
+```bash
+pixi run bosonic-dm background --config configs/nersc.yaml
+```
+
+Use `--stage` to select specific pipeline stages and `--overwrite` to replace
+existing products. For example:
+
+```bash
+pixi run bosonic-dm simulation \
+  --config configs/nersc.yaml \
+  --interaction dark-compton \
+  --stage plots \
+  --overwrite
+```
+
 Calibration-derived resolution dictionaries are configured separately through
 `paths.calibration_dictionaries_root`; simulation products are written below
 `paths.data_root`.
@@ -85,6 +115,9 @@ pixi run check-dark-compton-stats
 ## Project Structure
 
 - `src/bosonic_dm/`: Core library code.
+  - `cli.py`: Command-line entry point for `simulation`, `background`, and `all`.
+  - `config.py`, `models.py`, `yaml_io.py`: Configuration, result models, and YAML I/O.
+  - `pipeline/`: High-level orchestration for simulation and background analyses.
   - `cuts.py`: Quality cuts and filtering logic.
   - `efficiency.py`: Efficiency computations.
   - `io.py`: Parquet and awkward data manipulation.
@@ -95,3 +128,15 @@ pixi run check-dark-compton-stats
 - `notebooks/`: Exploratory Jupyter notebooks.
 - `data/v1/`: Parquet datasets and dictionaries.
 - `tmp/`: Generated temporary files and macros.
+
+The intended flow is:
+
+```text
+CLI (cli.py) → configuration (config.py) → pipeline/
+                                      ├── simulation.py → tables, efficiencies, plots
+                                      └── background.py → spectra, summaries, plots
+```
+
+The CLI is deliberately thin: scientific logic belongs in the Python API and
+the pipeline modules, so the same analysis can be called from scripts or
+notebooks.

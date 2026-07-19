@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import polars as pl
 from lgdo import lh5
-from tqdm.notebook import tqdm
+from tqdm.auto import tqdm
 
 from bosonic_dm.plotting.utils import _DET_TYPE_MAP
 from bosonic_dm.stats import compute_weighted_uncertainty, weighted_mean
