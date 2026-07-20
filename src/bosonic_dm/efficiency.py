@@ -11,6 +11,7 @@ from collections.abc import Mapping, Sequence
 import polars as pl
 from tqdm.auto import tqdm
 
+from bosonic_dm.io import get_mean_fcc_det_type
 from bosonic_dm.stats import bayesian_efficiency
 
 logger = logging.getLogger(__name__)
@@ -337,3 +338,76 @@ def filter_valid_selection_efficiency(
         if valid_detectors:
             filtered[energy] = valid_detectors
     return filtered
+
+
+def restructure_efficiency_by_selection(ratio_dict: Mapping) -> dict:
+    """Restructure an efficiency dictionary from `energy -> detector -> selection` to `selection -> energy -> detector`.
+
+    Parameters
+    ----------
+    ratio_dict
+        Nested dictionary of efficiencies, structured as:
+        ``{energy: {detector_name: {"selections": {"selection_name": dict, ...}, ...}, ...}``.
+
+    Returns
+    -------
+    dict
+        A restructured nested dictionary structured as:
+        ``{selection: {energy: {detector_name: dict, ...}, ...}``.
+    """
+    restructured: dict = {}
+    for energy, det_dict in ratio_dict.items():
+        for det_name, det_info in det_dict.items():
+            # Handle standard new format where selections are grouped under "selections"
+            if "selections" in det_info:
+                # Extract top-level info (excluding "selections")
+                base_info = {k: v for k, v in det_info.items() if k != "selections"}
+
+                selections = det_info["selections"]
+                for selection, sel_data in selections.items():
+                    # Merge top-level info with the selection-specific info
+                    merged_data = base_info.copy()
+                    merged_data.update(sel_data)
+
+                    restructured.setdefault(selection, {}).setdefault(energy, {})[
+                        det_name
+                    ] = merged_data
+            else:
+                # Fallback for simple/flat dictionaries (e.g., if there are no selections)
+                restructured.setdefault("all", {}).setdefault(energy, {})[det_name] = (
+                    det_info
+                )
+
+    return restructured
+
+
+def build_labels_dicts(input_dict: Mapping) -> dict:
+    """Build a dictionary of styled plotting tuples for each valid efficiency selection.
+
+    Returns
+    -------
+    dict
+        A dictionary with the structure:
+        ``{selection: (label, ls, marker, means_dict)}``
+    """
+    labels_dicts = {
+        "all": ("All", "-.", "o"),
+        "valid-psd": ("All - valid PSD", "-", "v"),
+        "sse": ("SSE - valid PSD", "--", "s"),
+        "mse": ("MSE - valid PSD", ":", "^"),
+    }
+
+    for selection, (label, ls, marker) in list(labels_dicts.items()):
+        tmp = filter_valid_selection_efficiency(input_dict, selection)
+        tmp_r = restructure_efficiency_by_selection(tmp)
+
+        averaged_means = get_mean_fcc_det_type(
+            tmp_r.get(selection, {}),
+            key="efficiency",
+            weight_key="expo",
+            unc_key="efficiency_stat_unc",
+        )
+
+        labels_dicts[selection] = (label, ls, marker, averaged_means)
+
+    return labels_dicts

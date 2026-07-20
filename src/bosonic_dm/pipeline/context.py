@@ -14,6 +14,7 @@ import dbetto
 from legendmeta import LegendMetadata
 
 from bosonic_dm.config import AnalysisConfig
+from bosonic_dm.resolution import get_channelmap_cached
 
 
 @dataclass
@@ -22,27 +23,23 @@ class AnalysisContext:
     timestamp: str
     lmeta: LegendMetadata
     eres_dict: dict[str, Any]
-    _chmap_cache: dict[str, Any]
 
-    def get_channelmap(
-        self, period: str | None = None, *, on: str | None = None
-    ) -> Any:
-        """Get the channel map for a given period or timestamp, caching it to avoid repeated filesystem reads."""
-        cache_key = on if on is not None else period
-        if not cache_key:
-            msg = "Must provide either 'period' or 'on'."
-            raise ValueError(msg)
-
-        if cache_key not in self._chmap_cache:
-            if on is not None:
-                self._chmap_cache[cache_key] = self.lmeta.channelmap(on=on)
-            else:
-                self._chmap_cache[cache_key] = self.lmeta.channelmap(period)
-        return self._chmap_cache[cache_key]
+    def get_channelmap(self, on: str) -> Any:
+        """Get the channel map for a given timestamp, caching it to avoid repeated filesystem reads."""
+        return get_channelmap_cached(self.lmeta, on)
 
     def get_channelmap_simulation(self) -> Any:
-        """Return a representative channelmap for simulation (typically p03)."""
-        return self.get_channelmap("p03")
+        """Return a representative channelmap for simulation by using the first available physics run."""
+        # TODO: check this logic tomorrow
+        try:
+            runinfo = self.lmeta.dataprod.runinfo
+            first_period = next(iter(runinfo))
+            first_run = next(iter(runinfo[first_period]))
+            start_key = runinfo[first_period][first_run].phy.start_key
+        except (StopIteration, KeyError, TypeError, AttributeError) as e:
+            msg = "Could not determine a representative start_key for simulation from runinfo."
+            raise ValueError(msg) from e
+        return self.get_channelmap(start_key)
 
 
 logger = logging.getLogger(__name__)
@@ -78,5 +75,4 @@ def build_analysis_context(config: AnalysisConfig) -> AnalysisContext:
         timestamp=timestamp,
         lmeta=lmeta,
         eres_dict=eres_dict,
-        _chmap_cache={},
     )

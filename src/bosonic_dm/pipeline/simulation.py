@@ -194,15 +194,19 @@ def run_simulation_analysis(
                         )
                         continue
 
-                    detector_arrays = assign_detectors_to_vertices(
+                    detector_arrays, evtid_arrays = assign_detectors_to_vertices(
                         gdml=gdml_path,
                         lh5_files=files,
                         vtx_group="vtx",
                         save=False,
+                        return_evtids=True,
                     )
                     if isinstance(detector_arrays, np.ndarray):
                         detector_arrays = [detector_arrays]
-                    vertex_counts[energy] = aggregate_vertex_counts(detector_arrays)
+                        evtid_arrays = [evtid_arrays]
+                    vertex_counts[energy] = aggregate_vertex_counts(
+                        detector_arrays, evtid_arrays
+                    )
 
                 if vertex_counts:
                     write_yaml(vertex_counts, counts_yaml_path)

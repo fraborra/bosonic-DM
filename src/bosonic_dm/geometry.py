@@ -100,7 +100,8 @@ def _process_single_file(
     vtx_group: str = "vtx",
     *,
     save: bool = False,
-) -> NDArray:
+    return_evtids: bool = False,
+) -> NDArray | tuple[NDArray, NDArray]:
     """Assign detectors for a single LH5 file using a pre-built detector map.
 
     Parameters
@@ -123,6 +124,15 @@ def _process_single_file(
     xloc = np.asarray(lh5.read_as(f"{vtx_group}/xloc", lh5_file, "np"))
     yloc = np.asarray(lh5.read_as(f"{vtx_group}/yloc", lh5_file, "np"))
     zloc = np.asarray(lh5.read_as(f"{vtx_group}/zloc", lh5_file, "np"))
+
+    if return_evtids:
+        try:
+            evtids = np.asarray(lh5.read_as(f"{vtx_group}/evtid", lh5_file, "np"))
+        except Exception as e:
+            logger.warning(
+                "Failed to read evtid from %s, falling back to index: %s", lh5_file, e
+            )
+            evtids = np.arange(len(xloc))
 
     n_vertices = len(xloc)
     logger.info("Read %d vertices from %s", n_vertices, lh5_file)
@@ -193,11 +203,14 @@ def _process_single_file(
         lh5.write(det_lgdo, "det", str(lh5_file), group=vtx_group, wo_mode="append")
         logger.info("Wrote '%s/det' to %s", vtx_group, lh5_file)
 
+    if return_evtids:
+        return det_names, evtids
     return det_names
 
 
 def aggregate_vertex_counts(
     det_name_arrays: Sequence[NDArray],
+    evtid_arrays: Sequence[NDArray] | None = None,
 ) -> dict[str, int]:
     """Aggregate per-detector vertex counts across multiple files.
 
@@ -208,6 +221,10 @@ def aggregate_vertex_counts(
         :func:`_process_single_file` or :func:`assign_detectors_to_vertices`.
         Each element is an array of detector name bytes (e.g. ``b"V02160A"``).
         Vertices labelled ``b"none"`` are excluded.
+    evtid_arrays
+        Optional sequence of event ID arrays (same length as ``det_name_arrays``).
+        If provided, multiple vertices in the same detector from the same event
+        will be counted only once.
 
     Returns
     -------
@@ -216,8 +233,21 @@ def aggregate_vertex_counts(
         generated inside that detector, sorted alphabetically by detector name.
     """
     total: Counter[str] = Counter()
-    for arr in det_name_arrays:
-        names, counts = np.unique(arr, return_counts=True)
+
+    if evtid_arrays is None:
+        evtid_arrays = [None] * len(det_name_arrays)
+
+    for arr, evtid_arr in zip(det_name_arrays, evtid_arrays, strict=True):
+        if evtid_arr is not None:
+            if len(arr) > 0:
+                struct_arr = np.rec.fromarrays([evtid_arr, arr])
+                unique_structs = np.unique(struct_arr)
+                names, counts = np.unique(unique_structs.f1, return_counts=True)
+            else:
+                names, counts = [], []
+        else:
+            names, counts = np.unique(arr, return_counts=True)
+
         for name_bytes, count in zip(names, counts, strict=True):
             name_str = (
                 name_bytes.decode()
@@ -237,7 +267,8 @@ def assign_detectors_to_vertices(
     *,
     save: bool = False,
     counts_yaml: str | Path | None = None,
-) -> NDArray | list[NDArray]:
+    return_evtids: bool = False,
+) -> NDArray | list[NDArray] | tuple[NDArray | list[NDArray], NDArray | list[NDArray]]:
     """Determine which HPGe detector each vertex is inside.
 
     The geometry is loaded once from *gdml* and reused across all files.
@@ -261,13 +292,15 @@ def assign_detectors_to_vertices(
         If given, write aggregate per-detector vertex counts to this
         YAML path.  The file will contain a flat
         ``{detector_name: n_vertices, ...}`` dictionary.
+    return_evtids
+        If True, also read and return the event IDs for each file.
 
     Returns
     -------
-    NDArray | list[NDArray]
-        If a single file is given, returns a single string array.
+    NDArray | list[NDArray] | tuple[NDArray | list[NDArray], NDArray | list[NDArray]]
+        If a single file is given, returns a single string array (and evtid array if requested).
         If a list of files is given, returns a list of string arrays
-        (one per file, in the same order).
+        (and a list of evtid arrays if requested).
     """
     det_map = build_detector_map(gdml)
 
@@ -277,14 +310,23 @@ def assign_detectors_to_vertices(
         lh5_files = [lh5_files]
 
     results: list[NDArray] = []
+    evtids_list: list[NDArray] = []
     for i, lh5_file in enumerate(tqdm(lh5_files, desc="Processing files", unit="file")):
         logger.info("Processing file %d/%d: %s", i + 1, len(lh5_files), lh5_file)
-        det_names = _process_single_file(lh5_file, det_map, vtx_group, save=save)
+        if return_evtids:
+            det_names, evtids = _process_single_file(
+                lh5_file, det_map, vtx_group, save=save, return_evtids=True
+            )
+            evtids_list.append(evtids)
+        else:
+            det_names = _process_single_file(lh5_file, det_map, vtx_group, save=save)
         results.append(det_names)
 
     # Write aggregate vertex counts to YAML if requested.
     if counts_yaml is not None:
-        counts = aggregate_vertex_counts(results)
+        counts = aggregate_vertex_counts(
+            results, evtid_arrays=evtids_list if return_evtids else None
+        )
         counts_path = Path(counts_yaml)
         counts_path.parent.mkdir(parents=True, exist_ok=True)
         Props.write_to(counts_path, counts)
@@ -294,6 +336,8 @@ def assign_detectors_to_vertices(
             counts_path,
         )
 
+    if return_evtids:
+        return (results[0], evtids_list[0]) if single_input else (results, evtids_list)
     return results[0] if single_input else results
 
 

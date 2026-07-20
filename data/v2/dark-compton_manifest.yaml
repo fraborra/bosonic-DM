@@ -1,0 +1,18 @@
+interaction: dark-compton
+requested_stages:
+  - efficiencies
+resolved_stages:
+  - count-vertices
+  - build-dataset
+  - efficiencies
+stage_status:
+  count-vertices: cached
+  build-dataset: cached
+  efficiencies: completed
+warnings: []
+dataset_paths:
+  - data/v2/parquet/dark-compton
+yaml_paths:
+  - data/v2/dictionaries/dark-compton_primary-counts.yaml
+  - data/v2/dictionaries/dark-compton_efficiency.yaml
+plot_paths: []
