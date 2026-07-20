@@ -6,8 +6,10 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 import polars as pl
+import pytest
 
 from bosonic_dm.efficiency import (
+    build_labels_dicts,
     compute_efficiency_from_lazyframe,
     filter_valid_selection_efficiency,
 )
@@ -173,3 +175,66 @@ def test_status_filter_excludes_unavailable_psd() -> None:
     assert result[200]["V00002A"]["selections"]["valid-psd"]["status"] == (
         "psd-unavailable"
     )
+
+
+def test_build_labels_dicts_can_aggregate_by_detector_group() -> None:
+    efficiency_results = {
+        200: {
+            "V00001A": {
+                "expo": 11.0,
+                "selections": {
+                    "all": {
+                        "status": "valid",
+                        "efficiency": 1.0,
+                        "efficiency_stat_unc": 0.1,
+                    }
+                },
+            },
+            "V00002A": {
+                "expo": 22.0,
+                "selections": {
+                    "all": {
+                        "status": "valid",
+                        "efficiency": 3.0,
+                        "efficiency_stat_unc": 0.2,
+                    }
+                },
+            },
+        }
+    }
+    detector_groups = {
+        "ICPC group1": {
+            "V00001A": {"~p09": "all"},
+            "V00002A": {"p09": "all"},
+        }
+    }
+    eres_dict = {
+        "p08": {
+            "r001": {
+                "V00001A": {"usability": "on", "expo": 1.0},
+                "V00002A": {"usability": "on", "expo": 2.0},
+            }
+        },
+        "p09": {
+            "r001": {
+                "V00001A": {"usability": "on", "expo": 10.0},
+                "V00002A": {"usability": "on", "expo": 20.0},
+            }
+        },
+    }
+
+    labels = build_labels_dicts(
+        efficiency_results,
+        group_by="detector_group",
+        detector_groups=detector_groups,
+        eres_dict=eres_dict,
+    )
+
+    group_result = labels["all"][3][200]["ICPC group1"]
+    assert group_result["value"] == pytest.approx(61.0 / 21.0)
+    assert group_result["exposure"] == pytest.approx(21.0)
+
+
+def test_build_labels_dicts_requires_group_inputs() -> None:
+    with pytest.raises(ValueError, match="detector_groups and eres_dict"):
+        build_labels_dicts({}, group_by="detector_group")

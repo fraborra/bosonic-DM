@@ -10,12 +10,13 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 import awkward as ak
+import lh5
 import numpy as np
 import pandas as pd
 import polars as pl
-from lgdo import lh5
 from tqdm.auto import tqdm
 
+from bosonic_dm.cuts import compute_group_exposure
 from bosonic_dm.plotting.utils import _DET_TYPE_MAP
 from bosonic_dm.stats import compute_weighted_uncertainty, weighted_mean
 
@@ -152,7 +153,7 @@ def get_mean_fcc_det_type(
     ----------
     ratio_dict
         Nested dictionary with structure
-        ``{ene: {ge: {key: value, weight_key: weight, ...}, ...}, ...}``.
+        ``{ene: {ge: {key: value, unc_key: uncertainty, ...}, ...}, ...}``.
     key
         Inner key whose value is averaged across detectors of the same type.
     weight_key
@@ -223,6 +224,134 @@ def get_mean_fcc_det_type(
                 }
             else:
                 ratio_dict_means[ene][det_type] = mean
+
+    return ratio_dict_means
+
+
+def get_mean_fcc_det_group(
+    ratio_dict: Mapping,
+    detector_groups: Mapping[str, Mapping | Sequence[str]],
+    eres_dict: Mapping,
+    key: str = "ratio",
+    weight_key: str = "expo",
+    unc_key: str | None = None,
+    exclude_dets: Sequence[str] | None = None,
+) -> dict:
+    """Compute a weighted mean for each supplied detector group.
+
+    Parameters
+    ----------
+    ratio_dict
+        Nested dictionary with structure
+        ``{ene: {ge: {key: value, weight_key: weight, ...}, ...}, ...}``.
+    detector_groups
+        Mapping from each output group name to either a sequence of detector
+        names or a mapping whose keys are detector names. The latter accepts
+        the structure loaded directly from ``groups_dict.yaml`` and applies
+        its period/run inclusion and exclusion rules. A sequence of detector
+        names selects all periods and runs for those detectors.
+    eres_dict
+        Nested exposure dictionary with structure
+        ``{period: {run: {detector: {"usability": ..., weight_key: ...}}}}``.
+        Only usable period/run entries selected for a detector's group are
+        included in that detector's weight.
+    key
+        Inner key whose value is averaged across detectors in the same group.
+    weight_key
+        Exposure key in *eres_dict* used as weight for the weighted average.
+    unc_key
+        Inner key used as the uncertainty for each detector's value. If provided,
+        the uncertainty is propagated using `compute_weighted_uncertainty` and
+        the function returns a dict ``{"value": mean, "unc": unc_total,
+        "exposure": exposure_total}`` instead of just a float.
+    exclude_dets
+        List of detector names to exclude from every group average.
+
+    Notes
+    -----
+    Groups are evaluated independently. A detector included in more than one
+    group contributes to each average with the exposure selected for that
+    particular group.
+    """
+    detector_to_groups: dict[str, dict[str, float]] = {}
+    for group, detectors in detector_groups.items():
+        if isinstance(detectors, (str, bytes)):
+            msg = (
+                f"Detector group {group!r} must be a sequence or mapping of "
+                "detector names, not a string."
+            )
+            raise TypeError(msg)
+
+        group_dict = (
+            detectors
+            if isinstance(detectors, Mapping)
+            else {detector: "all" for detector in detectors}
+        )
+        for detector, selection in group_dict.items():
+            exposure = compute_group_exposure(
+                eres_dict,
+                {detector: selection},
+                exposure_key=weight_key,
+            )
+            detector_to_groups.setdefault(detector, {})[group] = exposure
+
+    ratio_dict_means: dict = {}
+
+    for ene, ge_dict in ratio_dict.items():
+        ratio_dict_means[ene] = {}
+        group_data: dict[str, dict[str, list]] = {
+            group: {"vals": [], "w": [], "unc": []} for group in detector_groups
+        }
+
+        for ge, data_dict in ge_dict.items():
+            if exclude_dets is not None and ge in exclude_dets:
+                continue
+
+            group_exposures = detector_to_groups.get(ge)
+            if group_exposures is None:
+                continue
+
+            val = data_dict.get(key)
+            if val is None:
+                continue
+
+            for group, exposure in group_exposures.items():
+                group_data[group]["vals"].append(val)
+                group_data[group]["w"].append(exposure)
+                if unc_key is not None:
+                    group_data[group]["unc"].append(data_dict.get(unc_key, 0.0))
+
+        for group, data in group_data.items():
+            if not data["vals"]:
+                continue
+
+            vals_arr = np.array(data["vals"], dtype=float)
+            w_arr = np.array(data["w"], dtype=float)
+
+            # Mask to drop non-finite values/weights and keep arrays aligned
+            mask = np.isfinite(vals_arr) & np.isfinite(w_arr)
+            vals_arr = vals_arr[mask]
+            w_arr = w_arr[mask]
+
+            if len(vals_arr) == 0 or np.sum(w_arr) == 0:
+                continue
+
+            mean = weighted_mean(vals_arr, w_arr)
+            exposure_total = float(np.sum(w_arr))
+
+            if unc_key is not None:
+                s_arr = np.array(data["unc"], dtype=float)[mask]
+                s_arr = np.where(np.isfinite(s_arr), s_arr, 0.0)
+                unc_total = compute_weighted_uncertainty(
+                    w_arr, vals_arr, mean, s_arr
+                )
+                ratio_dict_means[ene][group] = {
+                    "value": mean,
+                    "unc": unc_total,
+                    "exposure": exposure_total,
+                }
+            else:
+                ratio_dict_means[ene][group] = mean
 
     return ratio_dict_means
 

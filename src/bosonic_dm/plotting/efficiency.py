@@ -7,10 +7,23 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from pathlib import Path
+from typing import Literal
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from bosonic_dm.plotting.utils import _DET_TYPE_COLOR
+
+
+def _get_aggregate_categories(labels_dicts: Mapping[str, tuple]) -> list[str]:
+    """Return aggregate names in their first-seen order."""
+    categories: list[str] = []
+    for _, _, _, means in labels_dicts.values():
+        for energy in sorted(means):
+            for category in means[energy]:
+                if category not in categories:
+                    categories.append(category)
+    return categories
 
 
 def plot_efficiency_comparison(
@@ -21,8 +34,9 @@ def plot_efficiency_comparison(
     ylabel: str,
     sharey: bool = True,
     save_path: str | Path | None = None,
-) -> tuple[plt.Figure, plt.Axes]:
-    """Plot detection efficiency or effective exposure for different detector types.
+    group_by: Literal["detector_type", "detector_group"] = "detector_type",
+) -> tuple[plt.Figure, np.ndarray]:
+    """Plot efficiency or effective exposure by detector type or detector group.
 
     Parameters
     ----------
@@ -42,26 +56,57 @@ def plot_efficiency_comparison(
         Whether subplots should share the same y-axis, by default True.
     save_path : str | Path, optional
         If provided, the plot will be saved to this path.
+    group_by
+        Select fixed detector-type panels or dynamic panels based on the
+        detector-group aggregates in ``labels_dicts``.
 
     Returns
     -------
-    tuple[plt.Figure, plt.Axes]
+    tuple[plt.Figure, np.ndarray]
         The generated Matplotlib Figure and Axes objects.
     """
     if plot_type not in ("efficiency", "eff_exp"):
         msg = f"Unknown plot_type '{plot_type}'; expected 'efficiency' or 'eff_exp'"
         raise ValueError(msg)
+    if group_by not in ("detector_type", "detector_group"):
+        msg = (
+            f"Unknown group_by {group_by!r}; expected 'detector_type' "
+            "or 'detector_group'."
+        )
+        raise ValueError(msg)
 
-    fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True, sharey=sharey)
+    if group_by == "detector_type":
+        categories = list(_DET_TYPE_COLOR)
+        category_colors = _DET_TYPE_COLOR
+    else:
+        categories = _get_aggregate_categories(labels_dicts)
+        if not categories:
+            msg = "No detector-group aggregates are available to plot."
+            raise ValueError(msg)
+        color_cycle = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+        category_colors = {
+            category: color_cycle[index % len(color_cycle)]
+            for index, category in enumerate(categories)
+        }
 
-    for ax, det_type in zip(axes.flat, _DET_TYPE_COLOR, strict=True):
-        color = _DET_TYPE_COLOR[det_type]
+    n_columns = 2 if len(categories) > 1 else 1
+    n_rows = (len(categories) + n_columns - 1) // n_columns
+    fig, axes = plt.subplots(
+        n_rows,
+        n_columns,
+        figsize=(12, 4 * n_rows),
+        sharex=True,
+        sharey=sharey,
+        squeeze=False,
+    )
 
+    for ax, category in zip(axes.flat, categories, strict=False):
+        color = category_colors[category]
         for _, (label, ls, marker, means) in labels_dicts.items():
             enes, vals, uncs = [], [], []
 
             for ene in sorted(means.keys()):
-                entry = means[ene].get(det_type)
+                entry = means[ene].get(category)
                 if not entry:
                     continue
 
@@ -84,10 +129,15 @@ def plot_efficiency_comparison(
                     capsize=3,
                 )
 
-        ax.set_title(det_type, color=color)
+        ax.set_title(category, color=color)
         ax.set_xlabel("Simulated Energy [keV]")
         ax.set_ylabel(ylabel)
-        ax.legend()
+        handles, _ = ax.get_legend_handles_labels()
+        if handles:
+            ax.legend()
+
+    for ax in axes.flat[len(categories) :]:
+        ax.set_visible(False)
 
     fig.suptitle(f"{plot_title} - {interaction}")
     fig.tight_layout()

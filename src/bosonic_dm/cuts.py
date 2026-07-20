@@ -11,9 +11,9 @@ from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 
 import awkward as ak
+import lh5
 import numpy as np
 import polars as pl
-from lgdo import lh5
 
 logger = logging.getLogger(__name__)
 
@@ -528,13 +528,14 @@ def _matches_selection(
 def compute_group_exposure(
     eres_dict: Mapping,
     group_dict: Mapping[str, str | Mapping[str, str | Sequence[str]]],
+    exposure_key: str = "expo",
 ) -> float:
     """Compute the total exposure for detectors selected by *group_dict*.
 
     Walks every ``period → run → detector`` entry in *eres_dict*, checks
     whether the detector is requested by *group_dict* (using the same
     inclusion/exclusion rules as ``filter_dataset``), and accumulates the
-    ``expo`` field for detectors whose ``usability`` is ``"on"``.
+    requested exposure field for detectors whose ``usability`` is ``"on"``.
 
     Parameters
     ----------
@@ -548,11 +549,13 @@ def compute_group_exposure(
             {"V02160A": "all", "V02160B": "all"}          # all periods/runs
             {"V08682B": {"p06": "all", "p07": "all"}}     # specific periods
             {"V01389A": {"~p09": "all"}}                   # exclude p09
+    exposure_key
+        Key containing the exposure in each detector's run information.
 
     Returns
     -------
     float
-        Total exposure in the same units as the ``expo`` values in
+        Total exposure in the same units as the *exposure_key* values in
         *eres_dict* (typically kg·yr).
 
     Examples
@@ -577,6 +580,6 @@ def compute_group_exposure(
                 # Check period/run inclusion using the same rules as filter_dataset
                 det_sel = group_dict[det_name]
                 if _matches_selection(period, run, det_sel):
-                    total_expo += det_info["expo"]
+                    total_expo += det_info[exposure_key]
 
     return total_expo

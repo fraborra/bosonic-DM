@@ -7,11 +7,12 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping, Sequence
+from typing import Literal
 
 import polars as pl
 from tqdm.auto import tqdm
 
-from bosonic_dm.io import get_mean_fcc_det_type
+from bosonic_dm.io import get_mean_fcc_det_group, get_mean_fcc_det_type
 from bosonic_dm.stats import bayesian_efficiency
 
 logger = logging.getLogger(__name__)
@@ -381,8 +382,28 @@ def restructure_efficiency_by_selection(ratio_dict: Mapping) -> dict:
     return restructured
 
 
-def build_labels_dicts(input_dict: Mapping) -> dict:
+def build_labels_dicts(
+    input_dict: Mapping,
+    *,
+    group_by: Literal["detector_type", "detector_group"] = "detector_type",
+    detector_groups: Mapping[str, Mapping | Sequence[str]] | None = None,
+    eres_dict: Mapping | None = None,
+) -> dict:
     """Build a dictionary of styled plotting tuples for each valid efficiency selection.
+
+    Parameters
+    ----------
+    input_dict
+        Detector-level efficiency results.
+    group_by
+        Aggregate the detector results by detector type or by the supplied
+        detector groups.
+    detector_groups
+        Detector-group definitions. Required when ``group_by="detector_group"``.
+        The mapping can be loaded directly from ``groups_dict.yaml``.
+    eres_dict
+        Period/run detector exposure dictionary. Required when
+        ``group_by="detector_group"``.
 
     Returns
     -------
@@ -390,6 +411,21 @@ def build_labels_dicts(input_dict: Mapping) -> dict:
         A dictionary with the structure:
         ``{selection: (label, ls, marker, means_dict)}``
     """
+    if group_by not in ("detector_type", "detector_group"):
+        msg = (
+            f"Unknown group_by {group_by!r}; expected 'detector_type' "
+            "or 'detector_group'."
+        )
+        raise ValueError(msg)
+    if group_by == "detector_group" and (
+        detector_groups is None or eres_dict is None
+    ):
+        msg = (
+            "detector_groups and eres_dict are required when "
+            "group_by='detector_group'."
+        )
+        raise ValueError(msg)
+
     labels_dicts = {
         "all": ("All", "-.", "o"),
         "valid-psd": ("All - valid PSD", "-", "v"),
@@ -401,12 +437,22 @@ def build_labels_dicts(input_dict: Mapping) -> dict:
         tmp = filter_valid_selection_efficiency(input_dict, selection)
         tmp_r = restructure_efficiency_by_selection(tmp)
 
-        averaged_means = get_mean_fcc_det_type(
-            tmp_r.get(selection, {}),
-            key="efficiency",
-            weight_key="expo",
-            unc_key="efficiency_stat_unc",
-        )
+        if group_by == "detector_type":
+            averaged_means = get_mean_fcc_det_type(
+                tmp_r.get(selection, {}),
+                key="efficiency",
+                weight_key="expo",
+                unc_key="efficiency_stat_unc",
+            )
+        else:
+            averaged_means = get_mean_fcc_det_group(
+                tmp_r.get(selection, {}),
+                detector_groups,
+                eres_dict,
+                key="efficiency",
+                weight_key="expo",
+                unc_key="efficiency_stat_unc",
+            )
 
         labels_dicts[selection] = (label, ls, marker, averaged_means)
 
