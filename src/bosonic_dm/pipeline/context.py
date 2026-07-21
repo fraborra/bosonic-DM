@@ -65,9 +65,7 @@ def build_analysis_context(config: AnalysisConfig) -> AnalysisContext:
     lmeta = LegendMetadata(path=metadata_path)
     # Load eres_dict
     # Usually it's located in the dictionaries_root configured by the user
-    eres_dict_path = (
-        config.paths.calibration_dictionaries_root / "eres_per_det_tot.yaml"
-    )
+    eres_dict_path = config.paths.inputs_root / "dictionaries" / "eres_dict.yaml"
     eres_dict = dbetto.Props.read_from(str(eres_dict_path))
 
     return AnalysisContext(

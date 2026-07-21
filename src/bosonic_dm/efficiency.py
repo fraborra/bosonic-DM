@@ -13,6 +13,7 @@ import polars as pl
 from tqdm.auto import tqdm
 
 from bosonic_dm.io import get_mean_fcc_det_group, get_mean_fcc_det_type
+from bosonic_dm.resolution import weighted_resolution_per_detector
 from bosonic_dm.stats import bayesian_efficiency
 
 logger = logging.getLogger(__name__)
@@ -110,11 +111,13 @@ def compute_efficiency_from_lazyframe(
         ene_key = int(ene)
         ratio_dict[ene_key] = {}
 
-        if ene_key not in eres_dict:
-            logger.warning("Energy %d keV not found in eres_dict, skipping", ene_key)
+        det_eres = weighted_resolution_per_detector(eres_dict, ene)
+        if not det_eres:
+            logger.warning(
+                "No valid resolution info found in eres_dict, skipping energy %d keV",
+                ene_key,
+            )
             continue
-
-        det_eres = eres_dict[ene_key]
         vtx_counts_for_ene = vertex_counts.get(ene_key, {})
 
         # --- Phase 1: build per-detector info and read n_primaries ----------

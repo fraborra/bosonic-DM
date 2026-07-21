@@ -1,3 +1,7 @@
+#tmp
+*.yaml
+*.png
+*.pdf
 # specific folders
 legend-metadata/
 data/v1/tiers/

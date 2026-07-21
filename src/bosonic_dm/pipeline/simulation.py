@@ -9,15 +9,22 @@ import logging
 from collections.abc import Sequence
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from dbetto import Props
 
 from bosonic_dm.config import AnalysisConfig
-from bosonic_dm.efficiency import compute_efficiency_from_lazyframe
+from bosonic_dm.efficiency import build_labels_dicts, compute_efficiency_from_lazyframe
 from bosonic_dm.io import build_parquet_dataset
 from bosonic_dm.models import AnalysisArtifacts
 from bosonic_dm.pipeline.context import build_analysis_context
+from bosonic_dm.plotting.efficiency import plot_efficiency_comparison
+from bosonic_dm.plotting.spectra import (
+    plot_aoe_survival_fraction,
+    plot_lar_survival_fraction,
+    plot_sim_energy_spectra,
+)
 from bosonic_dm.yaml_io import write_yaml
 
 logger = logging.getLogger(__name__)
@@ -281,7 +288,7 @@ def run_simulation_analysis(
             )
 
         calibration_path = (
-            config.paths.calibration_dictionaries_root / "eres_per_det_tot.yaml"
+            config.paths.inputs_root / "dictionaries" / "eres_per_det_tot.yaml"
         )
         production_config = (
             config.production.reference_root / config.production.version / "config.json"
@@ -327,7 +334,135 @@ def run_simulation_analysis(
             )
 
     if "plots" in resolved_stages:
-        artifacts.stage_status["plots"] = "not-implemented"
+        efficiency_path = (
+            config.paths.dictionaries_root / f"{interaction}_efficiency.yaml"
+        )
+        if not efficiency_path.exists():
+            _warn(
+                artifacts,
+                "Skipping plots for %s: efficiency dictionary not found",
+                interaction,
+            )
+            artifacts.stage_status["plots"] = "blocked"
+        else:
+            efficiency_dict = Props.read_from(str(efficiency_path))
+
+            # Avoid rebuilding context if already built in efficiencies stage
+            if "context" not in locals():
+                context = build_analysis_context(config)
+
+            det_groups = Props.read_from(str(config.detector_groups))
+
+            plot_configs = [
+                ("detector_type", None, "png"),
+                ("detector_group", det_groups, "png"),
+            ]
+
+            for group_by, groups, ext in plot_configs:
+                labels_dicts = build_labels_dicts(
+                    efficiency_dict,
+                    eres_dict=context.eres_dict,
+                    group_by=group_by,
+                    detector_groups=groups,
+                )
+
+                for plot_type, title, ylabel, sharey in [
+                    ("efficiency", "Efficiency", "Efficiency", True),
+                    (
+                        "eff_exp",
+                        "Effective Exposure",
+                        "Effective Exposure [kg yr]",
+                        False,
+                    ),
+                ]:
+                    save_path = None
+                    if config.output.save_plots:
+                        save_path = (
+                            config.paths.plots_root
+                            / f"{interaction}_{plot_type}_by_{group_by}.{ext}"
+                        )
+
+                    fig, _ = plot_efficiency_comparison(
+                        labels_dicts=labels_dicts,
+                        interaction=interaction,
+                        plot_type=plot_type,
+                        plot_title=title,
+                        ylabel=ylabel,
+                        sharey=sharey,
+                        group_by=group_by,
+                        save_path=save_path,
+                    )
+
+                    if save_path:
+                        artifacts.plot_paths.append(save_path)
+
+                    plt.close(fig)
+
+            artifacts.stage_status["plots"] = "completed"
+
+            # Extra simulation plots
+            cfg = config.interactions[interaction]
+            if (
+                cfg.make_lar_survival_plots
+                or cfg.make_energy_spectra_plots
+                or cfg.make_aoe_survival_plots
+            ):
+                parquet_dir = config.paths.parquet_root / interaction
+                if parquet_dir.exists():
+                    lf = pl.scan_parquet(str(parquet_dir), hive_partitioning=True)
+                    plot_save_dir = (
+                        config.paths.plots_root / interaction
+                        if config.output.save_plots
+                        else Path("plots")
+                    )
+
+                    if cfg.make_energy_spectra_plots:
+                        rawid_path = (
+                            config.paths.inputs_root
+                            / "dictionaries/rawid_by_det_type.yaml"
+                        )
+                        if rawid_path.exists():
+                            rawid_by_det_type = Props.read_from(str(rawid_path))
+                            plot_sim_energy_spectra(
+                                lf=lf,
+                                simulated_energies=config.energies_keV,
+                                rawid_by_det_type=rawid_by_det_type,
+                                interaction=interaction,
+                                save_dir=plot_save_dir / "energy_spectra",
+                            )
+                        else:
+                            _warn(
+                                artifacts,
+                                "Cannot plot sim energy spectra: %s missing",
+                                rawid_path,
+                            )
+
+                    if cfg.make_lar_survival_plots or cfg.make_aoe_survival_plots:
+                        chmap = context.get_channelmap_simulation()
+
+                    if cfg.make_lar_survival_plots:
+                        plot_lar_survival_fraction(
+                            lf=lf,
+                            simulated_energies=config.energies_keV,
+                            chmap=chmap,
+                            interaction=interaction,
+                            save_dir=plot_save_dir / "lar_survival",
+                        )
+
+                    if cfg.make_aoe_survival_plots:
+                        plot_aoe_survival_fraction(
+                            lf=lf,
+                            simulated_energies=config.energies_keV,
+                            chmap=chmap,
+                            interaction=interaction,
+                            save_dir=plot_save_dir / "aoe_survival",
+                        )
+                else:
+                    _warn(
+                        artifacts,
+                        "Parquet dir %s missing. Cannot generate advanced plots.",
+                        parquet_dir,
+                    )
 
     _write_manifest(
         config,

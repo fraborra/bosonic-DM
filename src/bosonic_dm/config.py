@@ -27,7 +27,7 @@ class PathsConfig:
     data_root: Path
     parquet_root: Path
     dictionaries_root: Path
-    calibration_dictionaries_root: Path
+    inputs_root: Path
     plots_root: Path
     temporary_root: Path
 
@@ -42,6 +42,8 @@ class InteractionConfig:
     name: str
     job_template: str
     make_lar_survival_plots: bool
+    make_energy_spectra_plots: bool
+    make_aoe_survival_plots: bool
 
 
 @dataclass(frozen=True)
@@ -51,14 +53,12 @@ class BackgroundConfig:
     comparison_cut_profile: str
     energy_ranges_keV: list[tuple[int, int]]
     bin_widths_keV: list[int]
-    detector_groups: Path
 
 
 @dataclass(frozen=True)
 class OutputConfig:
     overwrite: bool
     save_plots: bool
-    show_plots: bool
     write_manifest: bool
 
 
@@ -72,6 +72,7 @@ class AnalysisConfig:
     interactions: Mapping[str, InteractionConfig]
     background: BackgroundConfig
     output: OutputConfig
+    detector_groups: Path
 
 
 def _resolve_path(path_str: str) -> Path:
@@ -108,12 +109,7 @@ def load_analysis_config(path: str | Path) -> AnalysisConfig:
         data_root=data_root_path,
         parquet_root=data_root_path / "parquet",
         dictionaries_root=data_root_path / "dictionaries",
-        calibration_dictionaries_root=_resolve_path(
-            raw_paths.get(
-                "calibration_dictionaries_root",
-                str(data_root_path / "dictionaries"),
-            )
-        ),
+        inputs_root=_resolve_path(raw_paths.get("inputs_root", "data/inputs")),
         plots_root=_resolve_path(raw_paths.get("plots_root", "plots")),
         temporary_root=_resolve_path(raw_paths.get("temporary_root", "tmp")),
     )
@@ -143,6 +139,8 @@ def load_analysis_config(path: str | Path) -> AnalysisConfig:
             name=name,
             job_template=data["job_template"],
             make_lar_survival_plots=data.get("make_lar_survival_plots", False),
+            make_energy_spectra_plots=data.get("make_energy_spectra_plots", False),
+            make_aoe_survival_plots=data.get("make_aoe_survival_plots", False),
         )
 
     raw_bg = raw_config["background"]
@@ -152,14 +150,19 @@ def load_analysis_config(path: str | Path) -> AnalysisConfig:
         comparison_cut_profile=raw_bg["comparison_cut_profile"],
         energy_ranges_keV=[tuple(r) for r in raw_bg["energy_ranges_keV"]],
         bin_widths_keV=list(raw_bg["bin_widths_keV"]),
-        detector_groups=_resolve_path(raw_bg["detector_groups"]),
     )
+
+    det_groups_str = raw_analysis.get(
+        "detector_groups", "dictionaries/detector-grouping/groups_dict.yaml"
+    )
+    bg_det_groups = Path(det_groups_str)
+    if not bg_det_groups.is_absolute():
+        bg_det_groups = paths.inputs_root / bg_det_groups
 
     raw_out = raw_config["output"]
     output = OutputConfig(
         overwrite=raw_out.get("overwrite", False),
         save_plots=raw_out.get("save_plots", True),
-        show_plots=raw_out.get("show_plots", False),
         write_manifest=raw_out.get("write_manifest", True),
     )
 
@@ -188,4 +191,5 @@ def load_analysis_config(path: str | Path) -> AnalysisConfig:
         interactions=interactions,
         background=background,
         output=output,
+        detector_groups=bg_det_groups,
     )
