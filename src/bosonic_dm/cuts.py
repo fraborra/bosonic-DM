@@ -525,6 +525,15 @@ def _matches_selection(
     return included and not excluded
 
 
+def matches_period_run_selection(
+    period: str,
+    run: str,
+    detector_selection: str | Mapping[str, str | Sequence[str]],
+) -> bool:
+    """Return whether a period/run is selected by a detector-group rule."""
+    return _matches_selection(period, run, detector_selection)
+
+
 def compute_group_exposure(
     eres_dict: Mapping,
     group_dict: Mapping[str, str | Mapping[str, str | Sequence[str]]],
@@ -579,7 +588,7 @@ def compute_group_exposure(
 
                 # Check period/run inclusion using the same rules as filter_dataset
                 det_sel = group_dict[det_name]
-                if _matches_selection(period, run, det_sel):
+                if matches_period_run_selection(period, run, det_sel):
                     total_expo += det_info[exposure_key]
 
     return total_expo

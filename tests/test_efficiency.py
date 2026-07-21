@@ -24,9 +24,27 @@ def _channelmap() -> dict:
 
 def _resolution() -> dict:
     return {
-        200: {
-            "V00001A": {"fwhm": 1.0, "unc": 0.1, "expo": 1.0},
-            "V00002A": {"fwhm": 1.0, "unc": 0.1, "expo": 1.0},
+        "p01": {
+            "r001": {
+                "V00001A": {
+                    "usability": "on",
+                    "a": 1.0,
+                    "b": 0.0,
+                    "a_unc": 0.1,
+                    "b_unc": 0.0,
+                    "ab_corr": 0.0,
+                    "expo": 1.0,
+                },
+                "V00002A": {
+                    "usability": "on",
+                    "a": 1.0,
+                    "b": 0.0,
+                    "a_unc": 0.1,
+                    "b_unc": 0.0,
+                    "ab_corr": 0.0,
+                    "expo": 1.0,
+                },
+            }
         }
     }
 
@@ -239,3 +257,102 @@ def test_build_labels_dicts_requires_group_inputs() -> None:
     dummy_eres = {"p01": {"r001": {"V00001A": {"usability": "on", "expo": 1.0}}}}
     with pytest.raises(ValueError, match="detector_groups is required"):
         build_labels_dicts({}, eres_dict=dummy_eres, group_by="detector_group")
+
+
+def test_run_fwhm_only_changes_the_group_selecting_that_run() -> None:
+    frame = pl.DataFrame(
+        {
+            "rawid": [1389, 1389, 8682, 8682],
+            "energy": [200.0, 202.0, 200.0, 202.0],
+            "sim_e": [200, 200, 200, 200],
+            "is_good_channel": [True, True, True, True],
+            "has_aoe": [True, True, True, True],
+            "is_single_site": [True, True, True, True],
+        }
+    ).lazy()
+    channelmap = {
+        "V01389A": SimpleNamespace(daq=SimpleNamespace(rawid=1389)),
+        "V08682B": SimpleNamespace(daq=SimpleNamespace(rawid=8682)),
+    }
+    resolution = {
+        "p05": {
+            "r001": {
+                detector: {
+                    "usability": "on",
+                    "a": 1.0,
+                    "b": 0.0,
+                    "a_unc": 0.0,
+                    "b_unc": 0.0,
+                    "ab_corr": 0.0,
+                    "expo": exposure,
+                }
+                for detector, exposure in {
+                    "V01389A": 1.0,
+                    "V08682B": 2.0,
+                }.items()
+            }
+        },
+        "p09": {
+            "r001": {
+                detector: {
+                    "usability": "on",
+                    "a": 9.0,
+                    "b": 0.0,
+                    "a_unc": 0.0,
+                    "b_unc": 0.0,
+                    "ab_corr": 0.0,
+                    "expo": exposure,
+                }
+                for detector, exposure in {
+                    "V01389A": 10.0,
+                    "V08682B": 20.0,
+                }.items()
+            }
+        },
+    }
+
+    result = compute_efficiency_from_lazyframe(
+        lf=frame,
+        eres_dict=resolution,
+        simulated_energies=[200],
+        chmap=channelmap,
+        vertex_counts={200: {"V01389A": 10, "V08682B": 10}},
+        half_width_fwhm=1.0,
+        selections=["all"],
+    )
+
+    assert (
+        result[200]["V01389A"]["period_runs"]["p05"]["r001"]["selections"]["all"][
+            "n_events"
+        ]
+        == 1
+    )
+    assert (
+        result[200]["V01389A"]["period_runs"]["p09"]["r001"]["selections"]["all"][
+            "n_events"
+        ]
+        == 2
+    )
+
+    detector_groups = {
+        "ICPC group1": {
+            "V01389A": {"p09": "all"},
+            "V08682B": {"p09": "all"},
+        },
+        "ICPC group2": {
+            "V01389A": {"~p09": "all"},
+            "V08682B": {"~p09": "all"},
+        },
+    }
+    labels = build_labels_dicts(
+        result,
+        group_by="detector_group",
+        detector_groups=detector_groups,
+        eres_dict=resolution,
+    )
+    groups = labels["all"][3][200]
+
+    assert groups["ICPC group1"]["value"] == pytest.approx(2.5 / 11.0)
+    assert groups["ICPC group1"]["exposure"] == pytest.approx(30.0)
+    assert groups["ICPC group2"]["value"] == pytest.approx(1.5 / 11.0)
+    assert groups["ICPC group2"]["exposure"] == pytest.approx(3.0)
