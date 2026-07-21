@@ -385,9 +385,9 @@ def restructure_efficiency_by_selection(ratio_dict: Mapping) -> dict:
 def build_labels_dicts(
     input_dict: Mapping,
     *,
+    eres_dict: Mapping,
     group_by: Literal["detector_type", "detector_group"] = "detector_type",
     detector_groups: Mapping[str, Mapping | Sequence[str]] | None = None,
-    eres_dict: Mapping | None = None,
 ) -> dict:
     """Build a dictionary of styled plotting tuples for each valid efficiency selection.
 
@@ -395,15 +395,16 @@ def build_labels_dicts(
     ----------
     input_dict
         Detector-level efficiency results.
+    eres_dict
+        Nested exposure dictionary with structure
+        ``{period: {run: {detector: {usability, expo, ...}}}}``.
+        Used as weights for the weighted average in both grouping modes.
     group_by
         Aggregate the detector results by detector type or by the supplied
         detector groups.
     detector_groups
         Detector-group definitions. Required when ``group_by="detector_group"``.
         The mapping can be loaded directly from ``groups_dict.yaml``.
-    eres_dict
-        Period/run detector exposure dictionary. Required when
-        ``group_by="detector_group"``.
 
     Returns
     -------
@@ -417,13 +418,8 @@ def build_labels_dicts(
             "or 'detector_group'."
         )
         raise ValueError(msg)
-    if group_by == "detector_group" and (
-        detector_groups is None or eres_dict is None
-    ):
-        msg = (
-            "detector_groups and eres_dict are required when "
-            "group_by='detector_group'."
-        )
+    if group_by == "detector_group" and detector_groups is None:
+        msg = "detector_groups is required when group_by='detector_group'."
         raise ValueError(msg)
 
     labels_dicts = {
@@ -440,6 +436,7 @@ def build_labels_dicts(
         if group_by == "detector_type":
             averaged_means = get_mean_fcc_det_type(
                 tmp_r.get(selection, {}),
+                eres_dict,
                 key="efficiency",
                 weight_key="expo",
                 unc_key="efficiency_stat_unc",

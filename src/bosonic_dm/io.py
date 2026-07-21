@@ -142,6 +142,7 @@ def get_values_sorted(
 
 def get_mean_fcc_det_type(
     ratio_dict: Mapping,
+    eres_dict: Mapping,
     key: str = "ratio",
     weight_key: str = "expo",
     unc_key: str | None = None,
@@ -154,10 +155,15 @@ def get_mean_fcc_det_type(
     ratio_dict
         Nested dictionary with structure
         ``{ene: {ge: {key: value, unc_key: uncertainty, ...}, ...}, ...}``.
+    eres_dict
+        Nested exposure dictionary with structure
+        ``{period: {run: {detector: {usability, expo, ...}}}}``.
+        Each detector's weight is the total usable exposure summed
+        over all periods and runs.
     key
         Inner key whose value is averaged across detectors of the same type.
     weight_key
-        Inner key used as weight for the weighted average.
+        Exposure key in *eres_dict* used as weight for the weighted average.
     unc_key
         Inner key used as the uncertainty for each detector's value. If provided,
         the uncertainty is propagated using `compute_weighted_uncertainty` and
@@ -166,6 +172,17 @@ def get_mean_fcc_det_type(
     exclude_dets
         List of detector names to exclude from the average.
     """
+    # Pre-compute total usable exposure per detector from eres_dict
+    detector_exposures: dict[str, float] = {}
+    for _period, runs in eres_dict.items():
+        for _run, detectors in runs.items():
+            for det_name, det_info in detectors.items():
+                if det_info.get("usability") != "on":
+                    continue
+                detector_exposures[det_name] = detector_exposures.get(
+                    det_name, 0.0
+                ) + det_info.get(weight_key, 0.0)
+
     ratio_dict_means: dict = {}
 
     for ene, ge_dict in ratio_dict.items():
@@ -185,8 +202,11 @@ def get_mean_fcc_det_type(
                 continue
 
             val = data_dict.get(key)
-            w = data_dict.get(weight_key)
-            if val is None or w is None:
+            if val is None:
+                continue
+
+            w = detector_exposures.get(ge, 0.0)
+            if w == 0.0:
                 continue
 
             type_data[det_type]["vals"].append(val)
@@ -285,7 +305,7 @@ def get_mean_fcc_det_group(
         group_dict = (
             detectors
             if isinstance(detectors, Mapping)
-            else {detector: "all" for detector in detectors}
+            else dict.fromkeys(detectors, "all")
         )
         for detector, selection in group_dict.items():
             exposure = compute_group_exposure(
@@ -342,9 +362,7 @@ def get_mean_fcc_det_group(
             if unc_key is not None:
                 s_arr = np.array(data["unc"], dtype=float)[mask]
                 s_arr = np.where(np.isfinite(s_arr), s_arr, 0.0)
-                unc_total = compute_weighted_uncertainty(
-                    w_arr, vals_arr, mean, s_arr
-                )
+                unc_total = compute_weighted_uncertainty(w_arr, vals_arr, mean, s_arr)
                 ratio_dict_means[ene][group] = {
                     "value": mean,
                     "unc": unc_total,

@@ -11,10 +11,7 @@ from bosonic_dm.plotting.efficiency import plot_efficiency_comparison
 def test_plot_efficiency_comparison_supports_detector_groups() -> None:
     groups = ["ICPC group1", "ICPC group2", "BEGe", "PPC", "COAX"]
     means = {
-        200: {
-            group: {"value": 0.8, "unc": 0.01, "exposure": 1.0}
-            for group in groups
-        }
+        200: {group: {"value": 0.8, "unc": 0.01, "exposure": 1.0} for group in groups}
     }
     labels = {"all": ("All", "-", "o", means)}
 

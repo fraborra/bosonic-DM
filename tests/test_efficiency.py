@@ -236,5 +236,6 @@ def test_build_labels_dicts_can_aggregate_by_detector_group() -> None:
 
 
 def test_build_labels_dicts_requires_group_inputs() -> None:
-    with pytest.raises(ValueError, match="detector_groups and eres_dict"):
-        build_labels_dicts({}, group_by="detector_group")
+    dummy_eres = {"p01": {"r001": {"V00001A": {"usability": "on", "expo": 1.0}}}}
+    with pytest.raises(ValueError, match="detector_groups is required"):
+        build_labels_dicts({}, eres_dict=dummy_eres, group_by="detector_group")

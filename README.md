@@ -38,9 +38,9 @@ pixi run bosonic-dm all \
 ```
 
 `simulation` currently runs one interaction at a time with `--interaction`,
-while `all` accepts one or more interactions with `--interactions` and also
-runs the background analysis. The planned CLI improvement is to make
-`simulation` accept multiple interactions as well.
+while `all` accepts one or more interactions with `--interactions` and also runs
+the background analysis. The planned CLI improvement is to make `simulation`
+accept multiple interactions as well.
 
 Run only the background pipeline with:
 
@@ -115,9 +115,12 @@ pixi run check-dark-compton-stats
 ## Project Structure
 
 - `src/bosonic_dm/`: Core library code.
-  - `cli.py`: Command-line entry point for `simulation`, `background`, and `all`.
-  - `config.py`, `models.py`, `yaml_io.py`: Configuration, result models, and YAML I/O.
-  - `pipeline/`: High-level orchestration for simulation and background analyses.
+  - `cli.py`: Command-line entry point for `simulation`, `background`, and
+    `all`.
+  - `config.py`, `models.py`, `yaml_io.py`: Configuration, result models, and
+    YAML I/O.
+  - `pipeline/`: High-level orchestration for simulation and background
+    analyses.
   - `cuts.py`: Quality cuts and filtering logic.
   - `efficiency.py`: Efficiency computations.
   - `io.py`: Parquet and awkward data manipulation.
@@ -137,6 +140,5 @@ CLI (cli.py) → configuration (config.py) → pipeline/
                                       └── background.py → spectra, summaries, plots
 ```
 
-The CLI is deliberately thin: scientific logic belongs in the Python API and
-the pipeline modules, so the same analysis can be called from scripts or
-notebooks.
+The CLI is deliberately thin: scientific logic belongs in the Python API and the
+pipeline modules, so the same analysis can be called from scripts or notebooks.
