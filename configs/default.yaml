@@ -8,8 +8,8 @@ production:
 paths:
   simulation_root: "/path/to/simulation/root"
   data_root: "data/v1"
-  # Calibration-derived inputs are independent of a simulation production.
-  calibration_dictionaries_root: "data/v1/dictionaries"
+  # Shared inputs root for all static data
+  inputs_root: "data/inputs"
   plots_root: "plots"
   temporary_root: "tmp"
 
@@ -33,6 +33,7 @@ analysis:
     - valid-psd
     - sse
     - mse
+  detector_groups: "dictionaries/detector-grouping/groups_dict.yaml"
 
 interactions:
   axio-electric:
@@ -54,7 +55,6 @@ background:
     - 1
     - 5
     - 10
-  detector_groups: "data/v1/dictionaries/detector-grouping/groups_dict.yaml"
 
 output:
   overwrite: false

@@ -8,7 +8,7 @@ production:
 paths:
   simulation_root: "/my/local/simulation/root"
   data_root: "data/v1"
-  calibration_dictionaries_root: "data/v1/dictionaries"
+  inputs_root: "data/inputs"
   plots_root: "plots"
   temporary_root: "tmp"
 
@@ -24,6 +24,7 @@ analysis:
   selections:
     - all
     - valid-psd
+  detector_groups: "dictionaries/detector-grouping/groups_dict.yaml"
 
 interactions:
   axio-electric:
@@ -42,7 +43,6 @@ background:
     - [20, 300]
   bin_widths_keV:
     - 5
-  detector_groups: "data/v1/dictionaries/detector-grouping/groups_dict.yaml"
 
 output:
   overwrite: false
