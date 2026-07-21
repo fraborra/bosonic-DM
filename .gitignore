@@ -20,6 +20,7 @@ plots/
 notebooks/plots/
 scripts/scratch/
 !data/inputs/
+!data/inputs/**/*.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
