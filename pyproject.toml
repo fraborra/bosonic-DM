@@ -11,10 +11,10 @@ license-files = [
 py-modules = []
 
 [tool.setuptools.package-dir]
-"" = "workflow/src"
+"" = "src"
 
 [tool.setuptools.packages.find]
-where = ["workflow/src"]
+where = ["src"]
 
 
 [project]
@@ -26,7 +26,6 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.11"
 version = "0.1.0"
-
 
 dependencies = [
     "awkward",
@@ -42,7 +41,6 @@ dependencies = [
     "mplhep >=1.0",
     "numpy",
     "psutil",
-    "pyg4ometry",
     "dspeed",
     "pygama >=2.3.6",
     "pylegendmeta >=1.3.5",
@@ -73,6 +71,14 @@ dependencies = [
     "cmdstanpy",
 ]
 
+[project.scripts]
+bosonic-dm = "bosonic_dm.cli:main"
+generate-dark-compton = "bosonic_dm.dark_compton_generators:main"
+check-dark-compton-stats = "bosonic_dm.check_dark_compton_stats:main"
+assign-detectors = "bosonic_dm.geometry:main"
+migrate-yaml = "bosonic_dm.yaml_io:main"
+
+
 
 [project.optional-dependencies]
 test = [
@@ -94,7 +100,7 @@ testpaths = [
 ]
 
 [tool.ruff]
-src = ["workflow/src"]
+src = ["src"]
 
 [tool.ruff.lint]
 extend-select = [
@@ -180,6 +186,7 @@ arviz = "*"
 getdist = "*"
 ultranest = "*"
 pyarrow = "*"
+pyg4ometry = "*"
 polars = "*"
 jax = "*"
 pytorch = "*"
@@ -195,3 +202,4 @@ default = { solve-group = "default" }
 test = { features = ["test"], solve-group = "default" }
 
 [tool.pixi.tasks]
+test = "python3 -m pytest"

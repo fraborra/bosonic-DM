@@ -1,0 +1,69 @@
+schema_version: 1
+
+production:
+  version: "v2.1.5"
+  reference_root: "${LEGEND_PRODUCTION_ROOT}"
+  metadata_override: null
+
+paths:
+  simulation_root: "${BOSONIC_DM_SIM_ROOT}"
+  data_root: "data/v2"
+  # Shared inputs root for all static data
+  inputs_root: "data/inputs"
+  plots_root: "data/v2/plots"
+  temporary_root: "tmp"
+
+analysis:
+  simulated_energies_keV:
+    - 200
+    - 300
+    - 400
+    - 500
+    - 600
+    - 700
+    - 800
+    - 900
+    - 1000
+
+  fep_window:
+    half_width_fwhm: 2.0
+
+  selections:
+    - all
+    - valid-psd
+    - sse
+    - mse
+  # specific file in case you do not want to use the default one
+  # in $BOSONIC_DM_ROOT/data/inputs/dictionaries/detector-grouping/groups_dict.yaml
+  # detector_groups: "dictionaries/detector-grouping/groups_dict.yaml"
+
+interactions:
+  axio-electric:
+    job_template: "electron_{energy}keV_hpge_bulk"
+    make_lar_survival_plots: true
+    make_energy_spectra_plots: true
+    make_aoe_survival_plots: true
+
+  dark-compton:
+    job_template: "fromfile_dark_compton_{energy}keV_hpge_bulk"
+    make_lar_survival_plots: true
+    make_energy_spectra_plots: true
+    make_aoe_survival_plots: true
+
+background:
+  pet_glob: "${LEGEND_PET_ROOT}/phy/*.lh5"
+  apply_lar_veto: true
+  comparison_cut_profile: "without-bb-like"
+  energy_ranges_keV:
+    - [20, 300]
+    - [20, 1000]
+  bin_widths_keV:
+    - 1
+    - 5
+    - 10
+
+output:
+  overwrite: false
+  save_plots: true
+  show_plots: false
+  write_manifest: true

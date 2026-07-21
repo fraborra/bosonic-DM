@@ -1,15 +1,26 @@
+#tmp
+*.yaml
+*.png
+*.pdf
 # specific folders
 legend-metadata/
-v1/tiers/
+data/v1/tiers/
 plots/
-tmp_configfiles/
+tmp/
 
 # not useful .md files
 *.md
+!README.md
 
 # data files
 *.parquet
-v1/dictionaries/first.yaml
+data/v1/
+data/v2/
+plots/
+notebooks/plots/
+scripts/scratch/
+!data/inputs/
+!data/inputs/**/*.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

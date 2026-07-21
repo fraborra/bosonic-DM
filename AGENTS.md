@@ -41,3 +41,7 @@
 - **Bayesian approach** for all analyses and uncertainty calculations
 - Binomial efficiencies: Beta conjugate prior (Jeffrey's, `Beta(0.5, 0.5)`);
   report posterior mean ± posterior standard deviation
+
+## Agent Behavior
+
+- **Ask before modifying out-of-scope files**: Always ask for the user's explicit permission before proceeding to modify files that were not strictly requested, such as automatically updating Jupyter notebooks to reflect changes in source files.
