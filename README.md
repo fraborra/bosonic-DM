@@ -142,3 +142,9 @@ CLI (cli.py) → configuration (config.py) → pipeline/
 
 The CLI is deliberately thin: scientific logic belongs in the Python API and the
 pipeline modules, so the same analysis can be called from scripts or notebooks.
+
+## 🚧 Work in Progress
+
+- **Physics Data Analysis**: The API and CLI pipelines for background and
+  physics data analysis (`src/bosonic_dm/pipeline/background.py`) are still
+  under construction and currently lack full implementation.

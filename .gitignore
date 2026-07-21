@@ -14,7 +14,12 @@ tmp/
 
 # data files
 *.parquet
-data/v1/dictionaries/first.yaml
+data/v1/
+data/v2/
+plots/
+notebooks/plots/
+scripts/scratch/
+!data/inputs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
