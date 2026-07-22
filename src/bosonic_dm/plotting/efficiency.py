@@ -11,7 +11,9 @@ from typing import Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.lines import Line2D
 
+from bosonic_dm.efficiency import build_labels_dicts
 from bosonic_dm.plotting.utils import _DET_TYPE_COLOR
 
 
@@ -286,3 +288,290 @@ def plot_fep_survival_fraction(
         fig.savefig(save_path, dpi=400)
 
     return fig, axes
+
+
+def plot_efficiency_per_detector(
+    efficiency_dict: Mapping,
+    interaction: str = "",
+    selection: str = "all",
+    plot_type: Literal["efficiency", "eff_exp"] = "efficiency",
+    save_path: str | Path | None = None,
+    figsize: tuple[float, float] = (14, 6),
+) -> tuple[plt.Figure, plt.Axes]:
+    """Scatter plot of per-detector efficiency or effective exposure for each simulated energy.
+
+    Detector names are placed on the x-axis, and each simulated energy is plotted as a
+    separate scatter series with error bars.
+
+    Parameters
+    ----------
+    efficiency_dict : Mapping
+        Per-detector efficiency output dictionary from the pipeline (nested dictionary
+        ``{energy: {detector_name: {...}}}``).
+    selection : str
+        Selection cut name (e.g. 'all', 'valid-psd', 'sse', 'mse', 'non-sse').
+        Defaults to 'all'.
+    plot_type : str
+        Either 'efficiency' or 'eff_exp' (efficiency multiplied by exposure).
+    save_path : str | Path, optional
+        If provided, save the plot to this path.
+    figsize : tuple[float, float], optional
+        Figure size in inches, default (14, 6).
+
+    Returns
+    -------
+    tuple[plt.Figure, plt.Axes]
+        Matplotlib Figure and Axes objects.
+    """
+    if plot_type not in ("efficiency", "eff_exp"):
+        msg = f"Unknown plot_type '{plot_type}'; expected 'efficiency' or 'eff_exp'"
+        raise ValueError(msg)
+
+    sel_key = "mse" if selection.lower() in ("mse", "non-sse") else selection.lower()
+
+    # Collect all unique detector names sorted
+    detectors_set = set()
+    energies = sorted([int(e) for e in efficiency_dict.keys()])
+
+    for ene in efficiency_dict:
+        detectors_set.update(efficiency_dict[ene].keys())
+
+    detectors = sorted(detectors_set)
+    if not detectors:
+        msg = "No detectors found in efficiency_dict."
+        raise ValueError(msg)
+
+    det_to_x = {det: i for i, det in enumerate(detectors)}
+
+    fig, ax = plt.subplots(figsize=figsize)
+    color_cycle = plt.cm.tab10(np.linspace(0, 1, max(10, len(energies))))
+
+    for idx, ene in enumerate(energies):
+        dict_key = ene if ene in efficiency_dict else str(ene)
+        det_data = efficiency_dict[dict_key]
+
+        x_vals, y_vals, y_errs = [], [], []
+
+        for det_name in detectors:
+            if det_name not in det_data:
+                continue
+
+            entry = det_data[det_name]
+            sel_dict = entry.get("selections", {}).get(sel_key)
+            if not sel_dict:
+                continue
+
+            val = sel_dict.get("efficiency", np.nan)
+            unc = sel_dict.get("efficiency_stat_unc", 0.0)
+
+            if plot_type == "eff_exp":
+                expo = entry.get("expo", 1.0)
+                val *= expo
+                unc *= expo
+
+            if not np.isnan(val):
+                x_vals.append(det_to_x[det_name])
+                y_vals.append(val)
+                y_errs.append(unc)
+
+        if x_vals:
+            ax.errorbar(
+                x_vals,
+                y_vals,
+                yerr=y_errs,
+                fmt="o",
+                capsize=3,
+                markersize=5,
+                color=color_cycle[idx % len(color_cycle)],
+                label=f"{ene} keV",
+            )
+
+    ax.set_xticks(range(len(detectors)))
+    ax.set_xticklabels(detectors, rotation=90, fontsize=9)
+    # ax.set_xlabel("Detector Name", fontsize=12)
+
+    ylabel = "Efficiency" if plot_type == "efficiency" else "Effective Exposure [kg yr]"
+    eff_str = "efficiency" if plot_type == "efficiency" else "effective exposure"
+    title_prefix = f"{interaction} - " if interaction else ""
+    ax.set_ylabel(ylabel, fontsize=12)
+    ax.set_title(f"{title_prefix}per-detector {eff_str} - {selection}", fontsize=14)
+    ax.grid(True, linestyle=":", alpha=0.5)
+    ax.legend(title="Energy", bbox_to_anchor=(1.02, 1), loc="upper left", fontsize=10)
+
+    fig.tight_layout()
+
+    if save_path:
+        save_path = Path(save_path)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(save_path, dpi=400, bbox_inches="tight")
+
+    return fig, ax
+
+
+def plot_interaction_efficiency_comparison(
+    dict_1: Mapping,
+    dict_2: Mapping,
+    label_1: str = "dark-compton",
+    label_2: str = "axio-electric",
+    selection: str = "all",
+    eres_dict: Mapping | None = None,
+    plot_type: Literal["efficiency", "eff_exp"] = "efficiency",
+    group_by: Literal["detector_type", "detector_group"] = "detector_type",
+    detector_groups: Mapping | None = None,
+    save_path: str | Path | None = None,
+    figsize: tuple[float, float] = (10, 6),
+) -> tuple[plt.Figure, plt.Axes]:
+    """Plot an overlay comparison of efficiencies between two interactions.
+
+    Plots category-aggregated efficiencies (or effective exposures) vs simulated energy,
+    with solid lines for interaction 1 and dashed lines for interaction 2.
+
+    Parameters
+    ----------
+    dict_1 : Mapping
+        Either a per-detector ``efficiency_dict`` or formatted ``labels_dicts`` for interaction 1.
+    dict_2 : Mapping
+        Either a per-detector ``efficiency_dict`` or formatted ``labels_dicts`` for interaction 2.
+    label_1 : str
+        Name/label for interaction 1 (e.g. 'dark-compton').
+    label_2 : str
+        Name/label for interaction 2 (e.g. 'axio-electric').
+    selection : str
+        Selection cut key (e.g. 'all', 'valid-psd', 'sse', 'mse', 'non-sse').
+    eres_dict : Mapping, optional
+        Exposure/resolution dictionary required if passing raw ``efficiency_dict`` objects.
+    plot_type : str
+        Either 'efficiency' or 'eff_exp'.
+    group_by : str
+        Either 'detector_type' or 'detector_group'.
+    detector_groups : Mapping, optional
+        Detector groups mapping required if ``group_by='detector_group'``.
+    save_path : str | Path, optional
+        If provided, save the plot to this path.
+    figsize : tuple[float, float], optional
+        Figure size in inches, default (10, 6).
+
+    Returns
+    -------
+    tuple[plt.Figure, plt.Axes]
+        Matplotlib Figure and Axes objects.
+    """
+    sel_key = "mse" if selection.lower() in ("mse", "non-sse") else selection.lower()
+
+    def _ensure_labels_dicts(d: Mapping) -> Mapping:
+        if "all" in d or "valid-psd" in d:
+            return d
+        if eres_dict is None:
+            msg = (
+                "eres_dict is required when passing raw efficiency_dict to "
+                "plot_interaction_efficiency_comparison."
+            )
+            raise ValueError(msg)
+        return build_labels_dicts(
+            d,
+            eres_dict=eres_dict,
+            group_by=group_by,
+            detector_groups=detector_groups,
+        )
+
+    labels_1 = _ensure_labels_dicts(dict_1)
+    labels_2 = _ensure_labels_dicts(dict_2)
+
+    if sel_key not in labels_1 or sel_key not in labels_2:
+        msg = f"Selection '{selection}' not found in provided dictionaries."
+        raise ValueError(msg)
+
+    _, _, _, means_1 = labels_1[sel_key]
+    _, _, _, means_2 = labels_2[sel_key]
+
+    if group_by == "detector_type":
+        categories = list(_DET_TYPE_COLOR)
+        category_colors = _DET_TYPE_COLOR
+    else:
+        categories = _get_aggregate_categories(labels_1)
+        if not categories:
+            msg = "No detector-group aggregates found."
+            raise ValueError(msg)
+        color_cycle = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+        category_colors = {
+            cat: color_cycle[i % len(color_cycle)] for i, cat in enumerate(categories)
+        }
+
+    fig, ax = plt.subplots(figsize=figsize)
+
+    for cat in categories:
+        color = category_colors.get(cat, "tab:gray")
+
+        # Interaction 1
+        x1, y1, y1_unc = [], [], []
+        for ene in sorted(means_1.keys()):
+            entry = means_1[ene].get(cat)
+            if entry:
+                mult = entry["exposure"] if plot_type == "eff_exp" else 1.0
+                x1.append(ene)
+                y1.append(entry["value"] * mult)
+                y1_unc.append(entry["unc"] * mult)
+
+        if x1:
+            ax.errorbar(
+                x1,
+                y1,
+                yerr=y1_unc,
+                marker=".",
+                linestyle="-",
+                color=color,
+                label=f"{cat} ({label_1})",
+                capsize=3,
+            )
+
+        # Interaction 2
+        x2, y2, y2_unc = [], [], []
+        for ene in sorted(means_2.keys()):
+            entry = means_2[ene].get(cat)
+            if entry:
+                mult = entry["exposure"] if plot_type == "eff_exp" else 1.0
+                x2.append(ene)
+                y2.append(entry["value"] * mult)
+                y2_unc.append(entry["unc"] * mult)
+
+        if x2:
+            ax.errorbar(
+                x2,
+                y2,
+                yerr=y2_unc,
+                marker=".",
+                linestyle="--",
+                color=color,
+                label=f"{cat} ({label_2})",
+                capsize=3,
+            )
+
+    legend_elements = [
+        Line2D([0], [0], color=category_colors[cat], marker=".", ls="", label=cat)
+        for cat in categories
+        if cat in category_colors
+    ] + [
+        Line2D([0], [0], color="black", linestyle="-", label=label_1),
+        Line2D([0], [0], color="black", linestyle="--", label=label_2),
+    ]
+
+    ylabel = "Efficiency" if plot_type == "efficiency" else "Effective Exposure [kg yr]"
+    eff_str = "efficiency" if plot_type == "efficiency" else "effective exposure"
+    ax.set_xlabel("Simulated energy [keV]", fontsize=14)
+    ax.set_ylabel(ylabel, fontsize=14)
+    ax.set_title(
+        f"{eff_str} comparison: {label_1} vs {label_2} - {selection}",
+        fontsize=14,
+        pad=15,
+    )
+    ax.grid(True, linestyle=":", alpha=0.5)
+    ax.legend(handles=legend_elements, fontsize=10)
+
+    fig.tight_layout()
+
+    if save_path:
+        save_path = Path(save_path)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(save_path, dpi=400, bbox_inches="tight")
+
+    return fig, ax

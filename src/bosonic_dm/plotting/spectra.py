@@ -295,8 +295,8 @@ def plot_lar_survival_fraction(
                 sf[mask],
                 yerr=sf_sigma[mask],
                 fmt=".",
-                markersize=3,
-                linewidth=0.8,
+                markersize=6,
+                linewidth=1.2,
                 color=_DET_TYPE_COLOR[det_type],
             )
 
@@ -313,10 +313,11 @@ def plot_lar_survival_fraction(
 
             ax.axhline(1.0, color="grey", linestyle="--", linewidth=0.6)
             ax.set_ylim(-0.05, 1.15)
-            ax.set_xlabel("Energy in HPGe [keV]", fontsize=12)
-            ax.set_ylabel("Survival fraction", fontsize=12)
-            ax.set_title(det_type, fontsize=13)
-            ax.legend(fontsize=8, loc="lower left")
+            ax.set_xlabel("Energy in HPGe [keV]", fontsize=14)
+            ax.set_ylabel("Survival fraction", fontsize=14)
+            ax.set_title(det_type, fontsize=15)
+            ax.tick_params(axis="both", which="major", labelsize=12)
+            ax.legend(fontsize=11, loc="lower left")
 
         fig.tight_layout()
         fig.savefig(
@@ -528,8 +529,8 @@ def plot_aoe_survival_fraction(
                 sf[mask],
                 yerr=sf_sigma[mask],
                 fmt=".",
-                markersize=3,
-                linewidth=0.8,
+                markersize=6,
+                linewidth=1.2,
                 color="tab:blue",
                 label="SSE",
             )
@@ -539,8 +540,8 @@ def plot_aoe_survival_fraction(
                 sf_mse[mask],
                 yerr=sf_sigma_mse[mask],
                 fmt=".",
-                markersize=3,
-                linewidth=0.8,
+                markersize=6,
+                linewidth=1.2,
                 color="tab:orange",
                 label="non-SSE",
             )
@@ -558,10 +559,11 @@ def plot_aoe_survival_fraction(
 
             ax.axhline(1.0, color="grey", linestyle="--", linewidth=0.6)
             ax.set_ylim(-0.05, 1.15)
-            ax.set_xlabel("Energy in HPGe [keV]", fontsize=12)
-            ax.set_ylabel("Survival fraction", fontsize=12)
-            ax.set_title(det_type, fontsize=13)
-            ax.legend(fontsize=8, loc="lower left")
+            ax.set_xlabel("Energy in HPGe [keV]", fontsize=14)
+            ax.set_ylabel("Survival fraction", fontsize=14)
+            ax.set_title(det_type, fontsize=15)
+            ax.tick_params(axis="both", which="major", labelsize=12)
+            ax.legend(fontsize=11, loc="lower left")
 
         fig.tight_layout()
         fig.savefig(
