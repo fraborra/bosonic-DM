@@ -429,7 +429,7 @@ def build_labels_dicts(
         "all": ("All", "-.", "o"),
         "valid-psd": ("All - valid PSD", "-", "v"),
         "sse": ("SSE - valid PSD", "--", "s"),
-        "mse": ("MSE - valid PSD", ":", "^"),
+        "mse": ("non-SSE - valid PSD", ":", "^"),
     }
 
     for selection, (label, ls, marker) in list(labels_dicts.items()):

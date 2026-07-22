@@ -17,6 +17,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from tqdm.auto import tqdm
 
 from bosonic_dm.cuts import compute_group_exposure
+from bosonic_dm.dark_compton_generators import calculate_energies
 from bosonic_dm.plotting.utils import _DET_TYPE_COLOR, _DET_TYPE_MAP
 from bosonic_dm.stats import bayesian_efficiency
 
@@ -181,8 +182,6 @@ def plot_lar_survival_fraction(
         Directory where figures are saved.  Figures are named
         ``lar_survival_fraction_{ene}keV.png``.
     """
-    from bosonic_dm.dark_compton_generators import calculate_energies  # noqa: PLC0415
-
     save_path = Path(save_dir)
     save_path.mkdir(parents=True, exist_ok=True)
 
@@ -403,8 +402,6 @@ def plot_aoe_survival_fraction(
     Calculates survival fraction for SSE events relative to all valid PSD events,
     after applying LAr veto cut.
     """
-    from bosonic_dm.dark_compton_generators import calculate_energies  # noqa: PLC0415
-
     save_path = Path(save_dir)
     save_path.mkdir(parents=True, exist_ok=True)
 
@@ -497,6 +494,7 @@ def plot_aoe_survival_fraction(
 
             all_energy = subset["energy"].to_numpy()
             surv_energy = subset.filter(pl.col("is_single_site"))["energy"].to_numpy()
+            mse_energy = subset.filter(~pl.col("is_single_site"))["energy"].to_numpy()
 
             # Bin-by-bin counts
             n_total, bin_edges = np.histogram(
@@ -505,16 +503,23 @@ def plot_aoe_survival_fraction(
                 range=xlim,
             )
             n_surv, _ = np.histogram(surv_energy, bins=bin_edges)
+            n_mse, _ = np.histogram(mse_energy, bins=bin_edges)
             bin_centres = 0.5 * (bin_edges[:-1] + bin_edges[1:])
 
             # Bayesian survival fraction per bin
             mask = n_total > 0
             sf = np.full_like(n_total, np.nan, dtype=float)
             sf_sigma = np.full_like(n_total, np.nan, dtype=float)
+            sf_mse = np.full_like(n_total, np.nan, dtype=float)
+            sf_sigma_mse = np.full_like(n_total, np.nan, dtype=float)
 
             for i in np.where(mask)[0]:
                 sf[i], sf_sigma[i] = bayesian_efficiency(
                     int(n_surv[i]),
+                    int(n_total[i]),
+                )
+                sf_mse[i], sf_sigma_mse[i] = bayesian_efficiency(
+                    int(n_mse[i]),
                     int(n_total[i]),
                 )
 
@@ -525,7 +530,19 @@ def plot_aoe_survival_fraction(
                 fmt=".",
                 markersize=3,
                 linewidth=0.8,
-                color=_DET_TYPE_COLOR[det_type],
+                color="tab:blue",
+                label="SSE",
+            )
+
+            ax.errorbar(
+                bin_centres[mask],
+                sf_mse[mask],
+                yerr=sf_sigma_mse[mask],
+                fmt=".",
+                markersize=3,
+                linewidth=0.8,
+                color="tab:orange",
+                label="non-SSE",
             )
 
             # --- Shade the 3 FEP regions ------------------------------------
