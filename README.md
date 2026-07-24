@@ -1,150 +1,199 @@
 # bosonic-DM
 
-Python package for bosonic DM analysis for the LEGEND-200 experiment.
+Analysis tools for bosonic dark-matter searches with the LEGEND-200 experiment.
+The package provides reusable Python functions and command-line pipelines for
+simulation processing, efficiency estimation, plots, and background studies.
 
-## Installation
+> **Status:** under active development. In particular, the background-analysis
+> pipeline is not yet fully implemented. Treat its products as development
+> outputs until the analysis is validated.
 
-This project is managed using [Pixi](https://pixi.sh/).
+## Requirements and installation
 
-To install the environment and the package in editable mode, run:
+The project requires Python 3.11 or newer and uses [Pixi](https://pixi.sh/) to
+manage its environment. From the repository root:
 
 ```bash
-pixi run pip install -e .
+pixi install
+pixi run pip install --editable .
 ```
 
-## CLI Usage Guide
+Use `pixi run` for all project commands. To run the test suite:
 
-The package provides command-line interfaces for specific tasks without needing
-to run Jupyter notebooks.
+```bash
+pixi run test
+```
 
-### Run the simulation pipeline
+## Analysis configuration
 
-The simulation command resolves stage dependencies automatically. Missing energy
-inputs are recorded as skipped or partial work in the manifest instead of
-producing efficiencies with missing denominators.
+The `bosonic-dm` pipeline is configured with a YAML file. It expands environment
+variables in path values and creates the configured output directories as
+needed. No site-specific configuration is committed to this repository, so
+create one for your data location, for example `configs/local.yaml`:
+
+```yaml
+schema_version: 1
+
+production:
+  version: v2.1.5
+  reference_root: /path/to/legend/reference
+  # metadata_override: /optional/path/to/metadata
+
+paths:
+  simulation_root: /path/to/simulation
+  data_root: data/v1
+  # Optional; these default to data/inputs, plots, and tmp.
+  inputs_root: data/inputs
+  plots_root: plots
+  temporary_root: tmp
+
+analysis:
+  simulated_energies_keV: [200, 300, 400]
+  fep_window:
+    half_width_fwhm: 1.0
+  selections: []
+  # Relative paths are resolved below inputs_root.
+  detector_groups: dictionaries/detector-grouping/groups_dict.yaml
+
+interactions:
+  axio-electric:
+    job_template: axio-electric_{energy}keV
+  dark-compton:
+    job_template: dark-compton_{energy}keV
+    make_lar_survival_plots: true
+    make_energy_spectra_plots: true
+    make_aoe_survival_plots: true
+
+background:
+  pet_glob: /path/to/pet/*.lh5
+  apply_lar_veto: true
+  comparison_cut_profile: default
+  energy_ranges_keV: [[0, 3000]]
+  bin_widths_keV: [1]
+
+output:
+  overwrite: false
+  save_plots: true
+  write_manifest: true
+```
+
+Each interaction's `job_template` must contain `{energy}`. The simulation
+pipeline searches for corresponding converted and step-tier LH5 files below
+`simulation_root/generated/tier/`. Calibration and other analysis dictionaries
+are stored under `data_root/dictionaries/`; input detector-group dictionaries
+are supplied in `data/inputs/`.
+
+## Main CLI
+
+Run a single simulated interaction:
 
 ```bash
 pixi run bosonic-dm simulation \
-  --config configs/nersc.yaml \
+  --config configs/local.yaml \
   --interaction dark-compton
 ```
 
-To run both simulation interactions, pass them to the `all` command:
+Run both simulation interactions and then the background pipeline:
+
+```bash
+pixi run bosonic-dm all --config configs/local.yaml
+```
+
+The `all` command accepts a subset with `--interactions`, while `simulation`
+accepts exactly one `--interaction`:
 
 ```bash
 pixi run bosonic-dm all \
-  --config configs/nersc.yaml \
+  --config configs/local.yaml \
   --interactions axio-electric dark-compton
 ```
 
-`simulation` currently runs one interaction at a time with `--interaction`,
-while `all` accepts one or more interactions with `--interactions` and also runs
-the background analysis. The planned CLI improvement is to make `simulation`
-accept multiple interactions as well.
-
-Run only the background pipeline with:
+Run only the background pipeline:
 
 ```bash
-pixi run bosonic-dm background --config configs/nersc.yaml
+pixi run bosonic-dm background --config configs/local.yaml
 ```
 
-Use `--stage` to select specific pipeline stages and `--overwrite` to replace
-existing products. For example:
+Pass `--overwrite` to replace existing products. `--stage` accepts one or more
+stages. Simulation stages are `count-vertices`, `build-dataset`, `efficiencies`,
+and `plots`; dependencies are added automatically. For example, requesting
+`plots` runs all required preceding stages:
 
 ```bash
 pixi run bosonic-dm simulation \
-  --config configs/nersc.yaml \
+  --config configs/local.yaml \
   --interaction dark-compton \
   --stage plots \
   --overwrite
 ```
 
-Calibration-derived resolution dictionaries are configured separately through
-`paths.calibration_dictionaries_root`; simulation products are written below
-`paths.data_root`.
+If enabled in `output.write_manifest`, each simulation run writes
+`<data_root>/<interaction>_manifest.yaml`. The manifest records requested and
+resolved stages, output paths, skipped work, and non-fatal warnings. In
+particular, missing energy inputs are reported rather than used to produce an
+efficiency with an incomplete denominator.
+
+## Additional commands
+
+### Generate Dark Compton macros
+
+Generate GPS macro YAML files in `tmp/` for the supplied dark-matter masses
+(keV):
+
+```bash
+pixi run generate-dark-compton --energies 200 300 500
+```
+
+Without `--energies`, it generates masses from 200 to 1000 keV in 100 keV steps.
+The output files are `tmp/generators-dark_compton.yaml` and
+`tmp/simconfig-dark_compton.yaml`.
+
+### Assign detectors to simulated vertices
+
+Map vertices in one or more LH5 files to LEGEND-200 HPGe detectors. Add `--save`
+to write the detector field into the LH5 files, and `--counts-yaml` to save
+aggregate counts:
+
+```bash
+pixi run assign-detectors \
+  --gdml /path/to/l200.gdml \
+  --lh5-file /path/to/input-1.lh5 /path/to/input-2.lh5 \
+  --counts-yaml data/v1/dictionaries/dark-compton_primary-counts.yaml
+```
 
 ### Migrate legacy YAML files
 
-Rewrite legacy dictionaries containing NumPy/Python YAML tags:
+Rewrite legacy dictionaries containing NumPy/Python YAML tags using the safe
+YAML format:
 
 ```bash
-pixi run migrate-yaml \
-  data/v1/dictionaries/eres_per_det_tot.yaml \
-  data/v1/dictionaries/rawid_by_det_type.yaml \
-  --in-place
+pixi run migrate-yaml data/v1/dictionaries/eres_per_det_tot.yaml --in-place
 ```
 
-The migration is atomic and verifies that the rewritten file can be read back
-using the safe YAML loader.
+Migration is atomic and verifies that the rewritten file is readable by the safe
+YAML loader.
 
-### Generate Dark Compton Macros
-
-Generates the `generators-dark_compton.yaml` and `simconfig-dark_compton.yaml`
-GPS macros inside the `tmp/` directory.
-
-**Command:**
-
-```bash
-pixi run generate-dark-compton [OPTIONS]
-```
-
-**Options:**
-
-- `-e, --energies`: List of dark matter mass ($m_{DM}$) values in keV to
-  simulate. If not provided, it defaults to
-  `200 300 400 500 600 700 800 900 1000`.
-
-**Example:**
-
-```bash
-pixi run generate-dark-compton -e 200 300 500
-```
-
-### Check Dark Compton Stats
-
-Calculates the statistical uncertainties of the detection efficiencies for
-individual detectors to estimate how many additional events need to be generated
-to satisfy relative statistical uncertainty requirements.
-
-**Command:**
+### Check Dark Compton simulation statistics
 
 ```bash
 pixi run check-dark-compton-stats
 ```
 
-## Project Structure
+This is currently a site-specific diagnostic: it uses a hard-coded LEGEND
+production reference path and reads Dark Compton products below `data/v1/`.
 
-- `src/bosonic_dm/`: Core library code.
-  - `cli.py`: Command-line entry point for `simulation`, `background`, and
-    `all`.
-  - `config.py`, `models.py`, `yaml_io.py`: Configuration, result models, and
-    YAML I/O.
-  - `pipeline/`: High-level orchestration for simulation and background
-    analyses.
-  - `cuts.py`: Quality cuts and filtering logic.
-  - `efficiency.py`: Efficiency computations.
-  - `io.py`: Parquet and awkward data manipulation.
-  - `resolution.py`: Energy resolution (FWHM) extraction.
-  - `stats.py`: Statistical utilities.
-  - `utils.py`: General utilities.
-  - `plotting/`: Subpackage for plotting logic (AoE, spectra, resolution).
-- `notebooks/`: Exploratory Jupyter notebooks.
-- `data/v1/`: Parquet datasets and dictionaries.
-- `tmp/`: Generated temporary files and macros.
+## Repository layout
 
-The intended flow is:
+- `src/bosonic_dm/` — core library and CLI entry points.
+- `src/bosonic_dm/pipeline/` — simulation and background orchestration.
+- `src/bosonic_dm/plotting/` — analysis plotting routines.
+- `data/inputs/` — version-controlled input dictionaries.
+- `notebooks/` — exploratory and legacy notebooks.
+- `tests/` — automated tests.
 
-```text
-CLI (cli.py) → configuration (config.py) → pipeline/
-                                      ├── simulation.py → tables, efficiencies, plots
-                                      └── background.py → spectra, summaries, plots
-```
+The CLI is deliberately thin; analysis code is available from the Python API for
+use in scripts and notebooks.
 
-The CLI is deliberately thin: scientific logic belongs in the Python API and the
-pipeline modules, so the same analysis can be called from scripts or notebooks.
+## License
 
-## 🚧 Work in Progress
-
-- **Physics Data Analysis**: The API and CLI pipelines for background and
-  physics data analysis (`src/bosonic_dm/pipeline/background.py`) are still
-  under construction and currently lack full implementation.
+See [LICENSE](LICENSE).
