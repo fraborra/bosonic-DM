@@ -17,9 +17,9 @@ from matplotlib.backends.backend_pdf import PdfPages
 from tqdm.auto import tqdm
 
 from bosonic_dm.cuts import compute_group_exposure
-from bosonic_dm.dark_compton_generators import calculate_energies
 from bosonic_dm.plotting.utils import _DET_TYPE_COLOR, _DET_TYPE_MAP
 from bosonic_dm.stats import bayesian_efficiency
+from bosonic_dm.utils import calculate_energies
 
 logger = logging.getLogger(__name__)
 

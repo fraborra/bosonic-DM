@@ -17,6 +17,7 @@
 - Python package; see `pyproject.toml` for deps, build config, and Pixi config
 - ALWAYS run commands via `pixi run`
 - ALWAYS use `python3`, never `python`
+- To run tests, ALWAYS use `pixi run -e test test` (the `pytest` dependency is only available in the `test` environment)
 
 ## Linting & Pre-commit
 

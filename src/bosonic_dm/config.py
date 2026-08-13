@@ -115,7 +115,15 @@ def load_analysis_config(path: str | Path) -> AnalysisConfig:
     )
 
     raw_analysis = raw_config["analysis"]
-    energies = tuple(sorted(set(raw_analysis["simulated_energies_keV"])))
+    energies_raw = raw_analysis["simulated_energies_keV"]
+    if isinstance(energies_raw, dict):
+        start = energies_raw["start"]
+        stop = energies_raw["stop"]
+        step = energies_raw.get("step", 10)
+        energies_list = list(range(start, stop + 1, step))
+    else:
+        energies_list = energies_raw
+    energies = tuple(sorted(set(energies_list)))
     if any(e <= 0 for e in energies):
         msg = "Energies must be positive."
         raise ValueError(msg)
