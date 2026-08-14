@@ -203,4 +203,5 @@ default = { solve-group = "default" }
 test = { features = ["test"], solve-group = "default" }
 
 [tool.pixi.tasks]
-test = "python3 -m pytest"
+# test = "python3 -m pytest"
+test = { cmd = "python3 -m pytest", default-environment = "test" }
