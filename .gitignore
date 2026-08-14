@@ -11,6 +11,7 @@ tmp/
 # not useful .md files
 *.md
 !README.md
+!BACKGROUND_ANALYSIS_IMPLEMENTATION_PLAN.md
 
 # data files
 *.parquet
