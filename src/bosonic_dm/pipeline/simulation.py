@@ -195,7 +195,7 @@ def run_simulation_analysis(
                 if do_overwrite:
                     vertex_counts = {}
 
-                for energy in missing_count_energies:
+                for energy in tqdm(missing_count_energies, desc="Energies", position=0):
                     files = stp_files.get(energy, [])
                     if not files:
                         _warn(

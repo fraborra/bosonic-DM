@@ -19,7 +19,6 @@ from dbetto import Props
 from lgdo import lh5
 from numpy.typing import NDArray
 from pygeomtools import get_sensvol_metadata
-from tqdm.auto import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +60,7 @@ def build_detector_map(gdml: str | Path) -> dict:
     detectors = [
         name for name in reg.physicalVolumeDict if name and name[0] in _HPGE_PREFIXES
     ]
-    logger.info("Found %d HPGe detectors in GDML", len(detectors))
+    logger.debug("Found %d HPGe detectors in GDML", len(detectors))
 
     det_map: dict = {}
     for det_name in detectors:
@@ -135,7 +134,7 @@ def _process_single_file(
             evtids = np.arange(len(xloc))
 
     n_vertices = len(xloc)
-    logger.info("Read %d vertices from %s", n_vertices, lh5_file)
+    logger.debug("Read %d vertices from %s", n_vertices, lh5_file)
 
     # Convert to mm for pygeomhpges.
     x_mm = xloc * _M_TO_MM
@@ -149,7 +148,7 @@ def _process_single_file(
 
     for det_name, info in det_map.items():
         if not np.any(unassigned):
-            logger.info("All vertices assigned, stopping early")
+            logger.debug("All vertices assigned, stopping early")
             break
 
         pos = info["pos"]
@@ -190,7 +189,7 @@ def _process_single_file(
             )
 
     n_assigned = int(np.sum(~unassigned))
-    logger.info(
+    logger.debug(
         "Assigned %d / %d vertices (%.1f%%)",
         n_assigned,
         n_vertices,
@@ -201,7 +200,7 @@ def _process_single_file(
     if save:
         det_lgdo = lgdo.Array(nda=det_names)
         lh5.write(det_lgdo, "det", str(lh5_file), group=vtx_group, wo_mode="append")
-        logger.info("Wrote '%s/det' to %s", vtx_group, lh5_file)
+        logger.debug("Wrote '%s/det' to %s", vtx_group, lh5_file)
 
     if return_evtids:
         return det_names, evtids
@@ -311,8 +310,8 @@ def assign_detectors_to_vertices(
 
     results: list[NDArray] = []
     evtids_list: list[NDArray] = []
-    for i, lh5_file in enumerate(tqdm(lh5_files, desc="Processing files", unit="file")):
-        logger.info("Processing file %d/%d: %s", i + 1, len(lh5_files), lh5_file)
+    for i, lh5_file in enumerate(lh5_files):
+        logger.debug("Processing file %d/%d: %s", i + 1, len(lh5_files), lh5_file)
         if return_evtids:
             det_names, evtids = _process_single_file(
                 lh5_file, det_map, vtx_group, save=save, return_evtids=True
@@ -330,7 +329,7 @@ def assign_detectors_to_vertices(
         counts_path = Path(counts_yaml)
         counts_path.parent.mkdir(parents=True, exist_ok=True)
         Props.write_to(counts_path, counts)
-        logger.info(
+        logger.debug(
             "Wrote aggregate vertex counts (%d detectors) to %s",
             len(counts),
             counts_path,
