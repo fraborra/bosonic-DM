@@ -69,9 +69,7 @@ def _make_config(
 
 def test_background_default_stage_is_build_dataset() -> None:
     assert BACKGROUND_DEFAULT_STAGES == ("build-dataset",)
-    assert resolve_background_stages(BACKGROUND_DEFAULT_STAGES) == (
-        "build-dataset",
-    )
+    assert resolve_background_stages(BACKGROUND_DEFAULT_STAGES) == ("build-dataset",)
 
 
 def test_unknown_background_stage_is_rejected() -> None:
@@ -174,7 +172,7 @@ def test_manifest_can_be_disabled(tmp_path: Path) -> None:
 @patch("bosonic_dm.pipeline.background.build_background_dataset")
 @patch("bosonic_dm.pipeline.background.build_analysis_context")
 def test_save_plots_populates_plot_paths_and_manifest(
-    mock_context: MagicMock,
+    mock_context: MagicMock,  # noqa: ARG001
     mock_build: MagicMock,
     mock_spectrum: MagicMock,
     mock_summary: MagicMock,
@@ -190,9 +188,7 @@ def test_save_plots_populates_plot_paths_and_manifest(
         selections=config.selections,
         interactions=config.interactions,
         background=config.background,
-        output=OutputConfig(
-            overwrite=False, save_plots=True, write_manifest=True
-        ),
+        output=OutputConfig(overwrite=False, save_plots=True, write_manifest=True),
         detector_groups=config.detector_groups,
     )
     pet_path = tmp_path / "pet/l200-p03-r000-phy-tier_pet.lh5"
@@ -215,7 +211,7 @@ def test_save_plots_populates_plot_paths_and_manifest(
     artifacts = run_background_analysis(config)
 
     assert artifacts.stage_status["build-dataset"] == "completed"
-    # One energy_range × one bin_width = 1 spectrum + 1 summary = 2 plots
+    # One energy_range x one bin_width = 1 spectrum + 1 summary = 2 plots
     assert len(artifacts.plot_paths) == 2
     assert spectrum_path in artifacts.plot_paths
     assert summary_path in artifacts.plot_paths
@@ -224,4 +220,3 @@ def test_save_plots_populates_plot_paths_and_manifest(
 
     manifest = read_yaml(artifacts.manifest_path)
     assert len(manifest["plot_paths"]) == 2
-

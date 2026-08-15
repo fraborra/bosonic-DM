@@ -4,9 +4,9 @@ Analysis tools for bosonic dark-matter searches with the LEGEND-200 experiment.
 The package provides reusable Python functions and command-line pipelines for
 simulation processing, efficiency estimation, plots, and background studies.
 
-> **Status:** under active development. In particular, the background-analysis
-> pipeline is not yet fully implemented. Treat its products as development
-> outputs until the analysis is validated.
+> **Status:** under active development. The run-aware background dataset and
+> diagnostic plots are implemented, but the products must still be validated on
+> production data before they are used for inference.
 
 ## Requirements and installation
 
@@ -18,7 +18,8 @@ pixi install
 pixi run pip install --editable .
 ```
 
-Use `pixi run` for all project commands. To run the test suite:
+Use `pixi run` for all project commands. To run the test suite in the Pixi test
+environment:
 
 ```bash
 pixi run test
@@ -113,6 +114,66 @@ Run only the background pipeline:
 ```bash
 pixi run bosonic-dm background --config configs/local.yaml
 ```
+
+### Background dataset workflow
+
+The background command reads PET-tier LH5 files one at a time and writes a
+run-aware, Hive-partitioned Parquet dataset:
+
+```text
+<data_root>/parquet/background/
+  period=pXX/
+    run=rXXX/
+      <PET-source-name>.parquet
+```
+
+Each run is mapped with the channel map valid at its physics start key. Only
+multiplicity-one events are flattened permanently; the remaining selections are
+stored as boolean columns so they can be changed or compared from a notebook
+without rereading LH5 data:
+
+- `passes_baseline`: good channel, no pulser or forced trigger, no offline muon,
+  and an HPGe coincidence.
+- `passes_default`: baseline plus the standard BB-like selection.
+- `passes_without_bb_like`: baseline without the BB-like requirement, while
+  retaining the delayed-discharge veto used by the legacy background notebook.
+- `passes_lar`: no SiPM coincidence.
+- `passes_analysis`: default selection combined with the configured LAr-veto
+  behavior.
+- `passes_comparison`: the configured comparison profile combined with the same
+  LAr-veto behavior.
+
+For example, the dataset can be inspected lazily with Polars:
+
+```python
+from pathlib import Path
+
+import polars as pl
+
+dataset_root = Path("data/v1/parquet/background")
+background = pl.scan_parquet(dataset_root, hive_partitioning=True)
+
+selected = background.filter(pl.col("passes_analysis"))
+cutflow = background.select(
+    pl.len().alias("multiplicity_one"),
+    pl.col("passes_baseline").sum().alias("baseline"),
+    pl.col("passes_default").sum().alias("default"),
+    pl.col("passes_lar").sum().alias("lar"),
+    pl.col("passes_analysis").sum().alias("analysis"),
+).collect()
+```
+
+When `output.save_plots` is enabled, the pipeline also writes spectrum overlays
+and a partition summary below `<plots_root>/background/`. These are diagnostic
+checks based on event counts; they are not exposure-normalized fit inputs. The
+comparison sample is correlated with the default sample, so its current ratio
+error bars must not be interpreted as an inference-ready uncertainty.
+
+The run also writes `<data_root>/background_manifest.yaml`, listing discovered
+PET files, written or reused partitions, plots, warnings, and stage status.
+Existing partitions are reused based on their presence. Until cache
+fingerprinting is implemented, use `--overwrite` whenever the PET production,
+metadata, cut definitions, LAr setting, or comparison profile changes.
 
 Pass `--overwrite` to replace existing products. `--stage` accepts one or more
 stages. Simulation stages are `count-vertices`, `build-dataset`, `efficiencies`,
@@ -264,7 +325,6 @@ individual detectors to estimate how many additional events need to be generated
 to satisfy relative statistical uncertainty requirements.
 
 **Command:**
->>>>>>> origin/main
 
 ```bash
 pixi run check-dark-compton-stats

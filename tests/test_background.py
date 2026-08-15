@@ -201,7 +201,8 @@ def test_atomic_write_does_not_leave_partial_fragment(
         **kwargs: object,
     ) -> None:
         del args, kwargs
-        raise OSError("simulated write failure")
+        msg = "simulated write failure"
+        raise OSError(msg)
 
     monkeypatch.setattr(pl.DataFrame, "write_parquet", fail_write)
 

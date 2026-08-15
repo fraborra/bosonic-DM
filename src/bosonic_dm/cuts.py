@@ -323,17 +323,15 @@ def add_background_cut_flags(
     with_profiles = df.with_columns(
         baseline.alias("passes_baseline"),
         (baseline & pl.col("is_bb_like")).alias("passes_default"),
-        (baseline & ~pl.col("is_delayed_discharge")).alias(
-            "passes_without_bb_like"
-        ),
+        (baseline & ~pl.col("is_delayed_discharge")).alias("passes_without_bb_like"),
         (~pl.col("coincident_spms")).alias("passes_lar"),
     )
     lar_condition = pl.col("passes_lar") if apply_lar_veto else pl.lit(True)
     return with_profiles.with_columns(
         (pl.col("passes_default") & lar_condition).alias("passes_analysis"),
-        (
-            pl.col(profile_columns[comparison_cut_profile]) & lar_condition
-        ).alias("passes_comparison"),
+        (pl.col(profile_columns[comparison_cut_profile]) & lar_condition).alias(
+            "passes_comparison"
+        ),
     )
 
 

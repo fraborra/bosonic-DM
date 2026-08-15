@@ -5,9 +5,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import matplotlib.image as mpimg
 import numpy as np
 import polars as pl
-import pytest
 
 from bosonic_dm.plotting.background import (
     plot_background_partition_summary,
@@ -99,8 +99,6 @@ class TestPlotBackgroundSpectrum:
 
     def test_spectrum_plot_both_panels_present(self, tmp_path: Path) -> None:
         """The saved figure has exactly two axes (spectrum + ratio)."""
-        import matplotlib.image as mpimg
-
         dataset_root = _make_dataset(tmp_path)
         output_dir = tmp_path / "plots" / "background"
 
@@ -167,15 +165,13 @@ class TestPlotBackgroundPartitionSummary:
         dataset_root = _make_dataset(tmp_path)
         output_dir = tmp_path / "plots" / "background"
 
-        path, warnings = plot_background_partition_summary(dataset_root, output_dir)
+        path, _warnings = plot_background_partition_summary(dataset_root, output_dir)
 
         assert path.exists()
         assert path.name == "partition_summary.png"
         assert path.parent == output_dir
 
-    def test_partition_summary_warns_on_empty_partitions(
-        self, tmp_path: Path
-    ) -> None:
+    def test_partition_summary_warns_on_empty_partitions(self, tmp_path: Path) -> None:
         dataset_root = _make_dataset_with_empty_partition(tmp_path)
         output_dir = tmp_path / "plots" / "background"
 
@@ -186,9 +182,7 @@ class TestPlotBackgroundPartitionSummary:
         assert "p04/r001" in warnings[0]
         assert "zero" in warnings[0].lower()
 
-    def test_no_warnings_when_all_partitions_have_events(
-        self, tmp_path: Path
-    ) -> None:
+    def test_no_warnings_when_all_partitions_have_events(self, tmp_path: Path) -> None:
         dataset_root = _make_dataset(tmp_path)
         output_dir = tmp_path / "plots" / "background"
 
@@ -196,9 +190,7 @@ class TestPlotBackgroundPartitionSummary:
 
         assert warnings == []
 
-    def test_partition_summary_with_exposure_overlay(
-        self, tmp_path: Path
-    ) -> None:
+    def test_partition_summary_with_exposure_overlay(self, tmp_path: Path) -> None:
         dataset_root = _make_dataset(tmp_path)
         output_dir = tmp_path / "plots" / "background"
 
@@ -209,4 +201,3 @@ class TestPlotBackgroundPartitionSummary:
 
         assert path.exists()
         assert warnings == []
-

@@ -5,11 +5,11 @@
 
 from __future__ import annotations
 
-import glob
 import logging
 from collections.abc import Sequence
-import dbetto
 from pathlib import Path
+
+import dbetto
 
 from bosonic_dm.background import build_background_dataset
 from bosonic_dm.config import AnalysisConfig
@@ -53,7 +53,7 @@ def discover_background_inputs(pet_glob: str) -> tuple[Path, ...]:
     return tuple(
         sorted(
             path
-            for match in glob.glob(pet_glob, recursive=True)
+            for match in Path.glob(pet_glob, recursive=True)
             if (path := Path(match)).is_file()
         )
     )
@@ -132,16 +132,19 @@ def run_background_analysis(
     prod = config.production
     base = prod.reference_root / prod.version
     config_json_path = base / "config.json"
-    
+
     resolved_pet_glob = config.background.pet_glob
 
     if not resolved_pet_glob:
         try:
             prod_cfg = dbetto.Props.read_from(str(config_json_path), subst_pathvar=True)
-            resolved_pet_glob = f"{prod_cfg['setups']['l200']['paths']['tier_pet']}/phy/*.lh5"
+            resolved_pet_glob = (
+                f"{prod_cfg['setups']['l200']['paths']['tier_pet']}/phy/*.lh5"
+            )
         except Exception as e:
             logger.error(f"Could not resolve tier_pet from {config_json_path}: {e}")
-            raise ValueError("No pet_glob provided in yaml and could not read config.json") from e
+            msg = "No pet_glob provided in yaml and could not read config.json"
+            raise ValueError(msg) from e
 
     pet_files = discover_background_inputs(resolved_pet_glob)
     dataset_path = background_dataset_path(config)

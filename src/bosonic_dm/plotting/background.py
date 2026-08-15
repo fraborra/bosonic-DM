@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Sequence
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -62,9 +61,7 @@ def plot_background_spectrum(
 
     lf = pl.scan_parquet(str(dataset_path), hive_partitioning=True)
     df = (
-        lf.filter(
-            (pl.col("energy") >= emin) & (pl.col("energy") < emax)
-        )
+        lf.filter((pl.col("energy") >= emin) & (pl.col("energy") < emax))
         .select("energy", "passes_analysis", "passes_comparison")
         .collect()
     )
@@ -90,7 +87,8 @@ def plot_background_spectrum(
 
     # --- Figure ---------------------------------------------------------------
     fig, (ax_spec, ax_ratio) = plt.subplots(
-        2, 1,
+        2,
+        1,
         figsize=(10, 7),
         sharex=True,
         gridspec_kw={"height_ratios": [3, 1], "hspace": 0.08},
@@ -116,7 +114,7 @@ def plot_background_spectrum(
     ax_spec.legend(fontsize=9, loc="upper right", frameon=True)
     # ax_spec.grid(True, linestyle=":", alpha=0.5)
     ax_spec.set_title(
-        f"Background spectrum  [{emin}–{emax}] keV, {bin_width_keV} keV bins",
+        f"Background spectrum  [{emin}-{emax}] keV, {bin_width_keV} keV bins",
         fontsize=12,
     )
 
@@ -219,7 +217,7 @@ def plot_background_partition_summary(
 
     periods = summary["period"].to_list()
     runs = summary["run"].to_list()
-    labels = [f"{p}/{r}" for p, r in zip(periods, runs)]
+    labels = [f"{p}/{r}" for p, r in zip(periods, runs, strict=True)]
     total = summary["total"].to_numpy().astype(float)
     n_analysis = summary["n_analysis"].to_numpy().astype(float)
     n_comparison = summary["n_comparison"].to_numpy().astype(float)
@@ -227,23 +225,21 @@ def plot_background_partition_summary(
     warnings: list[str] = []
     for i, label in enumerate(labels):
         if n_analysis[i] == 0:
-            warnings.append(
-                f"Partition {label} has zero events passing analysis cuts"
-            )
+            warnings.append(f"Partition {label} has zero events passing analysis cuts")
 
     # Normalise by exposure when available
     if exposure_by_partition:
-        for i, (p, r) in enumerate(zip(periods, runs)):
+        for i, (p, r) in enumerate(zip(periods, runs, strict=True)):
             expo = exposure_by_partition.get((p, r))
             if expo is not None and expo > 0:
                 total[i] /= expo
                 n_analysis[i] /= expo
                 n_comparison[i] /= expo
         ylabel = "Counts / (kg · yr)"
-        title = "Background partitions — event rate"
+        title = "Background partitions - event rate"
     else:
         ylabel = "Event count"
-        title = "Background partitions — event counts"
+        title = "Background partitions - event counts"
 
     x = np.arange(len(labels))
     bar_width = 0.25
