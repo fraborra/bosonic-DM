@@ -1,3 +1,6 @@
+# Copyright (C) 2026 Francesco Borra
+#
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
@@ -6,6 +9,7 @@ import pytest
 
 from bosonic_dm.cli import main
 from bosonic_dm.models import AnalysisArtifacts
+from bosonic_dm.pipeline.background import BACKGROUND_DEFAULT_STAGES
 
 
 @pytest.fixture
@@ -114,3 +118,4 @@ def test_background_command(mock_run, mock_load, mock_artifacts):
 
     kwargs = mock_run.call_args[1]
     assert kwargs["overwrite"] is None
+    assert kwargs["stages"] == BACKGROUND_DEFAULT_STAGES

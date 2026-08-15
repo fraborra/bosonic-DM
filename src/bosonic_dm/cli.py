@@ -12,6 +12,7 @@ from pathlib import Path
 
 from bosonic_dm.config import load_analysis_config
 from bosonic_dm.pipeline import run_background_analysis, run_simulation_analysis
+from bosonic_dm.pipeline.background import BACKGROUND_DEFAULT_STAGES
 from bosonic_dm.pipeline.simulation import SIMULATION_DEFAULT_STAGES
 
 logger = logging.getLogger(__name__)
@@ -86,7 +87,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
 
     elif args.command == "background":
-        stages = args.stage or ("build-dataset", "summaries", "plots")
+        stages = args.stage or BACKGROUND_DEFAULT_STAGES
         artifacts = run_background_analysis(config, stages=stages, overwrite=overwrite)
         logger.info("Background artifacts created: %s", artifacts)
 
@@ -99,7 +100,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
 
         # Run background
-        stages = args.stage or ("build-dataset", "summaries", "plots")
+        stages = args.stage or BACKGROUND_DEFAULT_STAGES
         run_background_analysis(config, stages=stages, overwrite=overwrite)
         logger.info("All analyses completed.")
 

@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
@@ -23,10 +23,32 @@ class AnalysisContext:
     timestamp: str
     lmeta: LegendMetadata
     eres_dict: dict[str, Any]
+    _run_start_keys: dict[tuple[str, str], str] = field(
+        default_factory=dict, init=False, repr=False
+    )
 
     def get_channelmap(self, on: str) -> Any:
         """Get the channel map for a given timestamp, caching it to avoid repeated filesystem reads."""
         return get_channelmap_cached(self.lmeta, on)
+
+    def get_run_start_key(self, period: str, run: str) -> str:
+        """Return and cache the physics start key for one period and run."""
+        cache_key = (period, run)
+        if cache_key in self._run_start_keys:
+            return self._run_start_keys[cache_key]
+
+        try:
+            start_key = self.lmeta.dataprod.runinfo[period][run].phy.start_key
+        except (KeyError, TypeError, AttributeError) as exc:
+            msg = f"Could not determine physics start_key for {period}-{run}."
+            raise ValueError(msg) from exc
+
+        self._run_start_keys[cache_key] = start_key
+        return start_key
+
+    def get_channelmap_for_run(self, period: str, run: str) -> Any:
+        """Return the cached channel map valid for one period and run."""
+        return self.get_channelmap(self.get_run_start_key(period, run))
 
     def get_channelmap_simulation(self) -> Any:
         """Return a representative channelmap for simulation by using the first available physics run."""
@@ -45,7 +67,11 @@ class AnalysisContext:
 logger = logging.getLogger(__name__)
 
 
-def build_analysis_context(config: AnalysisConfig) -> AnalysisContext:
+def build_analysis_context(
+    config: AnalysisConfig,
+    *,
+    load_eres: bool = True,
+) -> AnalysisContext:
     """Initialize metadata and channel map once to avoid repeated queries."""
     timestamp = datetime.now().isoformat(timespec="seconds")
     prod = config.production
@@ -63,10 +89,10 @@ def build_analysis_context(config: AnalysisConfig) -> AnalysisContext:
         metadata_path,
     )
     lmeta = LegendMetadata(path=metadata_path)
-    # Load eres_dict
-    # Usually it's located in the dictionaries_root configured by the user
-    eres_dict_path = config.paths.inputs_root / "dictionaries" / "eres_dict.yaml"
-    eres_dict = dbetto.Props.read_from(str(eres_dict_path))
+    eres_dict: dict[str, Any] = {}
+    if load_eres:
+        eres_dict_path = config.paths.inputs_root / "dictionaries" / "eres_dict.yaml"
+        eres_dict = dbetto.Props.read_from(str(eres_dict_path))
 
     return AnalysisContext(
         config=config,

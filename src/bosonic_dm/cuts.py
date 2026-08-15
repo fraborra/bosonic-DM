@@ -17,6 +17,38 @@ import polars as pl
 
 logger = logging.getLogger(__name__)
 
+PET_DATASET_SCHEMA: dict[str, pl.DataType] = {
+    "period": pl.String,
+    "run": pl.String,
+    "timestamp": pl.Float64,
+    "is_forced": pl.Boolean,
+    "coincident_muon": pl.Boolean,
+    "coincident_muon_offline": pl.Boolean,
+    "coincident_spms": pl.Boolean,
+    "coincident_spms_experimental": pl.Boolean,
+    "coincident_puls": pl.Boolean,
+    "coincident_geds": pl.Boolean,
+    "hit_idx": pl.Int64,
+    "rawid": pl.Int64,
+    "t0": pl.Float64,
+    "energy": pl.Float64,
+    "daqenergy": pl.Float64,
+    "multiplicity": pl.Int64,
+    "detector_name": pl.String,
+    "is_bb_like": pl.Boolean,
+    "is_good_channel": pl.Boolean,
+    "is_delayed_discharge": pl.Boolean,
+    "psd_is_good": pl.Boolean,
+    "psd_is_bb_like": pl.Boolean,
+    "psd_drift_time": pl.Float64,
+    "psd_low_aoe_value": pl.Float64,
+    "psd_low_aoe_is_good": pl.Boolean,
+    "psd_low_aoe_is_single_site": pl.Boolean,
+    "psd_ann_value": pl.Float64,
+    "psd_ann_is_good": pl.Boolean,
+    "psd_ann_is_single_site": pl.Boolean,
+}
+
 DEFAULT_FIELD_MASK: list[str] = [
     "trigger/timestamp",
     "trigger/is_forced",
@@ -25,6 +57,7 @@ DEFAULT_FIELD_MASK: list[str] = [
     "coincident/spms",
     "coincident/spms_experimental",
     "coincident/puls",
+    "coincident/geds",
     "geds/hit_idx",
     "geds/rawid",
     "geds/t0",
@@ -91,6 +124,16 @@ def _build_rawid_name_map(chmap: object) -> dict[int, str]:
     return result
 
 
+def build_rawid_name_map(chmap: object) -> dict[int, str]:
+    """Return the DAQ raw-ID to detector-name mapping for a channel map."""
+    return _build_rawid_name_map(chmap)
+
+
+def parse_pet_period_run(filepath: str | Path) -> tuple[str, str]:
+    """Return period and run identifiers parsed from a PET filename."""
+    return _parse_period_run(filepath)
+
+
 def read_pet_data(
     lh5_file: str | Path,
     field_mask: Sequence[str] | None = None,
@@ -155,6 +198,11 @@ def apply_quality_cuts(evt: ak.Array) -> ak.Array:
     return evt[mask]
 
 
+def select_multiplicity_one(evt: ak.Array) -> ak.Array:
+    """Retain events whose HPGe hit fields can be flattened one-to-one."""
+    return evt[evt.geds.multiplicity == 1]
+
+
 def pet_to_polars(
     evt: ak.Array,
     period: str,
@@ -187,7 +235,10 @@ def pet_to_polars(
     """
     n_events = len(evt)
     if n_events == 0:
-        return pl.DataFrame()
+        schema = PET_DATASET_SCHEMA.copy()
+        if rawid_name_map is None:
+            del schema["detector_name"]
+        return pl.DataFrame(schema=schema)
 
     columns: dict[str, np.ndarray | list] = {}
     columns["period"] = [period] * n_events
@@ -203,6 +254,7 @@ def pet_to_polars(
         evt.coincident.spms_experimental
     )
     columns["coincident_puls"] = ak.to_numpy(evt.coincident.puls)
+    columns["coincident_geds"] = ak.to_numpy(evt.coincident.geds)
 
     # GEDS fields are nested (one array of hits per event). Since pre-cuts ensure
     # multiplicity == 1, we can safely flatten them to align 1:1 with event-level columns.
@@ -211,6 +263,7 @@ def pet_to_polars(
     columns["t0"] = ak.to_numpy(ak.flatten(evt.geds.t0))
     columns["energy"] = ak.to_numpy(ak.flatten(evt.geds.energy))
     columns["daqenergy"] = ak.to_numpy(ak.flatten(evt.geds.daqenergy))
+    columns["multiplicity"] = ak.to_numpy(evt.geds.multiplicity)
 
     if rawid_name_map is not None:
         rawid_arr = columns["rawid"]
@@ -221,6 +274,9 @@ def pet_to_polars(
     columns["is_bb_like"] = ak.to_numpy(evt.geds.quality.is_bb_like)
     columns["is_good_channel"] = ak.to_numpy(
         ak.flatten(evt.geds.quality.is_good_channel)
+    )
+    columns["is_delayed_discharge"] = ak.to_numpy(
+        evt.geds.quality.is_not_bb_like.is_delayed_discharge
     )
 
     columns["psd_is_good"] = ak.to_numpy(ak.flatten(evt.geds.psd.is_good))
@@ -240,6 +296,45 @@ def pet_to_polars(
     )
 
     return pl.DataFrame(columns)
+
+
+def add_background_cut_flags(
+    df: pl.DataFrame,
+    *,
+    apply_lar_veto: bool,
+    comparison_cut_profile: str,
+) -> pl.DataFrame:
+    """Add reusable background cut decisions to a multiplicity-one dataset."""
+    profile_columns = {
+        "default": "passes_default",
+        "without-bb-like": "passes_without_bb_like",
+    }
+    if comparison_cut_profile not in profile_columns:
+        msg = f"Unknown background comparison cut profile: {comparison_cut_profile}"
+        raise ValueError(msg)
+
+    baseline = (
+        pl.col("is_good_channel")
+        & ~pl.col("coincident_puls")
+        & ~pl.col("is_forced")
+        & ~pl.col("coincident_muon_offline")
+        & pl.col("coincident_geds")
+    )
+    with_profiles = df.with_columns(
+        baseline.alias("passes_baseline"),
+        (baseline & pl.col("is_bb_like")).alias("passes_default"),
+        (baseline & ~pl.col("is_delayed_discharge")).alias(
+            "passes_without_bb_like"
+        ),
+        (~pl.col("coincident_spms")).alias("passes_lar"),
+    )
+    lar_condition = pl.col("passes_lar") if apply_lar_veto else pl.lit(True)
+    return with_profiles.with_columns(
+        (pl.col("passes_default") & lar_condition).alias("passes_analysis"),
+        (
+            pl.col(profile_columns[comparison_cut_profile]) & lar_condition
+        ).alias("passes_comparison"),
+    )
 
 
 def prepare_pet_dataset(

@@ -145,7 +145,7 @@ def load_analysis_config(path: str | Path) -> AnalysisConfig:
 
     raw_bg = raw_config["background"]
     background = BackgroundConfig(
-        pet_glob=os.path.expandvars(raw_bg["pet_glob"]),
+        pet_glob=os.path.expandvars(raw_bg.get("pet_glob", "")),
         apply_lar_veto=raw_bg["apply_lar_veto"],
         comparison_cut_profile=raw_bg["comparison_cut_profile"],
         energy_ranges_keV=[tuple(r) for r in raw_bg["energy_ranges_keV"]],
