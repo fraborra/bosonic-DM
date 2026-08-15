@@ -3,36 +3,29 @@ schema_version: 1
 production:
   version: "v2.1.5"
   reference_root: "${LEGEND_PRODUCTION_ROOT}"
-  metadata_override: null
+  metadata_override:
 
 paths:
   simulation_root: "${BOSONIC_DM_SIM_ROOT}"
-  data_root: "data/v2"
+  data_root: "data/v3"
   # Shared inputs root for all static data
   inputs_root: "data/inputs"
-  plots_root: "data/v2/plots"
+  plots_root: "data/v3/plots"
   temporary_root: "tmp"
 
 analysis:
   simulated_energies_keV:
-    - 200
-    - 300
-    - 400
-    - 500
-    - 600
-    - 700
-    - 800
-    - 900
-    - 1000
-
+    start: 100
+    stop: 1020
+    step: 10
   fep_window:
     half_width_fwhm: 2.0
 
   selections:
-    - all
-    - valid-psd
-    - sse
-    - mse
+  - all
+  - valid-psd
+  - sse
+  - mse
   # specific file in case you do not want to use the default one
   # in $BOSONIC_DM_ROOT/data/inputs/dictionaries/detector-grouping/groups_dict.yaml
   # detector_groups: "dictionaries/detector-grouping/groups_dict.yaml"
@@ -55,15 +48,15 @@ background:
   apply_lar_veto: true
   comparison_cut_profile: "without-bb-like"
   energy_ranges_keV:
-    - [20, 300]
-    - [20, 1000]
+  - [20, 300]
+  - [20, 1000]
   bin_widths_keV:
-    - 1
-    - 5
-    - 10
+  - 1
+  - 5
+  - 10
 
 output:
   overwrite: false
   save_plots: true
-  show_plots: false
+  show_plots: true
   write_manifest: true

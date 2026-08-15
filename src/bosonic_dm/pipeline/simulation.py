@@ -13,13 +13,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from dbetto import Props
+from tqdm.auto import tqdm
 
 from bosonic_dm.config import AnalysisConfig
 from bosonic_dm.efficiency import build_labels_dicts, compute_efficiency_from_lazyframe
 from bosonic_dm.io import build_parquet_dataset
 from bosonic_dm.models import AnalysisArtifacts
 from bosonic_dm.pipeline.context import build_analysis_context
-from bosonic_dm.plotting.efficiency import plot_efficiency_comparison
+from bosonic_dm.plotting.efficiency import (
+    plot_efficiency_comparison,
+    plot_fep_survival_fraction,
+)
 from bosonic_dm.plotting.spectra import (
     plot_aoe_survival_fraction,
     plot_lar_survival_fraction,
@@ -191,7 +195,7 @@ def run_simulation_analysis(
                 if do_overwrite:
                     vertex_counts = {}
 
-                for energy in missing_count_energies:
+                for energy in tqdm(missing_count_energies, desc="Energies", position=0):
                     files = stp_files.get(energy, [])
                     if not files:
                         _warn(
@@ -358,6 +362,17 @@ def run_simulation_analysis(
                 ("detector_group", det_groups, "png"),
             ]
 
+            cfg = config.interactions[interaction]
+            total_plots = len(plot_configs) * 3
+            if cfg.make_energy_spectra_plots:
+                total_plots += 1
+            if cfg.make_lar_survival_plots:
+                total_plots += 1
+            if cfg.make_aoe_survival_plots:
+                total_plots += 1
+
+            pbar = tqdm(total=total_plots, desc=f"Plots ({interaction})")
+
             for group_by, groups, ext in plot_configs:
                 labels_dicts = build_labels_dicts(
                     efficiency_dict,
@@ -397,11 +412,33 @@ def run_simulation_analysis(
                         artifacts.plot_paths.append(save_path)
 
                     plt.close(fig)
+                    pbar.update(1)
+
+                # Extra plot for FEP survival fraction
+                save_path_sf = None
+                if config.output.save_plots:
+                    save_path_sf = (
+                        config.paths.plots_root
+                        / f"{interaction}_fep_survival_fraction_by_{group_by}.{ext}"
+                    )
+
+                fig_sf, _ = plot_fep_survival_fraction(
+                    labels_dicts=labels_dicts,
+                    interaction=interaction,
+                    plot_title="FEP Survival Fraction",
+                    group_by=group_by,
+                    save_path=save_path_sf,
+                )
+
+                if save_path_sf:
+                    artifacts.plot_paths.append(save_path_sf)
+
+                plt.close(fig_sf)
+                pbar.update(1)
 
             artifacts.stage_status["plots"] = "completed"
 
             # Extra simulation plots
-            cfg = config.interactions[interaction]
             if (
                 cfg.make_lar_survival_plots
                 or cfg.make_energy_spectra_plots
@@ -436,6 +473,7 @@ def run_simulation_analysis(
                                 "Cannot plot sim energy spectra: %s missing",
                                 rawid_path,
                             )
+                        pbar.update(1)
 
                     if cfg.make_lar_survival_plots or cfg.make_aoe_survival_plots:
                         chmap = context.get_channelmap_simulation()
@@ -448,6 +486,7 @@ def run_simulation_analysis(
                             interaction=interaction,
                             save_dir=plot_save_dir / "lar_survival",
                         )
+                        pbar.update(1)
 
                     if cfg.make_aoe_survival_plots:
                         plot_aoe_survival_fraction(
@@ -457,12 +496,24 @@ def run_simulation_analysis(
                             interaction=interaction,
                             save_dir=plot_save_dir / "aoe_survival",
                         )
+                        pbar.update(1)
                 else:
                     _warn(
                         artifacts,
                         "Parquet dir %s missing. Cannot generate advanced plots.",
                         parquet_dir,
                     )
+
+                    skipped = 0
+                    if cfg.make_energy_spectra_plots:
+                        skipped += 1
+                    if cfg.make_lar_survival_plots:
+                        skipped += 1
+                    if cfg.make_aoe_survival_plots:
+                        skipped += 1
+                    pbar.update(skipped)
+
+            pbar.close()
 
     _write_manifest(
         config,

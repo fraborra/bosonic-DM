@@ -73,8 +73,9 @@ dependencies = [
 
 [project.scripts]
 bosonic-dm = "bosonic_dm.cli:main"
-generate-dark-compton = "bosonic_dm.dark_compton_generators:main"
+generate-gps-macros = "bosonic_dm.generators:main"
 check-dark-compton-stats = "bosonic_dm.check_dark_compton_stats:main"
+generate-dark-compton-kin = "bosonic_dm.generate_dark_compton_kin:main"
 assign-detectors = "bosonic_dm.geometry:main"
 migrate-yaml = "bosonic_dm.yaml_io:main"
 
@@ -207,4 +208,5 @@ default = { solve-group = "default" }
 test = { features = ["test"], solve-group = "default" }
 
 [tool.pixi.tasks]
-test = "python3 -m pytest"
+# test = "python3 -m pytest"
+test = { cmd = "python3 -m pytest", default-environment = "test" }

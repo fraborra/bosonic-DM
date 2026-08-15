@@ -161,6 +161,21 @@ pixi run assign-detectors \
   --counts-yaml data/v1/dictionaries/dark-compton_primary-counts.yaml
 ```
 
+### Configuration
+
+You can specify the energies for the simulation in your YAML configuration file
+(e.g., `configs/nersc.yaml`) under `analysis.simulated_energies_keV`. You can
+provide an exhaustive list, or to keep it clean, use a range dictionary with
+`start`, `stop`, and `step`:
+
+```yaml
+analysis:
+  simulated_energies_keV:
+    start: 100
+    stop: 1020
+    step: 10
+```
+
 ### Migrate legacy YAML files
 
 Rewrite legacy dictionaries containing NumPy/Python YAML tags using the safe
@@ -173,7 +188,83 @@ pixi run migrate-yaml data/v1/dictionaries/eres_per_det_tot.yaml --in-place
 Migration is atomic and verifies that the rewritten file is readable by the safe
 YAML loader.
 
-### Check Dark Compton simulation statistics
+### Generate GPS Macros
+
+Generates the `generators-*.yaml` and `simconfig-*.yaml` FromFile macros inside
+the `tmp/` directory for either dark compton, axio-electric, or both
+interactions.
+
+**Command:**
+
+```bash
+pixi run generate-gps-macros [OPTIONS]
+```
+
+**Options:**
+
+- `-e, --energies`: Explicit list of $m_{DM}$ values in keV (e.g.
+  `-e 200 300 400`).
+- `--mass-range START STOP STEP`: Inclusive mass range in keV (e.g.
+  `--mass-range 100 1020 10`).
+- `-t, --type`: Type of macros to generate. Choices: `dark_compton`,
+  `axio_electric`, `both` (default is `both`).
+
+If neither `-e` nor `--mass-range` is given, generates all default mass points
+(200–1000 keV in 100 keV steps).
+
+**Example:**
+
+```bash
+pixi run generate-gps-macros -t axio_electric -e 100 200 300
+pixi run generate-gps-macros --mass-range 100 1020 10
+```
+
+### Generate Dark Compton Kinematic Files
+
+Produces LH5 kinematic input files for the remage `FromFile` generator. Each
+event contains a correlated electron–photon pair with Dark Compton kinematics.
+
+**Command:**
+
+```bash
+pixi run generate-dark-compton-kin [OPTIONS]
+```
+
+**Options:**
+
+- `-e, --energies`: Explicit list of $m_{DM}$ values in keV (e.g.
+  `-e 200 300 400`).
+- `--mass-range START STOP STEP`: Inclusive mass range in keV (e.g.
+  `--mass-range 100 1020 10`).
+- `--events`: Number of events per file (default: 10 000 000).
+- `--outdir`: Output directory (default: `tmp/`).
+- `--seed`: Base random seed (default: 0).
+- `--chunk-size`: Events per LH5 write chunk (default: 500 000).
+
+If neither `-e` nor `--mass-range` is given, generates all default mass points
+(200–1000 keV in 100 keV steps).
+
+**Examples:**
+
+```bash
+# Generate a single mass point
+pixi run generate-dark-compton-kin -e 200 --events 10000000
+
+# Generate a custom range
+pixi run generate-dark-compton-kin --mass-range 100 1020 10
+
+# Generate all default mass points
+pixi run generate-dark-compton-kin
+```
+
+### Check Dark Compton Stats
+
+Calculates the statistical uncertainties of the detection efficiencies for
+individual detectors to estimate how many additional events need to be generated
+to satisfy relative statistical uncertainty requirements.
+
+**Command:**
+>>>>>>> origin/main
 
 ```bash
 pixi run check-dark-compton-stats
@@ -184,12 +275,27 @@ production reference path and reads Dark Compton products below `data/v1/`.
 
 ## Repository layout
 
-- `src/bosonic_dm/` — core library and CLI entry points.
-- `src/bosonic_dm/pipeline/` — simulation and background orchestration.
-- `src/bosonic_dm/plotting/` — analysis plotting routines.
-- `data/inputs/` — version-controlled input dictionaries.
-- `notebooks/` — exploratory and legacy notebooks.
-- `tests/` — automated tests.
+- `src/bosonic_dm/`: Core library code.
+  - `cli.py`: Command-line entry point for `simulation`, `background`, and
+    `all`.
+  - `config.py`, `models.py`, `yaml_io.py`: Configuration, result models, and
+    YAML I/O.
+  - `pipeline/`: High-level orchestration for simulation and background
+    analyses.
+  - `generators.py`: GPS macro generation.
+  - `generate_dark_compton_kin.py`: LH5 kinematic file generation for Dark
+    Compton FromFile remage generator.
+  - `cuts.py`: Quality cuts and filtering logic.
+  - `efficiency.py`: Efficiency computations.
+  - `io.py`: Parquet and awkward data manipulation.
+  - `resolution.py`: Energy resolution (FWHM) extraction.
+  - `stats.py`: Statistical utilities.
+  - `utils.py`: General utilities.
+  - `plotting/`: Subpackage for plotting logic (AoE, spectra, resolution).
+- `notebooks/`: Exploratory Jupyter notebooks.
+- `data/v1/`: Parquet datasets and dictionaries.
+- `tests/`: Automated tests.
+- `tmp/`: Generated temporary files and macros.
 
 The CLI is deliberately thin; analysis code is available from the Python API for
 use in scripts and notebooks.

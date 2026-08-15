@@ -17,6 +17,7 @@
 - Python package; see `pyproject.toml` for deps, build config, and Pixi config
 - ALWAYS run commands via `pixi run`
 - ALWAYS use `python3`, never `python`
+- To run tests, ALWAYS use `pixi run -e test test` (the `pytest` dependency is only available in the `test` environment)
 
 ## Linting & Pre-commit
 
@@ -45,3 +46,23 @@
 ## Agent Behavior
 
 - **Ask before modifying out-of-scope files**: Always ask for the user's explicit permission before proceeding to modify files that were not strictly requested, such as automatically updating Jupyter notebooks to reflect changes in source files.
+
+## Filesystem discovery
+
+- Never recursively traverse `/`, `/global`, `/global/cfs`, `/global/homes`,
+  `/pscratch`, `/opt`, `/usr`, or another shared top-level directory. This
+  prohibition applies on compute nodes as well as login nodes.
+- This prohibition includes `find`, `bfs`, `fd`, `tree`, recursive `du`,
+  `rg --files`, recursive `grep`, recursive `ls`, globstar expansion, and
+  recursive traversal written in Python or another language.
+- Before searching, identify a bounded root inside the current workspace or a
+  known project or data directory. Constrain depth and filename patterns where
+  possible. If no bounded root is known, stop and ask the user.
+- Locate software with `command -v`, `type -a`, `module spider`, package
+  metadata, or known environment prefixes. Do not search mounted filesystems
+  for executables.
+- Do not disable or bypass an installed filesystem-traversal hook, and do not
+  ask the user to approve an equivalent broad scan through another command.
+- A compute allocation is not permission for an unbounded traversal of a
+  shared filesystem. Narrow the search first; route only bounded,
+  computationally substantial searches through `$perlmutter-compute`.

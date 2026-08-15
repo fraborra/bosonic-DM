@@ -599,7 +599,7 @@ def build_labels_dicts(
         "all": ("All", "-.", "o"),
         "valid-psd": ("All - valid PSD", "-", "v"),
         "sse": ("SSE - valid PSD", "--", "s"),
-        "mse": ("MSE - valid PSD", ":", "^"),
+        "mse": ("non-SSE - valid PSD", ":", "^"),
     }
 
     has_run_results = any(
