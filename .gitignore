@@ -233,3 +233,11 @@ __marimo__/
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+
+# macOS
+.DS_Store
+.AppleDouble
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
