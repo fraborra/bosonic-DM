@@ -21,12 +21,48 @@ from bosonic_dm.stats import bayesian_efficiency
 
 logger = logging.getLogger(__name__)
 
-_SELECTION_PREFIXES = {
-    "all": "all",
-    "valid-psd": "valid_psd",
-    "sse": "sse",
-    "mse": "mse",
+_SELECTION_REQUIREMENTS = {
+    "all": {},
+    "valid-psd": {"has_aoe": True},
+    "sse": {"has_aoe": True, "is_single_site": True},
+    "mse": {"has_aoe": True, "is_single_site": False},
 }
+
+
+def build_selection_metadata(
+    selections: Sequence[str],
+    *,
+    half_width_fwhm: float,
+    apply_lar_veto: bool,
+) -> dict[str, object]:
+    """Describe the event selections used to produce an efficiency table."""
+    unknown_selections = set(selections) - set(_SELECTION_REQUIREMENTS)
+    if unknown_selections:
+        msg = f"Unknown efficiency selections: {sorted(unknown_selections)}"
+        raise ValueError(msg)
+
+    return {
+        "energy_window": {
+            "reconstructed_energy_column": "energy",
+            "center_energy_column": "sim_e",
+            "half_width_fwhm": half_width_fwhm,
+            "resolution_scope": "period-run-detector",
+        },
+        "good_channel": {
+            "column": "is_good_channel",
+            "pass_value": True,
+        },
+        "lar_veto": {
+            "applied": apply_lar_veto,
+            "column": "coincident_spms",
+            "pass_value": False,
+            "null_policy": "reject",
+        },
+        "selections": {
+            selection: {"event_requirements": dict(_SELECTION_REQUIREMENTS[selection])}
+            for selection in selections
+        },
+    }
 
 
 def _selection_result(
@@ -35,6 +71,7 @@ def _selection_result(
     n_events_up: int,
     n_events_down: int,
     n_primaries: int,
+    exposure_kg_yr: float,
     psd_available: bool | None,
     selection: str,
 ) -> dict[str, object]:
@@ -46,6 +83,10 @@ def _selection_result(
         "efficiency": None,
         "efficiency_stat_unc": None,
         "efficiency_syst_fwhm": None,
+        "exposure_kg_yr": exposure_kg_yr,
+        "effective_exposure_kg_yr": None,
+        "effective_exposure_stat_unc_kg_yr": None,
+        "effective_exposure_syst_fwhm_kg_yr": None,
     }
     if n_primaries <= 0:
         result["status"] = "missing-primaries"
@@ -69,6 +110,11 @@ def _selection_result(
             "efficiency": efficiency,
             "efficiency_stat_unc": stat_unc,
             "efficiency_syst_fwhm": abs(efficiency_up - efficiency_down) / 2.0,
+            "effective_exposure_kg_yr": exposure_kg_yr * efficiency,
+            "effective_exposure_stat_unc_kg_yr": exposure_kg_yr * stat_unc,
+            "effective_exposure_syst_fwhm_kg_yr": exposure_kg_yr
+            * abs(efficiency_up - efficiency_down)
+            / 2.0,
         }
     )
     return result
@@ -112,6 +158,10 @@ def _aggregate_run_selection(
             "efficiency": None,
             "efficiency_stat_unc": None,
             "efficiency_syst_fwhm": None,
+            "exposure_kg_yr": None,
+            "effective_exposure_kg_yr": None,
+            "effective_exposure_stat_unc_kg_yr": None,
+            "effective_exposure_syst_fwhm_kg_yr": None,
         }
 
     weights = np.asarray([item[0] for item in valid], dtype=float)
@@ -124,15 +174,24 @@ def _aggregate_run_selection(
     stat_uncertainties = np.asarray(
         [float(item[1]["efficiency_stat_unc"]) for item in valid], dtype=float
     )
+    exposure_kg_yr = float(np.sum(weights))
+    efficiency_mle = weighted("efficiency_mle")
+    efficiency = weighted("efficiency")
+    efficiency_stat_unc = float(
+        np.sqrt(np.sum((normalized_weights * stat_uncertainties) ** 2))
+    )
+    efficiency_syst_fwhm = weighted("efficiency_syst_fwhm")
     return {
         "status": "valid",
         "n_events": weighted("n_events"),
-        "efficiency_mle": weighted("efficiency_mle"),
-        "efficiency": weighted("efficiency"),
-        "efficiency_stat_unc": float(
-            np.sqrt(np.sum((normalized_weights * stat_uncertainties) ** 2))
-        ),
-        "efficiency_syst_fwhm": weighted("efficiency_syst_fwhm"),
+        "efficiency_mle": efficiency_mle,
+        "efficiency": efficiency,
+        "efficiency_stat_unc": efficiency_stat_unc,
+        "efficiency_syst_fwhm": efficiency_syst_fwhm,
+        "exposure_kg_yr": exposure_kg_yr,
+        "effective_exposure_kg_yr": exposure_kg_yr * efficiency,
+        "effective_exposure_stat_unc_kg_yr": exposure_kg_yr * efficiency_stat_unc,
+        "effective_exposure_syst_fwhm_kg_yr": exposure_kg_yr * efficiency_syst_fwhm,
     }
 
 
@@ -210,6 +269,10 @@ def compute_efficiency_from_lazyframe(
                                 "efficiency": float,
                                 "efficiency_stat_unc": float,
                                 "efficiency_syst_fwhm": float,
+                                "exposure_kg_yr": float,
+                                "effective_exposure_kg_yr": float,
+                                "effective_exposure_stat_unc_kg_yr": float,
+                                "effective_exposure_syst_fwhm_kg_yr": float,
                             },
                             "valid-psd": { ... },
                             "sse": { ... },
@@ -221,7 +284,7 @@ def compute_efficiency_from_lazyframe(
                 ...
             }
     """
-    unknown_selections = set(selections) - set(_SELECTION_PREFIXES)
+    unknown_selections = set(selections) - set(_SELECTION_REQUIREMENTS)
     if unknown_selections:
         msg = f"Unknown efficiency selections: {sorted(unknown_selections)}"
         raise ValueError(msg)
@@ -360,6 +423,7 @@ def compute_efficiency_from_lazyframe(
                         n_events_up=counts[1],
                         n_events_down=counts[2],
                         n_primaries=n_primaries,
+                        exposure_kg_yr=float(resolution_entry["expo"]),
                         psd_available=psd_available,
                         selection=selection,
                     )

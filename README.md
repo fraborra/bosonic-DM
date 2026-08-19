@@ -192,7 +192,16 @@ If enabled in `output.write_manifest`, each simulation run writes
 `<data_root>/<interaction>_manifest.yaml`. The manifest records requested and
 resolved stages, output paths, skipped work, and non-fatal warnings. In
 particular, missing energy inputs are reported rather than used to produce an
-efficiency with an incomplete denominator.
+efficiency with an incomplete denominator. It also records the FEP-window,
+good-channel, LAr-veto, and PSD/topology selection definitions used for the
+efficiency table.
+
+Each run-level and detector-aggregated selection in
+`<dictionaries_root>/<interaction>_efficiency.yaml` includes its usable
+`exposure_kg_yr`, nominal `effective_exposure_kg_yr`, and the propagated
+statistical and FWHM-window uncertainty fields. A category with no valid
+efficiency has no aggregated usable exposure or effective exposure; its
+run-level entries retain the physical exposure for diagnosis.
 
 ## Additional commands
 
