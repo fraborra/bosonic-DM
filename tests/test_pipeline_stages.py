@@ -102,6 +102,31 @@ def test_missing_inputs_soft_block_dependent_stages(tmp_path: Path) -> None:
     }
     assert artifacts.warnings
     manifest = read_yaml(data_root / "axio-electric_manifest.yaml")
+    assert manifest["schema_version"] == 1
+    assert manifest["efficiency_output_schema_version"] == 2
+    assert manifest["selection_metadata"] == {
+        "energy_window": {
+            "reconstructed_energy_column": "energy",
+            "center_energy_column": "sim_e",
+            "half_width_fwhm": 2.0,
+            "resolution_scope": "period-run-detector",
+        },
+        "good_channel": {
+            "column": "is_good_channel",
+            "pass_value": True,
+        },
+        "lar_veto": {
+            "applied": True,
+            "column": "coincident_spms",
+            "pass_value": False,
+            "null_policy": "reject",
+        },
+        "selections": {
+            "all": {
+                "event_requirements": {},
+            }
+        },
+    }
     assert manifest["resolved_stages"] == [
         "count-vertices",
         "build-dataset",

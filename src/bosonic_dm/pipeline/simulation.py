@@ -16,7 +16,11 @@ from dbetto import Props
 from tqdm.auto import tqdm
 
 from bosonic_dm.config import AnalysisConfig
-from bosonic_dm.efficiency import build_labels_dicts, compute_efficiency_from_lazyframe
+from bosonic_dm.efficiency import (
+    build_labels_dicts,
+    build_selection_metadata,
+    compute_efficiency_from_lazyframe,
+)
 from bosonic_dm.io import build_parquet_dataset
 from bosonic_dm.models import AnalysisArtifacts
 from bosonic_dm.pipeline.context import build_analysis_context
@@ -97,7 +101,14 @@ def _write_manifest(
 
     manifest_path = config.paths.data_root / f"{interaction}_manifest.yaml"
     manifest_data = {
+        "schema_version": 1,
         "interaction": interaction,
+        "efficiency_output_schema_version": 2,
+        "selection_metadata": build_selection_metadata(
+            config.selections,
+            half_width_fwhm=config.fep_window.half_width_fwhm,
+            apply_lar_veto=config.apply_lar_veto,
+        ),
         "requested_stages": list(requested_stages),
         "resolved_stages": list(resolved_stages),
         "stage_status": artifacts.stage_status,

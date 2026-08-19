@@ -75,6 +75,10 @@ def test_efficiency_marks_missing_primaries_and_psd_unavailable() -> None:
     assert first["selections"]["all"]["status"] == "valid"
     assert first["selections"]["valid-psd"]["status"] == "psd-unavailable"
     assert first["selections"]["valid-psd"]["efficiency"] is None
+    assert first["selections"]["valid-psd"]["exposure_kg_yr"] is None
+    assert first["period_runs"]["p01"]["r001"]["selections"]["valid-psd"][
+        "exposure_kg_yr"
+    ] == pytest.approx(1.0)
 
     second = result[200]["V00002A"]
     assert second["status"] == "missing-primaries"
@@ -240,6 +244,62 @@ def test_lar_veto_is_applied_to_every_selection() -> None:
         without_result = without_veto[200]["V00001A"]["selections"][selection]
         assert with_result["n_events"] == with_count
         assert without_result["n_events"] == without_count
+
+
+def test_efficiency_stores_run_and_aggregate_effective_exposure() -> None:
+    frame = pl.DataFrame(
+        {
+            "rawid": [101, 101],
+            "energy": [200.0, 200.0],
+            "sim_e": [200, 200],
+            "is_good_channel": [True, True],
+            "coincident_spms": [False, False],
+            "has_aoe": [True, True],
+            "is_single_site": [True, True],
+        }
+    ).lazy()
+    resolution = {
+        "p01": {
+            "r001": {
+                "V00001A": {
+                    "usability": "on",
+                    "a": 1.0,
+                    "b": 0.0,
+                    "a_unc": 0.0,
+                    "b_unc": 0.0,
+                    "ab_corr": 0.0,
+                    "expo": 3.0,
+                }
+            }
+        }
+    }
+    channelmap = {"V00001A": SimpleNamespace(daq=SimpleNamespace(rawid=101))}
+
+    result = compute_efficiency_from_lazyframe(
+        lf=frame,
+        eres_dict=resolution,
+        simulated_energies=[200],
+        chmap=channelmap,
+        vertex_counts={200: {"V00001A": 4}},
+        half_width_fwhm=1.0,
+        selections=["all"],
+    )
+
+    detector = result[200]["V00001A"]
+    run_selection = detector["period_runs"]["p01"]["r001"]["selections"]["all"]
+    aggregate_selection = detector["selections"]["all"]
+
+    for selection_result in (run_selection, aggregate_selection):
+        assert selection_result["exposure_kg_yr"] == pytest.approx(3.0)
+        assert selection_result["effective_exposure_kg_yr"] == pytest.approx(
+            3.0 * selection_result["efficiency"]
+        )
+        assert selection_result["effective_exposure_stat_unc_kg_yr"] == pytest.approx(
+            3.0 * selection_result["efficiency_stat_unc"]
+        )
+        assert selection_result["effective_exposure_syst_fwhm_kg_yr"] == pytest.approx(
+            3.0 * selection_result["efficiency_syst_fwhm"]
+        )
 
 
 def test_build_labels_dicts_can_aggregate_by_detector_group() -> None:
