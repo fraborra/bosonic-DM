@@ -58,34 +58,35 @@ def test_missing_inputs_soft_block_dependent_stages(tmp_path: Path) -> None:
             data_root=data_root,
             parquet_root=data_root / "parquet",
             dictionaries_root=data_root / "dictionaries",
-            calibration_dictionaries_root=tmp_path / "calibration",
+            inputs_root=tmp_path / "calibration",
             plots_root=tmp_path / "plots",
             temporary_root=tmp_path / "tmp",
         ),
         energies_keV=(200,),
         fep_window=FepWindowConfig(half_width_fwhm=2.0),
         selections=("all",),
+        apply_lar_veto=True,
         interactions={
             "axio-electric": InteractionConfig(
                 name="axio-electric",
                 job_template="electron_{energy}keV_hpge_bulk",
                 make_lar_survival_plots=False,
+                make_energy_spectra_plots=False,
+                make_aoe_survival_plots=False,
             )
         },
         background=BackgroundConfig(
             pet_glob="",
-            apply_lar_veto=True,
             comparison_cut_profile="without-bb-like",
             energy_ranges_keV=[(20, 300)],
             bin_widths_keV=[5],
-            detector_groups=tmp_path / "groups.yaml",
         ),
         output=OutputConfig(
             overwrite=False,
             save_plots=True,
-            show_plots=False,
             write_manifest=True,
         ),
+        detector_groups=tmp_path / "groups.yaml",
     )
 
     artifacts = run_simulation_analysis(

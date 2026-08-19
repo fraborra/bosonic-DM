@@ -99,6 +99,9 @@ log_cli_level = "INFO"
 testpaths = [
   "tests",
 ]
+pythonpath = [
+  "src",
+]
 
 [tool.ruff]
 src = ["src"]
@@ -197,6 +200,8 @@ psutil = "*"
 "pytables" = "*"
 "cmdstanpy" = "*"
 pre-commit = "*"
+pytest = ">=6"
+pytest-cov = ">=3"
 
 [tool.pixi.environments]
 default = { solve-group = "default" }

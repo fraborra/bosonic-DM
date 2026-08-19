@@ -9,11 +9,14 @@ import logging
 from collections.abc import Mapping, Sequence
 from typing import Literal
 
+import numpy as np
 import polars as pl
 from tqdm.auto import tqdm
 
+from bosonic_dm.cuts import matches_period_run_selection
 from bosonic_dm.io import get_mean_fcc_det_group, get_mean_fcc_det_type
-from bosonic_dm.resolution import weighted_resolution_per_detector
+from bosonic_dm.plotting.utils import _DET_TYPE_MAP
+from bosonic_dm.resolution import compute_fwhm, propagate_resolution_uncertainty
 from bosonic_dm.stats import bayesian_efficiency
 
 logger = logging.getLogger(__name__)
@@ -26,6 +29,113 @@ _SELECTION_PREFIXES = {
 }
 
 
+def _selection_result(
+    *,
+    n_events: int,
+    n_events_up: int,
+    n_events_down: int,
+    n_primaries: int,
+    psd_available: bool | None,
+    selection: str,
+) -> dict[str, object]:
+    """Build one run-level selection result with defined edge-case status."""
+    result: dict[str, object] = {
+        "status": "valid",
+        "n_events": n_events,
+        "efficiency_mle": None,
+        "efficiency": None,
+        "efficiency_stat_unc": None,
+        "efficiency_syst_fwhm": None,
+    }
+    if n_primaries <= 0:
+        result["status"] = "missing-primaries"
+        return result
+    if selection != "all" and psd_available is False:
+        result["status"] = "psd-unavailable"
+        return result
+    if any(
+        count < 0 or count > n_primaries
+        for count in (n_events, n_events_up, n_events_down)
+    ):
+        result["status"] = "invalid-counts"
+        return result
+
+    efficiency, stat_unc = bayesian_efficiency(n_events, n_primaries)
+    efficiency_up, _ = bayesian_efficiency(n_events_up, n_primaries)
+    efficiency_down, _ = bayesian_efficiency(n_events_down, n_primaries)
+    result.update(
+        {
+            "efficiency_mle": float(n_events / n_primaries),
+            "efficiency": efficiency,
+            "efficiency_stat_unc": stat_unc,
+            "efficiency_syst_fwhm": abs(efficiency_up - efficiency_down) / 2.0,
+        }
+    )
+    return result
+
+
+def _aggregate_run_selection(
+    run_results: Sequence[Mapping[str, object]],
+    selection: str,
+) -> dict[str, object]:
+    """Exposure-weight one selection after retaining its run-level results."""
+    valid: list[tuple[float, Mapping[str, object]]] = []
+    statuses: list[str] = []
+    for run_result in run_results:
+        run_selections = run_result["selections"]
+        if not isinstance(run_selections, Mapping):
+            msg = "Run result selections must be a mapping."
+            raise TypeError(msg)
+        selection_result = run_selections[selection]
+        if not isinstance(selection_result, Mapping):
+            msg = "Run selection result must be a mapping."
+            raise TypeError(msg)
+        status = str(selection_result["status"])
+        statuses.append(status)
+        exposure = float(run_result["expo"])
+        if status == "valid" and exposure > 0:
+            valid.append((exposure, selection_result))
+
+    if not valid:
+        if "missing-primaries" in statuses:
+            status = "missing-primaries"
+        elif "invalid-counts" in statuses:
+            status = "invalid-counts"
+        elif "psd-unavailable" in statuses:
+            status = "psd-unavailable"
+        else:
+            status = "missing-exposure"
+        return {
+            "status": status,
+            "n_events": None,
+            "efficiency_mle": None,
+            "efficiency": None,
+            "efficiency_stat_unc": None,
+            "efficiency_syst_fwhm": None,
+        }
+
+    weights = np.asarray([item[0] for item in valid], dtype=float)
+    normalized_weights = weights / np.sum(weights)
+
+    def weighted(field: str) -> float:
+        values = np.asarray([float(item[1][field]) for item in valid], dtype=float)
+        return float(np.sum(normalized_weights * values))
+
+    stat_uncertainties = np.asarray(
+        [float(item[1]["efficiency_stat_unc"]) for item in valid], dtype=float
+    )
+    return {
+        "status": "valid",
+        "n_events": weighted("n_events"),
+        "efficiency_mle": weighted("efficiency_mle"),
+        "efficiency": weighted("efficiency"),
+        "efficiency_stat_unc": float(
+            np.sqrt(np.sum((normalized_weights * stat_uncertainties) ** 2))
+        ),
+        "efficiency_syst_fwhm": weighted("efficiency_syst_fwhm"),
+    }
+
+
 def compute_efficiency_from_lazyframe(
     lf: pl.LazyFrame,
     eres_dict: dict,
@@ -34,16 +144,20 @@ def compute_efficiency_from_lazyframe(
     vertex_counts: Mapping[int, Mapping[str, int]],
     half_width_fwhm: float = 2.0,
     selections: Sequence[str] = ("all", "valid-psd", "sse", "mse"),
+    apply_lar_veto: bool = True,
 ) -> dict:
-    """Compute per-detector efficiencies for all selections in one pass.
+    """Compute run-aware per-detector efficiencies for all selections.
 
-    For every combination of simulated energy and detector listed in
-    *eres_dict*, the function uses the pre-computed *vertex_counts* as
-    the number of generated primaries.
+    The simulation events are collected once per energy. Each usable
+    period/run/detector entry in *eres_dict* then receives its own FEP window
+    from that run's resolution parameters. Run-level efficiencies are retained
+    under ``period_runs`` and only then exposure-weighted into the compatibility
+    detector-level ``selections`` fields.
 
-    It collects the lazy frame *lf* once per energy and uses a vectorised
-    join + group-by to count events inside the FEP window for every detector
-    simultaneously across four selections:
+    It collects the lazy frame *lf* once per energy and counts good-channel
+    events inside each run-specific FEP window across four selections. When
+    *apply_lar_veto* is true, every selection additionally requires no SiPM
+    coincidence:
     - all: events in FEP window
     - valid-psd: events in FEP window with has_aoe == True
     - sse: valid-psd with is_single_site == True
@@ -54,11 +168,12 @@ def compute_efficiency_from_lazyframe(
     lf
         A Polars *lazy* scan of the parquet dataset partitioned by ``sim_e``.
         Expected columns: ``rawid``, ``energy``, ``sim_e``, ``is_good_channel``,
-        ``has_aoe``, ``is_single_site``.
+        ``has_aoe``, and ``is_single_site``. When *apply_lar_veto* is true,
+        ``coincident_spms`` is also required.
     eres_dict
         Nested dictionary with structure
-        ``{energy: {detector_name: {"fwhm": float, ...}, ...}, ...}``
-        as produced by the resolution-extraction pipeline.
+        ``{period: {run: {detector_name: {"usability", "expo", "a", "b",
+        "a_unc", "b_unc", "ab_corr"}}}}``.
     simulated_energies
         List of simulated energies (in keV) to iterate over.
     chmap
@@ -71,6 +186,9 @@ def compute_efficiency_from_lazyframe(
     selections
         Selection names to compute. Supported values are ``all``,
         ``valid-psd``, ``sse``, and ``mse``.
+    apply_lar_veto
+        If true, require ``coincident_spms == False`` for every selection.
+        Null SiPM-coincidence decisions are rejected conservatively.
 
     Returns
     -------
@@ -81,7 +199,10 @@ def compute_efficiency_from_lazyframe(
                 energy: {
                     detector_name: {
                         "n_primaries":      int,
-                        "expo":             float,   # from eres_dict
+                        "expo":             float,
+                        "period_runs": {
+                            period: {run: {"expo", "fwhm", "selections"}}
+                        },
                         "selections": {
                             "all": {
                                 "n_events": int,
@@ -111,8 +232,51 @@ def compute_efficiency_from_lazyframe(
         ene_key = int(ene)
         ratio_dict[ene_key] = {}
 
-        det_eres = weighted_resolution_per_detector(eres_dict, ene)
-        if not det_eres:
+        resolution_entries: dict[str, list[dict[str, object]]] = {}
+        for period, runs in eres_dict.items():
+            for run, detectors in runs.items():
+                for det_name, values in detectors.items():
+                    if values.get("usability") != "on":
+                        continue
+                    if not all(key in values for key in ("a", "b", "expo")):
+                        logger.info(
+                            "Missing resolution values for %s in %s-%s; skipping",
+                            det_name,
+                            period,
+                            run,
+                        )
+                        continue
+                    fwhm = float(compute_fwhm(values["a"], values["b"], ene))
+                    fwhm_unc = float(
+                        propagate_resolution_uncertainty(
+                            values["a"],
+                            values["b"],
+                            values.get("a_unc", 0.0),
+                            values.get("b_unc", 0.0),
+                            values.get("ab_corr", 0.0),
+                            ene,
+                        )
+                    )
+                    if not np.isfinite(fwhm) or fwhm <= 0:
+                        logger.warning(
+                            "Invalid FWHM for %s in %s-%s at %d keV; skipping",
+                            det_name,
+                            period,
+                            run,
+                            ene_key,
+                        )
+                        continue
+                    resolution_entries.setdefault(det_name, []).append(
+                        {
+                            "period": str(period),
+                            "run": str(run),
+                            "expo": float(values["expo"]),
+                            "fwhm": fwhm,
+                            "fwhm_unc": fwhm_unc,
+                        }
+                    )
+
+        if not resolution_entries:
             logger.warning(
                 "No valid resolution info found in eres_dict, skipping energy %d keV",
                 ene_key,
@@ -120,53 +284,28 @@ def compute_efficiency_from_lazyframe(
             continue
         vtx_counts_for_ene = vertex_counts.get(ene_key, {})
 
-        # --- Phase 1: build per-detector info and read n_primaries ----------
-        det_rows: list[dict] = []
-        n_prim_map: dict[str, int] = {}
-        expo_map: dict[str, float] = {}
-
-        for det_name, eres_info in det_eres.items():
+        rawids: dict[str, int] = {}
+        for det_name in resolution_entries:
             try:
-                rawid = chmap[det_name].daq.rawid
+                rawids[det_name] = int(chmap[det_name].daq.rawid)
             except (KeyError, AttributeError):
                 logger.warning("Cannot resolve rawid for %s, skipping", det_name)
-                continue
 
-            n_primaries = vtx_counts_for_ene.get(det_name, 0)
-            n_prim_map[det_name] = n_primaries
-            expo_map[det_name] = float(eres_info.get("expo", 0.0))
-
-            fwhm = float(eres_info["fwhm"])
-            fwhm_unc = float(eres_info.get("unc", 0.0))
-            fwhm_up = fwhm + fwhm_unc
-            fwhm_down = max(fwhm - fwhm_unc, 0.0)
-
-            det_rows.append(
-                {
-                    "rawid": rawid,
-                    "det_name": det_name,
-                    "low": ene - half_width_fwhm * fwhm,
-                    "high": ene + half_width_fwhm * fwhm,
-                    "low_up": ene - half_width_fwhm * fwhm_up,
-                    "high_up": ene + half_width_fwhm * fwhm_up,
-                    "low_down": ene - half_width_fwhm * fwhm_down,
-                    "high_down": ene + half_width_fwhm * fwhm_down,
-                }
-            )
-
-        if not det_rows:
+        if not rawids:
             continue
 
-        det_df = pl.DataFrame(det_rows)
-        known_rawids = det_df["rawid"].to_list()
+        # The event sample is shared by all production runs; only the FEP
+        # window changes with period/run calibration conditions.
+        base_filter = (
+            pl.col("is_good_channel")
+            & (pl.col("sim_e") == ene)
+            & pl.col("rawid").is_in(list(rawids.values()))
+        )
+        if apply_lar_veto:
+            base_filter &= pl.col("coincident_spms").eq(False).fill_null(False)
 
-        # --- Phase 2: single collect per energy -----------------------------
         df_ene = (
-            lf.filter(
-                (pl.col("is_good_channel"))
-                & (pl.col("sim_e") == ene)
-                & (pl.col("rawid").is_in(known_rawids))
-            )
+            lf.filter(base_filter)
             .select("rawid", "energy", "has_aoe", "is_single_site")
             .collect()
         )
@@ -177,121 +316,75 @@ def compute_efficiency_from_lazyframe(
             pl.col("is_single_site").fill_null(False),
         )
 
-        # --- Phase 3: vectorised FEP counting via join + group_by -----------
-        df_joined = df_ene.join(det_df, on="rawid")
+        for det_name, rawid in rawids.items():
+            detector_frame = df_ene.filter(pl.col("rawid") == rawid)
+            energies = detector_frame["energy"].to_numpy()
+            distances_from_peak = np.abs(energies - ene)
+            has_aoe = detector_frame["has_aoe"].to_numpy().astype(bool)
+            is_single_site = detector_frame["is_single_site"].to_numpy().astype(bool)
+            psd_available = bool(np.any(has_aoe)) if len(detector_frame) else None
+            selection_masks = {
+                "all": np.ones(len(detector_frame), dtype=bool),
+                "valid-psd": has_aoe,
+                "sse": has_aoe & is_single_site,
+                "mse": has_aoe & ~is_single_site,
+            }
+            n_primaries = int(vtx_counts_for_ene.get(det_name, 0))
+            period_runs: dict[str, dict[str, dict[str, object]]] = {}
+            flat_run_results: list[dict[str, object]] = []
 
-        # Define selection boolean expressions
-        sel_all = pl.lit(True)
-        sel_psd = pl.col("has_aoe")
-        sel_sse = pl.col("has_aoe") & pl.col("is_single_site")
-        sel_mse = pl.col("has_aoe") & ~pl.col("is_single_site")
-
-        # Create aggregations for each selection and variation
-        aggs = []
-        selection_conditions = {
-            "all": sel_all,
-            "valid-psd": sel_psd,
-            "sse": sel_sse,
-            "mse": sel_mse,
-        }
-        for sel_name in selections:
-            prefix = _SELECTION_PREFIXES[sel_name]
-            condition = selection_conditions[sel_name]
-            aggs.extend(
-                [
-                    (
-                        pl.col("energy").is_between(pl.col("low"), pl.col("high"))
-                        & condition
-                    )
-                    .sum()
-                    .alias(f"{prefix}_events"),
-                    (
-                        pl.col("energy").is_between(pl.col("low_up"), pl.col("high_up"))
-                        & condition
-                    )
-                    .sum()
-                    .alias(f"{prefix}_events_up"),
-                    (
-                        pl.col("energy").is_between(
-                            pl.col("low_down"), pl.col("high_down")
+            for resolution_entry in resolution_entries[det_name]:
+                period = str(resolution_entry["period"])
+                run = str(resolution_entry["run"])
+                fwhm = float(resolution_entry["fwhm"])
+                fwhm_unc = max(float(resolution_entry["fwhm_unc"]), 0.0)
+                windows = (
+                    fwhm,
+                    fwhm + fwhm_unc,
+                    max(fwhm - fwhm_unc, 0.0),
+                )
+                run_selections: dict[str, dict[str, object]] = {}
+                for selection in selections:
+                    counts: list[int] = []
+                    for window_fwhm in windows:
+                        in_window = distances_from_peak <= (
+                            half_width_fwhm * window_fwhm
                         )
-                        & condition
+                        counts.append(
+                            int(
+                                np.count_nonzero(in_window & selection_masks[selection])
+                            )
+                        )
+                    run_selections[selection] = _selection_result(
+                        n_events=counts[0],
+                        n_events_up=counts[1],
+                        n_events_down=counts[2],
+                        n_primaries=n_primaries,
+                        psd_available=psd_available,
+                        selection=selection,
                     )
-                    .sum()
-                    .alias(f"{prefix}_events_down"),
-                ]
-            )
 
-        counts = df_joined.group_by("det_name").agg(
-            pl.col("has_aoe").sum().alias("psd_available_events"),
-            *aggs,
-        )
-        counts_map = {row["det_name"]: row for row in counts.iter_rows(named=True)}
-
-        # --- Phase 4: compute efficiencies ----------------------------------
-        for det_name, n_primaries in n_prim_map.items():
-            row = counts_map.get(det_name)
+                run_result: dict[str, object] = {
+                    "status": "valid" if n_primaries > 0 else "missing-primaries",
+                    "expo": float(resolution_entry["expo"]),
+                    "fwhm": fwhm,
+                    "fwhm_unc": fwhm_unc,
+                    "selections": run_selections,
+                }
+                period_runs.setdefault(period, {})[run] = run_result
+                flat_run_results.append(run_result)
 
             det_out = {
                 "status": "valid" if n_primaries > 0 else "missing-primaries",
                 "n_primaries": n_primaries,
-                "expo": expo_map[det_name],
-                "psd_available": (
-                    None if row is None else bool(row["psd_available_events"] > 0)
-                ),
-                "selections": {},
+                "expo": float(sum(float(item["expo"]) for item in flat_run_results)),
+                "psd_available": psd_available,
+                "period_runs": period_runs,
+                "selections": {
+                    selection: _aggregate_run_selection(flat_run_results, selection)
+                    for selection in selections
+                },
             }
-
-            for sel_name in selections:
-                prefix = _SELECTION_PREFIXES[sel_name]
-                n_events = row[f"{prefix}_events"] if row else 0
-                n_events_up = row[f"{prefix}_events_up"] if row else 0
-                n_events_down = row[f"{prefix}_events_down"] if row else 0
-
-                selection_out = {
-                    "status": "valid",
-                    "n_events": n_events,
-                    "efficiency_mle": None,
-                    "efficiency": None,
-                    "efficiency_stat_unc": None,
-                    "efficiency_syst_fwhm": None,
-                }
-
-                if n_primaries <= 0:
-                    selection_out["status"] = "missing-primaries"
-                elif sel_name != "all" and det_out["psd_available"] is False:
-                    selection_out["status"] = "psd-unavailable"
-                elif any(
-                    count < 0 or count > n_primaries
-                    for count in (n_events, n_events_up, n_events_down)
-                ):
-                    selection_out["status"] = "invalid-counts"
-                    logger.warning(
-                        "Invalid counts for %s at %d keV (%s): "
-                        "nominal=%d, up=%d, down=%d, primaries=%d",
-                        det_name,
-                        ene_key,
-                        sel_name,
-                        n_events,
-                        n_events_up,
-                        n_events_down,
-                        n_primaries,
-                    )
-                else:
-                    ratio, ratio_sigma = bayesian_efficiency(n_events, n_primaries)
-                    ratio_up, _ = bayesian_efficiency(n_events_up, n_primaries)
-                    ratio_down, _ = bayesian_efficiency(n_events_down, n_primaries)
-                    selection_out.update(
-                        {
-                            "efficiency_mle": float(n_events / n_primaries),
-                            "efficiency": ratio,
-                            "efficiency_stat_unc": ratio_sigma,
-                            "efficiency_syst_fwhm": abs(ratio_up - ratio_down) / 2.0,
-                        }
-                    )
-
-                det_out["selections"][sel_name] = selection_out
-
             ratio_dict[ene_key][det_name] = det_out
 
     return ratio_dict
@@ -385,6 +478,94 @@ def restructure_efficiency_by_selection(ratio_dict: Mapping) -> dict:
     return restructured
 
 
+def _summarize_run_entries(
+    entries: Sequence[tuple[float, float, float, float]],
+) -> dict[str, float] | None:
+    """Summarize ``(exposure, efficiency, stat unc, FWHM syst)`` entries."""
+    if not entries:
+        return None
+    values = np.asarray(entries, dtype=float)
+    finite = np.all(np.isfinite(values), axis=1) & (values[:, 0] > 0)
+    values = values[finite]
+    if len(values) == 0:
+        return None
+    weights = values[:, 0]
+    normalized = weights / np.sum(weights)
+    return {
+        "value": float(np.sum(normalized * values[:, 1])),
+        "unc": float(np.sqrt(np.sum((normalized * values[:, 2]) ** 2))),
+        "fwhm_syst": float(np.sum(normalized * values[:, 3])),
+        "exposure": float(np.sum(weights)),
+    }
+
+
+def _aggregate_run_aware_efficiencies(
+    input_dict: Mapping,
+    selection: str,
+    *,
+    group_by: Literal["detector_type", "detector_group"],
+    detector_groups: Mapping[str, Mapping | Sequence[str]] | None,
+) -> dict:
+    """Aggregate only selected run-level efficiencies and their exposures."""
+    output: dict = {}
+    for energy, detector_results in input_dict.items():
+        grouped_entries: dict[str, list[tuple[float, float, float, float]]] = {}
+        for detector, detector_result in detector_results.items():
+            period_runs = detector_result.get("period_runs", {})
+            for period, runs in period_runs.items():
+                for run, run_result in runs.items():
+                    selection_result = run_result.get("selections", {}).get(
+                        selection, {}
+                    )
+                    if selection_result.get("status") != "valid":
+                        continue
+                    efficiency = selection_result.get("efficiency")
+                    stat_unc = selection_result.get("efficiency_stat_unc")
+                    fwhm_syst = selection_result.get("efficiency_syst_fwhm")
+                    exposure = run_result.get("expo")
+                    if None in (efficiency, stat_unc, fwhm_syst, exposure):
+                        continue
+                    entry = (
+                        float(exposure),
+                        float(efficiency),
+                        float(stat_unc),
+                        float(fwhm_syst),
+                    )
+
+                    if group_by == "detector_type":
+                        detector_type = _DET_TYPE_MAP.get(detector[0].upper())
+                        if detector_type is not None:
+                            grouped_entries.setdefault(detector_type, []).append(entry)
+                        continue
+
+                    assert detector_groups is not None
+                    for group, detectors in detector_groups.items():
+                        if isinstance(detectors, (str, bytes)):
+                            msg = (
+                                f"Detector group {group!r} must be a sequence or "
+                                "mapping of detector names, not a string."
+                            )
+                            raise TypeError(msg)
+                        group_dict = (
+                            detectors
+                            if isinstance(detectors, Mapping)
+                            else dict.fromkeys(detectors, "all")
+                        )
+                        if detector not in group_dict:
+                            continue
+                        if matches_period_run_selection(
+                            str(period), str(run), group_dict[detector]
+                        ):
+                            grouped_entries.setdefault(group, []).append(entry)
+
+        output[energy] = {}
+        for group, entries in grouped_entries.items():
+            summary = _summarize_run_entries(entries)
+            if summary is not None:
+                output[energy][group] = summary
+    return output
+
+
 def build_labels_dicts(
     input_dict: Mapping,
     *,
@@ -432,7 +613,23 @@ def build_labels_dicts(
         "mse": ("non-SSE - valid PSD", ":", "^"),
     }
 
+    has_run_results = any(
+        "period_runs" in detector_result
+        for detector_results in input_dict.values()
+        for detector_result in detector_results.values()
+    )
+
     for selection, (label, ls, marker) in list(labels_dicts.items()):
+        if has_run_results:
+            averaged_means = _aggregate_run_aware_efficiencies(
+                input_dict,
+                selection,
+                group_by=group_by,
+                detector_groups=detector_groups,
+            )
+            labels_dicts[selection] = (label, ls, marker, averaged_means)
+            continue
+
         tmp = filter_valid_selection_efficiency(input_dict, selection)
         tmp_r = restructure_efficiency_by_selection(tmp)
 

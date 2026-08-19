@@ -11,6 +11,7 @@ tmp/
 # not useful .md files
 *.md
 !README.md
+!BACKGROUND_ANALYSIS_IMPLEMENTATION_PLAN.md
 
 # data files
 *.parquet
@@ -232,3 +233,11 @@ __marimo__/
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+
+# macOS
+.DS_Store
+.AppleDouble
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent

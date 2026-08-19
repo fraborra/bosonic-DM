@@ -326,6 +326,7 @@ def run_simulation_analysis(
                 vertex_counts=vertex_counts,
                 half_width_fwhm=config.fep_window.half_width_fwhm,
                 selections=config.selections,
+                apply_lar_veto=config.apply_lar_veto,
             )
 
             efficiency_path = (

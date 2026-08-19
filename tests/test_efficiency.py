@@ -24,9 +24,27 @@ def _channelmap() -> dict:
 
 def _resolution() -> dict:
     return {
-        200: {
-            "V00001A": {"fwhm": 1.0, "unc": 0.1, "expo": 1.0},
-            "V00002A": {"fwhm": 1.0, "unc": 0.1, "expo": 1.0},
+        "p01": {
+            "r001": {
+                "V00001A": {
+                    "usability": "on",
+                    "a": 1.0,
+                    "b": 0.0,
+                    "a_unc": 0.1,
+                    "b_unc": 0.0,
+                    "ab_corr": 0.0,
+                    "expo": 1.0,
+                },
+                "V00002A": {
+                    "usability": "on",
+                    "a": 1.0,
+                    "b": 0.0,
+                    "a_unc": 0.1,
+                    "b_unc": 0.0,
+                    "ab_corr": 0.0,
+                    "expo": 1.0,
+                },
+            }
         }
     }
 
@@ -40,6 +58,7 @@ def test_efficiency_marks_missing_primaries_and_psd_unavailable() -> None:
             "is_good_channel": [True, True, True],
             "has_aoe": [False, False, True],
             "is_single_site": [False, False, True],
+            "coincident_spms": [False, False, False],
         }
     ).lazy()
 
@@ -72,6 +91,7 @@ def test_efficiency_marks_counts_above_primaries_invalid() -> None:
             "is_good_channel": [True, True],
             "has_aoe": [True, True],
             "is_single_site": [True, True],
+            "coincident_spms": [False, False],
         }
     ).lazy()
 
@@ -98,6 +118,7 @@ def test_efficiency_honors_configured_selections() -> None:
             "is_good_channel": [True],
             "has_aoe": [True],
             "is_single_site": [True],
+            "coincident_spms": [False],
         }
     ).lazy()
 
@@ -122,6 +143,7 @@ def test_zero_reconstructed_events_remain_a_valid_zero_efficiency() -> None:
             "is_good_channel": [True],
             "has_aoe": [True],
             "is_single_site": [True],
+            "coincident_spms": [False],
         }
     ).lazy()
     result = compute_efficiency_from_lazyframe(
@@ -154,6 +176,7 @@ def test_status_filter_excludes_unavailable_psd() -> None:
             "is_good_channel": [True, True],
             "has_aoe": [True, False],
             "is_single_site": [True, False],
+            "coincident_spms": [False, False],
         }
     ).lazy()
     result = compute_efficiency_from_lazyframe(
@@ -175,6 +198,48 @@ def test_status_filter_excludes_unavailable_psd() -> None:
     assert result[200]["V00002A"]["selections"]["valid-psd"]["status"] == (
         "psd-unavailable"
     )
+
+
+def test_lar_veto_is_applied_to_every_selection() -> None:
+    frame = pl.DataFrame(
+        {
+            "rawid": [1, 1, 1, 1],
+            "energy": [200.0, 200.0, 200.0, 200.0],
+            "sim_e": [200, 200, 200, 200],
+            "is_good_channel": [True, True, True, True],
+            "has_aoe": [True, True, True, True],
+            "is_single_site": [True, True, False, False],
+            "coincident_spms": [False, True, False, True],
+        }
+    ).lazy()
+
+    with_veto = compute_efficiency_from_lazyframe(
+        lf=frame,
+        eres_dict=_resolution(),
+        simulated_energies=[200],
+        chmap=_channelmap(),
+        vertex_counts={200: {"V00001A": 10}},
+    )
+    without_veto = compute_efficiency_from_lazyframe(
+        lf=frame,
+        eres_dict=_resolution(),
+        simulated_energies=[200],
+        chmap=_channelmap(),
+        vertex_counts={200: {"V00001A": 10}},
+        apply_lar_veto=False,
+    )
+
+    expected_counts = {
+        "all": (2, 4),
+        "valid-psd": (2, 4),
+        "sse": (1, 2),
+        "mse": (1, 2),
+    }
+    for selection, (with_count, without_count) in expected_counts.items():
+        with_result = with_veto[200]["V00001A"]["selections"][selection]
+        without_result = without_veto[200]["V00001A"]["selections"][selection]
+        assert with_result["n_events"] == with_count
+        assert without_result["n_events"] == without_count
 
 
 def test_build_labels_dicts_can_aggregate_by_detector_group() -> None:
@@ -239,3 +304,103 @@ def test_build_labels_dicts_requires_group_inputs() -> None:
     dummy_eres = {"p01": {"r001": {"V00001A": {"usability": "on", "expo": 1.0}}}}
     with pytest.raises(ValueError, match="detector_groups is required"):
         build_labels_dicts({}, eres_dict=dummy_eres, group_by="detector_group")
+
+
+def test_run_fwhm_only_changes_the_group_selecting_that_run() -> None:
+    frame = pl.DataFrame(
+        {
+            "rawid": [1389, 1389, 8682, 8682],
+            "energy": [200.0, 202.0, 200.0, 202.0],
+            "sim_e": [200, 200, 200, 200],
+            "is_good_channel": [True, True, True, True],
+            "has_aoe": [True, True, True, True],
+            "is_single_site": [True, True, True, True],
+            "coincident_spms": [False, False, False, False],
+        }
+    ).lazy()
+    channelmap = {
+        "V01389A": SimpleNamespace(daq=SimpleNamespace(rawid=1389)),
+        "V08682B": SimpleNamespace(daq=SimpleNamespace(rawid=8682)),
+    }
+    resolution = {
+        "p05": {
+            "r001": {
+                detector: {
+                    "usability": "on",
+                    "a": 1.0,
+                    "b": 0.0,
+                    "a_unc": 0.0,
+                    "b_unc": 0.0,
+                    "ab_corr": 0.0,
+                    "expo": exposure,
+                }
+                for detector, exposure in {
+                    "V01389A": 1.0,
+                    "V08682B": 2.0,
+                }.items()
+            }
+        },
+        "p09": {
+            "r001": {
+                detector: {
+                    "usability": "on",
+                    "a": 9.0,
+                    "b": 0.0,
+                    "a_unc": 0.0,
+                    "b_unc": 0.0,
+                    "ab_corr": 0.0,
+                    "expo": exposure,
+                }
+                for detector, exposure in {
+                    "V01389A": 10.0,
+                    "V08682B": 20.0,
+                }.items()
+            }
+        },
+    }
+
+    result = compute_efficiency_from_lazyframe(
+        lf=frame,
+        eres_dict=resolution,
+        simulated_energies=[200],
+        chmap=channelmap,
+        vertex_counts={200: {"V01389A": 10, "V08682B": 10}},
+        half_width_fwhm=1.0,
+        selections=["all"],
+    )
+
+    assert (
+        result[200]["V01389A"]["period_runs"]["p05"]["r001"]["selections"]["all"][
+            "n_events"
+        ]
+        == 1
+    )
+    assert (
+        result[200]["V01389A"]["period_runs"]["p09"]["r001"]["selections"]["all"][
+            "n_events"
+        ]
+        == 2
+    )
+
+    detector_groups = {
+        "ICPC group1": {
+            "V01389A": {"p09": "all"},
+            "V08682B": {"p09": "all"},
+        },
+        "ICPC group2": {
+            "V01389A": {"~p09": "all"},
+            "V08682B": {"~p09": "all"},
+        },
+    }
+    labels = build_labels_dicts(
+        result,
+        group_by="detector_group",
+        detector_groups=detector_groups,
+        eres_dict=resolution,
+    )
+    groups = labels["all"][3][200]
+
+    assert groups["ICPC group1"]["value"] == pytest.approx(2.5 / 11.0)
+    assert groups["ICPC group1"]["exposure"] == pytest.approx(30.0)
+    assert groups["ICPC group2"]["value"] == pytest.approx(1.5 / 11.0)
+    assert groups["ICPC group2"]["exposure"] == pytest.approx(3.0)
