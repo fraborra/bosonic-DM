@@ -26,6 +26,7 @@ analysis:
   - valid-psd
   - sse
   - mse
+  apply_lar_veto: true
   # specific file in case you do not want to use the default one
   # in $BOSONIC_DM_ROOT/data/inputs/dictionaries/detector-grouping/groups_dict.yaml
   # detector_groups: "dictionaries/detector-grouping/groups_dict.yaml"
@@ -44,8 +45,7 @@ interactions:
     make_aoe_survival_plots: true
 
 background:
-  pet_glob: "${LEGEND_PET_ROOT}/phy/*.lh5"
-  apply_lar_veto: true
+  # pet_glob: #if passed override the legend-production folder
   comparison_cut_profile: "without-bb-like"
   energy_ranges_keV:
   - [20, 300]

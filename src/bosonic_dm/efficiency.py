@@ -144,6 +144,7 @@ def compute_efficiency_from_lazyframe(
     vertex_counts: Mapping[int, Mapping[str, int]],
     half_width_fwhm: float = 2.0,
     selections: Sequence[str] = ("all", "valid-psd", "sse", "mse"),
+    apply_lar_veto: bool = True,
 ) -> dict:
     """Compute run-aware per-detector efficiencies for all selections.
 
@@ -153,8 +154,10 @@ def compute_efficiency_from_lazyframe(
     under ``period_runs`` and only then exposure-weighted into the compatibility
     detector-level ``selections`` fields.
 
-    It collects the lazy frame *lf* once per energy and counts events inside
-    each run-specific FEP window across four selections:
+    It collects the lazy frame *lf* once per energy and counts good-channel
+    events inside each run-specific FEP window across four selections. When
+    *apply_lar_veto* is true, every selection additionally requires no SiPM
+    coincidence:
     - all: events in FEP window
     - valid-psd: events in FEP window with has_aoe == True
     - sse: valid-psd with is_single_site == True
@@ -165,7 +168,8 @@ def compute_efficiency_from_lazyframe(
     lf
         A Polars *lazy* scan of the parquet dataset partitioned by ``sim_e``.
         Expected columns: ``rawid``, ``energy``, ``sim_e``, ``is_good_channel``,
-        ``has_aoe``, ``is_single_site``.
+        ``has_aoe``, and ``is_single_site``. When *apply_lar_veto* is true,
+        ``coincident_spms`` is also required.
     eres_dict
         Nested dictionary with structure
         ``{period: {run: {detector_name: {"usability", "expo", "a", "b",
@@ -182,6 +186,9 @@ def compute_efficiency_from_lazyframe(
     selections
         Selection names to compute. Supported values are ``all``,
         ``valid-psd``, ``sse``, and ``mse``.
+    apply_lar_veto
+        If true, require ``coincident_spms == False`` for every selection.
+        Null SiPM-coincidence decisions are rejected conservatively.
 
     Returns
     -------
@@ -289,12 +296,16 @@ def compute_efficiency_from_lazyframe(
 
         # The event sample is shared by all production runs; only the FEP
         # window changes with period/run calibration conditions.
+        base_filter = (
+            pl.col("is_good_channel")
+            & (pl.col("sim_e") == ene)
+            & pl.col("rawid").is_in(list(rawids.values()))
+        )
+        if apply_lar_veto:
+            base_filter &= pl.col("coincident_spms").eq(False).fill_null(False)
+
         df_ene = (
-            lf.filter(
-                (pl.col("is_good_channel"))
-                & (pl.col("sim_e") == ene)
-                & (pl.col("rawid").is_in(list(rawids.values())))
-            )
+            lf.filter(base_filter)
             .select("rawid", "energy", "has_aoe", "is_single_site")
             .collect()
         )

@@ -53,6 +53,7 @@ analysis:
   fep_window:
     half_width_fwhm: 1.0
   selections: []
+  apply_lar_veto: true
   # Relative paths are resolved below inputs_root.
   detector_groups: dictionaries/detector-grouping/groups_dict.yaml
 
@@ -67,7 +68,6 @@ interactions:
 
 background:
   pet_glob: /path/to/pet/*.lh5
-  apply_lar_veto: true
   comparison_cut_profile: default
   energy_ranges_keV: [[0, 3000]]
   bin_widths_keV: [1]

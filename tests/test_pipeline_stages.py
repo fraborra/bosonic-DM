@@ -65,6 +65,7 @@ def test_missing_inputs_soft_block_dependent_stages(tmp_path: Path) -> None:
         energies_keV=(200,),
         fep_window=FepWindowConfig(half_width_fwhm=2.0),
         selections=("all",),
+        apply_lar_veto=True,
         interactions={
             "axio-electric": InteractionConfig(
                 name="axio-electric",
@@ -76,7 +77,6 @@ def test_missing_inputs_soft_block_dependent_stages(tmp_path: Path) -> None:
         },
         background=BackgroundConfig(
             pet_glob="",
-            apply_lar_veto=True,
             comparison_cut_profile="without-bb-like",
             energy_ranges_keV=[(20, 300)],
             bin_widths_keV=[5],

@@ -30,6 +30,7 @@ analysis:
   fep_window:
     half_width_fwhm: 2.0
   selections: [all]
+  apply_lar_veto: true
   detector_groups: {tmp_path}/groups.yaml
 interactions:
   axio-electric:
@@ -37,7 +38,6 @@ interactions:
     make_lar_survival_plots: false
 background:
   pet_glob: {tmp_path}/pet/*.lh5
-  apply_lar_veto: true
   comparison_cut_profile: without-bb-like
   energy_ranges_keV: [[20, 300]]
   bin_widths_keV: [5]
@@ -54,3 +54,4 @@ output:
 
     assert config.paths.dictionaries_root == output_root / "dictionaries"
     assert config.paths.inputs_root == calibration_root
+    assert config.apply_lar_veto is True

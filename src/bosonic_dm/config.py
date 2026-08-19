@@ -49,7 +49,6 @@ class InteractionConfig:
 @dataclass(frozen=True)
 class BackgroundConfig:
     pet_glob: str
-    apply_lar_veto: bool
     comparison_cut_profile: str
     energy_ranges_keV: list[tuple[int, int]]
     bin_widths_keV: list[int]
@@ -69,6 +68,7 @@ class AnalysisConfig:
     energies_keV: tuple[int, ...]
     fep_window: FepWindowConfig
     selections: tuple[str, ...]
+    apply_lar_veto: bool
     interactions: Mapping[str, InteractionConfig]
     background: BackgroundConfig
     output: OutputConfig
@@ -152,9 +152,23 @@ def load_analysis_config(path: str | Path) -> AnalysisConfig:
         )
 
     raw_bg = raw_config["background"]
+    if "apply_lar_veto" in raw_analysis:
+        apply_lar_veto = raw_analysis["apply_lar_veto"]
+    elif "apply_lar_veto" in raw_bg:
+        logging.warning(
+            "background.apply_lar_veto is deprecated; move it to "
+            "analysis.apply_lar_veto."
+        )
+        apply_lar_veto = raw_bg["apply_lar_veto"]
+    else:
+        msg = "analysis.apply_lar_veto is required."
+        raise ValueError(msg)
+    if not isinstance(apply_lar_veto, bool):
+        msg = "analysis.apply_lar_veto must be a boolean."
+        raise ValueError(msg)
+
     background = BackgroundConfig(
         pet_glob=os.path.expandvars(raw_bg.get("pet_glob", "")),
-        apply_lar_veto=raw_bg["apply_lar_veto"],
         comparison_cut_profile=raw_bg["comparison_cut_profile"],
         energy_ranges_keV=[tuple(r) for r in raw_bg["energy_ranges_keV"]],
         bin_widths_keV=list(raw_bg["bin_widths_keV"]),
@@ -196,6 +210,7 @@ def load_analysis_config(path: str | Path) -> AnalysisConfig:
         energies_keV=energies,
         fep_window=fep_window,
         selections=selections,
+        apply_lar_veto=apply_lar_veto,
         interactions=interactions,
         background=background,
         output=output,

@@ -49,13 +49,10 @@ def resolve_background_stages(stages: Sequence[str]) -> tuple[str, ...]:
 
 
 def discover_background_inputs(pet_glob: str) -> tuple[Path, ...]:
-    """Return existing PET files matching the configured glob in stable order."""
+    """Return PET files matching a filename glob in stable order."""
+    glob_path = Path(pet_glob)
     return tuple(
-        sorted(
-            path
-            for match in Path.glob(pet_glob, recursive=True)
-            if (path := Path(match)).is_file()
-        )
+        sorted(path for path in glob_path.parent.glob(glob_path.name) if path.is_file())
     )
 
 
@@ -169,7 +166,7 @@ def run_background_analysis(
                 pet_files,
                 dataset_path,
                 context,
-                apply_lar_veto=config.background.apply_lar_veto,
+                apply_lar_veto=config.apply_lar_veto,
                 comparison_cut_profile=config.background.comparison_cut_profile,
                 overwrite=do_overwrite,
             )

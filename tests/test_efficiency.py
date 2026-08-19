@@ -58,6 +58,7 @@ def test_efficiency_marks_missing_primaries_and_psd_unavailable() -> None:
             "is_good_channel": [True, True, True],
             "has_aoe": [False, False, True],
             "is_single_site": [False, False, True],
+            "coincident_spms": [False, False, False],
         }
     ).lazy()
 
@@ -90,6 +91,7 @@ def test_efficiency_marks_counts_above_primaries_invalid() -> None:
             "is_good_channel": [True, True],
             "has_aoe": [True, True],
             "is_single_site": [True, True],
+            "coincident_spms": [False, False],
         }
     ).lazy()
 
@@ -116,6 +118,7 @@ def test_efficiency_honors_configured_selections() -> None:
             "is_good_channel": [True],
             "has_aoe": [True],
             "is_single_site": [True],
+            "coincident_spms": [False],
         }
     ).lazy()
 
@@ -140,6 +143,7 @@ def test_zero_reconstructed_events_remain_a_valid_zero_efficiency() -> None:
             "is_good_channel": [True],
             "has_aoe": [True],
             "is_single_site": [True],
+            "coincident_spms": [False],
         }
     ).lazy()
     result = compute_efficiency_from_lazyframe(
@@ -172,6 +176,7 @@ def test_status_filter_excludes_unavailable_psd() -> None:
             "is_good_channel": [True, True],
             "has_aoe": [True, False],
             "is_single_site": [True, False],
+            "coincident_spms": [False, False],
         }
     ).lazy()
     result = compute_efficiency_from_lazyframe(
@@ -193,6 +198,48 @@ def test_status_filter_excludes_unavailable_psd() -> None:
     assert result[200]["V00002A"]["selections"]["valid-psd"]["status"] == (
         "psd-unavailable"
     )
+
+
+def test_lar_veto_is_applied_to_every_selection() -> None:
+    frame = pl.DataFrame(
+        {
+            "rawid": [1, 1, 1, 1],
+            "energy": [200.0, 200.0, 200.0, 200.0],
+            "sim_e": [200, 200, 200, 200],
+            "is_good_channel": [True, True, True, True],
+            "has_aoe": [True, True, True, True],
+            "is_single_site": [True, True, False, False],
+            "coincident_spms": [False, True, False, True],
+        }
+    ).lazy()
+
+    with_veto = compute_efficiency_from_lazyframe(
+        lf=frame,
+        eres_dict=_resolution(),
+        simulated_energies=[200],
+        chmap=_channelmap(),
+        vertex_counts={200: {"V00001A": 10}},
+    )
+    without_veto = compute_efficiency_from_lazyframe(
+        lf=frame,
+        eres_dict=_resolution(),
+        simulated_energies=[200],
+        chmap=_channelmap(),
+        vertex_counts={200: {"V00001A": 10}},
+        apply_lar_veto=False,
+    )
+
+    expected_counts = {
+        "all": (2, 4),
+        "valid-psd": (2, 4),
+        "sse": (1, 2),
+        "mse": (1, 2),
+    }
+    for selection, (with_count, without_count) in expected_counts.items():
+        with_result = with_veto[200]["V00001A"]["selections"][selection]
+        without_result = without_veto[200]["V00001A"]["selections"][selection]
+        assert with_result["n_events"] == with_count
+        assert without_result["n_events"] == without_count
 
 
 def test_build_labels_dicts_can_aggregate_by_detector_group() -> None:
@@ -268,6 +315,7 @@ def test_run_fwhm_only_changes_the_group_selecting_that_run() -> None:
             "is_good_channel": [True, True, True, True],
             "has_aoe": [True, True, True, True],
             "is_single_site": [True, True, True, True],
+            "coincident_spms": [False, False, False, False],
         }
     ).lazy()
     channelmap = {
