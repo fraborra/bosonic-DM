@@ -12,11 +12,11 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 import lgdo
+import lh5
 import numpy as np
 import pyg4ometry as pg4
 import pygeomhpges as hpges
 from dbetto import Props
-from lgdo import lh5
 from numpy.typing import NDArray
 from pygeomtools import get_sensvol_metadata
 

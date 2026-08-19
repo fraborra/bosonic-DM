@@ -17,6 +17,7 @@ from bosonic_dm.config import (
     ProductionConfig,
 )
 from bosonic_dm.pipeline.simulation import (
+    current_cut_setup,
     resolve_simulation_stages,
     run_simulation_analysis,
 )
@@ -102,9 +103,16 @@ def test_missing_inputs_soft_block_dependent_stages(tmp_path: Path) -> None:
     }
     assert artifacts.warnings
     manifest = read_yaml(data_root / "axio-electric_manifest.yaml")
-    assert manifest["schema_version"] == 1
-    assert manifest["efficiency_output_schema_version"] == 2
-    assert manifest["selection_metadata"] == {
+    assert manifest["schema_version"] == 2
+    assert manifest["stages"]["efficiencies"]["status"] == "blocked"
+    assert manifest["last_run"]["resolved_stages"] == [
+        "count-vertices",
+        "build-dataset",
+        "efficiencies",
+    ]
+    cut_setup = current_cut_setup(config)
+    assert cut_setup["efficiency_output_schema_version"] == 2
+    assert cut_setup["selection_metadata"] == {
         "energy_window": {
             "reconstructed_energy_column": "energy",
             "center_energy_column": "sim_e",
@@ -127,8 +135,3 @@ def test_missing_inputs_soft_block_dependent_stages(tmp_path: Path) -> None:
             }
         },
     }
-    assert manifest["resolved_stages"] == [
-        "count-vertices",
-        "build-dataset",
-        "efficiencies",
-    ]

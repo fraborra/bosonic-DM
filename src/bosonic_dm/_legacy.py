@@ -10,8 +10,8 @@ They are not part of the public API of ``bosonic_dm``.
 from __future__ import annotations
 
 import awkward as ak
+import lh5
 import matplotlib.pyplot as plt
-from lgdo import lh5
 from tqdm.notebook import tqdm
 
 
