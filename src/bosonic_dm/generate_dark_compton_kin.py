@@ -37,8 +37,9 @@ import argparse
 import logging
 from pathlib import Path
 
+import lh5
 import numpy as np
-from lgdo import Array, Table, lh5
+from lgdo import Array, Table
 
 from bosonic_dm.utils import (
     add_mass_selection_args,

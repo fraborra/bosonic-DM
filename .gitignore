@@ -8,10 +8,11 @@ data/v1/tiers/
 plots/
 tmp/
 
-# not useful .md files
+# Markdown files
 *.md
+
+# include useful .md files
 !README.md
-!BACKGROUND_ANALYSIS_IMPLEMENTATION_PLAN.md
 
 # data files
 *.parquet
