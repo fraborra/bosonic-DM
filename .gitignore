@@ -13,6 +13,7 @@ tmp/
 
 # include useful .md files
 !README.md
+!docs/**/*.md
 
 # data files
 *.parquet
