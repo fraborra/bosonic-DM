@@ -200,6 +200,14 @@ def run_simulation_analysis(
     int_cfg = config.interactions[interaction]
     dataset_name = int_cfg.name
     do_overwrite = overwrite if overwrite is not None else config.output.overwrite
+
+    logger.info(
+        "─── simulation: %s (%d energies, stages: %s, overwrite=%s) ───",
+        interaction,
+        len(config.energies_keV),
+        " → ".join(resolved_stages),
+        do_overwrite,
+    )
     manifest_path = config.paths.data_root / f"{interaction}_manifest.yaml"
     manifest = load_simulation_manifest(manifest_path, interaction)
     manifest["data_root"] = str(config.paths.data_root)
@@ -237,6 +245,7 @@ def run_simulation_analysis(
                 "status": "cached",
                 "outputs": [str(counts_yaml_path)],
             }
+            logger.info("Stage count-vertices: cached")
         else:
             first_energy = config.energies_keV[0]
             first_job = int_cfg.job_template.format(energy=first_energy)
@@ -360,6 +369,7 @@ def run_simulation_analysis(
             artifacts.stage_status["build-dataset"] = "partial"
         elif not energies_to_build:
             artifacts.stage_status["build-dataset"] = "cached"
+            logger.info("Stage build-dataset: cached")
         else:
             artifacts.stage_status["build-dataset"] = "completed"
 
@@ -389,6 +399,7 @@ def run_simulation_analysis(
                 "cut_setup": cut_setup,
             }
             efficiency_is_current = True
+            logger.info("Stage efficiencies: cached")
         else:
             ready_energies = [
                 energy
@@ -495,6 +506,7 @@ def run_simulation_analysis(
                 "cut_setup": cut_setup,
                 "plot_setup": plot_setup,
             }
+            logger.info("Stage plots: cached")
         elif not efficiency_is_current:
             _warn(
                 artifacts,

@@ -131,6 +131,12 @@ def run_background_analysis(
     requested_stages = tuple(stages)
     resolved_stages = resolve_background_stages(requested_stages)
     do_overwrite = overwrite if overwrite is not None else config.output.overwrite
+
+    logger.info(
+        "─── background (stages: %s, overwrite=%s) ───",
+        " → ".join(resolved_stages),
+        do_overwrite,
+    )
     manifest = load_background_manifest(background_manifest_path(config))
     manifest["data_root"] = str(config.paths.data_root)
     stages_manifest = manifest_stages(manifest)
@@ -171,6 +177,7 @@ def run_background_analysis(
             artifacts.dataset_paths.append(dataset_path)
             artifacts.stage_status["build-dataset"] = "cached"
             dataset_is_current = True
+            logger.info("Stage build-dataset: cached ✓")
             stages_manifest["build-dataset"] = {
                 "status": "cached",
                 "outputs": [str(dataset_path)],
