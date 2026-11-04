@@ -24,19 +24,21 @@ plots/
   background/...
 ```
 
-Only products for workflows and energies that have valid inputs will appear.
+Only products for workflows and energies that have valid inputs appear.
+
+Fit products are not part of this tree. `save_background_fit` and
+`save_signal_fit` write to the directory passed by the caller and record their
+inputs in a `summary.yaml`; see [Spectral fits](fitting.md#products).
 
 ## Simulation manifests
 
-`<data_root>/<interaction>_manifest.yaml` is cumulative. Its stage records track
-outputs and compatibility metadata, while `last_run` records:
+`<data_root>/<interaction>_manifest.yaml` is cumulative. Its stage records hold
+each stage's status, outputs, and the cut and plot settings used to decide
+whether efficiency and plot products can be reused. `last_run` records:
 
 - requested and dependency-resolved stages;
 - whether overwrite was enabled;
 - non-fatal warnings.
-
-The manifest's stage records capture each status plus the cut and plot settings
-needed to decide whether efficiency and plot products can be reused.
 
 ## Background manifest
 
@@ -58,15 +60,14 @@ needed to decide whether efficiency and plot products can be reused.
 | `blocked`   | Required inputs were unavailable and no current result was produced. |
 | `disabled`  | The configuration intentionally disabled the output, such as plots.  |
 
-Downstream users should check both the stage status and warnings. The existence
-of a file alone does not guarantee that it matches the current configuration.
+Check both the stage status and the warnings. A file can exist and still not
+match the current configuration.
 
 ## Overwrite behavior
 
 The effective overwrite value comes from `output.overwrite`, unless the command
-line includes `--overwrite`. Rebuilding is appropriate after changing source
-data or any setting that is not represented by a compatible cached stage.
+line includes `--overwrite`. Rebuild after changing source data or any setting
+that a cached stage does not record as compatible.
 
-Avoid deleting individual files from a partitioned dataset as a cache-control
-mechanism. Prefer `--overwrite`, then verify the manifest and reported output
-paths after the run.
+To force a rebuild, use `--overwrite` rather than deleting individual files from
+a partitioned dataset, then check the manifest and reported output paths.

@@ -107,7 +107,7 @@ their manifest records match the relevant cut and plot setup.
 
 ## Partial runs
 
-The workflow is designed to preserve useful results when only some energies are
-available. A stage may be `completed`, `cached`, `partial`, `blocked`, or
+When only some energies are available, the workflow still produces results for
+those energies. A stage may be `completed`, `cached`, `partial`, `blocked`, or
 `disabled`. Inspect `<data_root>/<interaction>_manifest.yaml` for the exact
 status and warnings from the last run.

@@ -3,7 +3,8 @@
 ## Prerequisites
 
 - Python 3.11 or newer.
-- [Pixi](https://pixi.sh/) for dependency and environment management.
+- [Pixi](https://pixi.sh/) for dependency and environment management. The Pixi
+  environment also provides CmdStan for the Stan fits.
 - Access to the LEGEND production metadata and the simulation or PET-tier files
   needed by the workflow you intend to run.
 
@@ -71,9 +72,9 @@ status, outputs, resolved stages, and warnings.
 
 ### The production root does not exist
 
-Configuration loading emits a warning, but it does not stop immediately. Stages
-that require production metadata will remain blocked until
-`production.reference_root/production.version` is available.
+Configuration loading warns but does not stop. Stages that need production
+metadata stay blocked until `production.reference_root/production.version` is
+available.
 
 ### No background PET files are found
 
@@ -88,5 +89,5 @@ reported per energy in the simulation manifest.
 
 ### An old product is reused
 
-Use `--overwrite` when you intentionally need to rebuild products. See
+Use `--overwrite` when you need to rebuild products. See
 [Outputs and manifests](outputs.md) for the current cache behavior.

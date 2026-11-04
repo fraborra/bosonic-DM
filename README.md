@@ -3,11 +3,12 @@
 Analysis tools for bosonic dark-matter searches with the LEGEND-200 experiment.
 The package provides reusable Python functions and command-line pipelines for
 simulation processing, efficiency estimation, diagnostic plots, and background
-studies.
+studies, plus Stan-based background and signal fits.
 
 > **Status:** under active development. The run-aware background dataset and
 > diagnostic plots must be validated on production data before they are used for
-> inference.
+> inference. The Stan background fit is being validated, and the signal fit is a
+> first stage with the background and signal response held fixed.
 
 ## Quick start
 
@@ -35,6 +36,9 @@ pixi run bosonic-dm background --config configs/local.yaml
 Use `pixi run` for every project command. Site-specific data paths and
 simulation inputs are intentionally not committed.
 
+The background and signal fits are run from Python rather than the CLI; see
+[Spectral fits](docs/fitting.md).
+
 ## Documentation
 
 - [Documentation index](docs/index.md)
@@ -43,16 +47,18 @@ simulation inputs are intentionally not committed.
 - [Command-line reference](docs/cli.md)
 - [Simulation pipeline](docs/simulation-pipeline.md)
 - [Background pipeline](docs/background-pipeline.md)
+- [Spectral fits](docs/fitting.md)
 - [Outputs and manifests](docs/outputs.md)
 - [Development guide](docs/development.md)
 
 ## Repository layout
 
-- `src/bosonic_dm/` — library and pipeline implementation.
-- `configs/` — default and local configuration examples.
-- `docs/` — user and contributor documentation.
-- `notebooks/` — exploratory and legacy analysis notebooks.
-- `tests/` — automated tests.
+- `src/bosonic_dm/`: library and pipeline implementation.
+- `stan/`: Stan models for the background and signal fits.
+- `configs/`: default and local configuration examples.
+- `docs/`: user and contributor documentation.
+- `notebooks/`: exploratory and legacy analysis notebooks.
+- `tests/`: automated tests.
 
 The CLI is deliberately thin; analysis functions are also available from the
 Python API for use in scripts and notebooks.

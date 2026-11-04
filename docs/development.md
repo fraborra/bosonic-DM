@@ -8,9 +8,10 @@ src/bosonic_dm/
   config.py              YAML loading and validated configuration objects
   models.py              result data structures
   pipeline/              simulation and background orchestration
-  plotting/              plotting functions
-  background.py          background event transformation
-  cuts.py                quality cuts and filtering
+  plotting/              plotting functions, including background-fit plots
+  fitting/               Stan background and signal fits, diagnostics, shapes
+  background.py          background dataset and binned spectra
+  cuts.py                quality cuts, filtering, and detector usability
   efficiency.py          efficiency calculations
   geometry.py            detector/vertex mapping
   io.py                  LH5, Awkward, and Parquet helpers
@@ -18,6 +19,10 @@ src/bosonic_dm/
   stats.py               statistical utilities
   yaml_io.py             safe YAML reading, writing, and migration
 ```
+
+The Stan models live in `stan/` at the repository root. The fitting modules
+locate them relative to the source tree, so use an editable installation.
+CmdStanPy compiles a model on first use.
 
 The CLI should remain a thin wrapper. Put reusable analysis logic in the package
 so it can also be called from scripts, tests, and notebooks.

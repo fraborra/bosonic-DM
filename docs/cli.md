@@ -1,6 +1,6 @@
 # Command-line reference
 
-All commands should be run through Pixi from the package repository.
+Run all commands through Pixi from the package repository.
 
 ## Analysis pipeline
 

@@ -67,6 +67,25 @@ cutflow = background.select(
 ).collect()
 ```
 
+## Detector usability
+
+The dataset keeps events from every detector/run in the channel map, whatever
+its usability. Group exposures count only detector/runs with usability `on`, so
+drop the other events before comparing counts with exposure. Build a table of
+usable `(period, run, detector_name)` triples and apply it:
+
+```python
+from bosonic_dm.cuts import build_usability_table, select_usable
+
+period_runs = background.select("period", "run").unique().collect().rows()
+usable = build_usability_table(context.get_channelmap_for_run, period_runs)
+usable_events = select_usable(background, usable)
+```
+
+`prepare_background_spectra`, `plot_background_spectrum`, and
+`plot_background_partition_summary` accept the same table through their `usable`
+argument. The pipeline's own diagnostic plots do not apply it.
+
 ## Diagnostic plots
 
 When `output.save_plots` is true, spectrum overlays for every configured energy
@@ -79,6 +98,9 @@ range and bin width, plus a partition summary, are written below:
 These plots compare event counts. They are not exposure-normalized fit inputs.
 The comparison sample is correlated with the default sample, so the current
 ratio error bars must not be interpreted as inference-ready uncertainties.
+
+Exposure-normalized spectra for fitting come from `prepare_background_spectra`;
+see [Spectral fits](fitting.md).
 
 ## Reuse and rebuilding
 
