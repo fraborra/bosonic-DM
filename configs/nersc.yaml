@@ -7,10 +7,10 @@ production:
 
 paths:
   simulation_root: "${BOSONIC_DM_SIM_ROOT}"
-  data_root: "data/v3"
+  data_root: "data/v4"
   # Shared inputs root for all static data
   inputs_root: "data/inputs"
-  plots_root: "data/v3/plots"
+  plots_root: "data/v4/plots"
   temporary_root: "tmp"
 
 analysis:

@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Francesco Borra
+# Copyright (C) 2026 Francesco Borra
 #
 
 """Data loading, quality cuts, and exposure computation for pet-tier data."""
@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 import re
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from pathlib import Path
 
 import awkward as ak
@@ -127,6 +127,83 @@ def _build_rawid_name_map(chmap: object) -> dict[int, str]:
 def build_rawid_name_map(chmap: object) -> dict[int, str]:
     """Return the DAQ raw-ID to detector-name mapping for a channel map."""
     return _build_rawid_name_map(chmap)
+
+
+USABILITY_KEYS: tuple[str, str, str] = ("period", "run", "detector_name")
+_USABILITY_SCHEMA = dict.fromkeys(USABILITY_KEYS, pl.String)
+
+
+def is_usable_detector(channel: Mapping) -> bool:
+    """Return whether a channel-map entry is a processable geds with usability ``on``.
+
+    Equivalent to ``chmap[ge].analysis.processable is True and
+    chmap[ge].analysis.usability == "on"``, restricted to ``system == "geds"``.
+    """
+    if channel.get("system") != "geds":
+        return False
+    analysis = channel.get("analysis") or {}
+    return analysis.get("processable") is True and analysis.get("usability") == "on"
+
+
+def build_usability_table(
+    channelmap_for_run: Callable[[str, str], Mapping],
+    period_runs: Iterable[tuple[str, str]],
+) -> pl.DataFrame:
+    """Return the usable ``(period, run, detector_name)`` triples.
+
+    Parameters
+    ----------
+    channelmap_for_run
+        Callable returning the channel map valid for a period and run, e.g.
+        ``AnalysisContext.get_channelmap_for_run``.
+    period_runs
+        ``(period, run)`` pairs to look up. For a dataset, use
+        ``lf.select("period", "run").unique().collect().rows()``.
+
+    Returns
+    -------
+    pl.DataFrame
+        String columns ``period``, ``run``, ``detector_name`` with one row per
+        detector that is processable and has usability ``"on"`` in that run.
+    """
+    rows = [
+        (period, run, str(name))
+        for period, run in sorted(set(period_runs))
+        for name, channel in channelmap_for_run(period, run).items()
+        if is_usable_detector(channel)
+    ]
+    return pl.DataFrame(rows, schema=_USABILITY_SCHEMA, orient="row")
+
+
+def usability_table_from_eres(eres_dict: Mapping) -> pl.DataFrame:
+    """Return usable triples from ``{period: {run: {det: {"usability": ...}}}}``.
+
+    Unlike :func:`build_usability_table`, this cannot check ``processable``.
+    """
+    rows = [
+        (period, run, det)
+        for period, runs in eres_dict.items()
+        for run, dets in runs.items()
+        for det, info in dets.items()
+        if info.get("usability") == "on"
+    ]
+    return pl.DataFrame(rows, schema=_USABILITY_SCHEMA, orient="row")
+
+
+def select_usable(
+    frame: pl.LazyFrame | pl.DataFrame,
+    usable: pl.DataFrame | pl.LazyFrame,
+) -> pl.LazyFrame:
+    """Keep only events whose ``(period, run, detector_name)`` is in ``usable``.
+
+    Uses a semi-join, so no columns are added. Join keys are cast to string so
+    Hive-inferred partition columns match the table.
+    """
+    lazy = frame.lazy() if isinstance(frame, pl.DataFrame) else frame
+    keys = [pl.col(key).cast(pl.String) for key in USABILITY_KEYS]
+    return lazy.with_columns(keys).join(
+        usable.lazy().with_columns(keys), on=list(USABILITY_KEYS), how="semi"
+    )
 
 
 def parse_pet_period_run(filepath: str | Path) -> tuple[str, str]:

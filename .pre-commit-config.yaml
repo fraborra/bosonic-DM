@@ -1,4 +1,6 @@
 exclude: ^.*\.ipynb$
+default_language_version:
+  node: "22.21.1"   # pin: nodeenv crashes on node 27 pre-release tags when using "latest"
 
 ci:
   autoupdate_commit_msg: "chore: update pre-commit hooks"

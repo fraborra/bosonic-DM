@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Francesco Borra
+# Copyright (C) 2026 Francesco Borra
 #
 
 """Diagnostic check plots for the background Parquet dataset."""
@@ -11,6 +11,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
+
+from bosonic_dm.cuts import select_usable
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +27,7 @@ def plot_background_spectrum(
     exposure_kg_yr: float | None = None,
     yscale: str = "log",
     show_plot: bool = False,
+    usable: pl.DataFrame | None = None,
 ) -> Path:
     """Plot an analysis-vs-comparison spectrum with a ratio panel.
 
@@ -49,6 +52,9 @@ def plot_background_spectrum(
     show_plot
         If ``True``, display the figure interactively (e.g. in a
         notebook) instead of closing it after saving.
+    usable
+        Optional ``(period, run, detector_name)`` table from
+        ``build_usability_table``; events outside it are dropped.
 
     Returns
     -------
@@ -60,6 +66,8 @@ def plot_background_spectrum(
     bin_edges = np.linspace(emin, emax, n_bins + 1)
 
     lf = pl.scan_parquet(str(dataset_path), hive_partitioning=True)
+    if usable is not None:
+        lf = select_usable(lf, usable)
     df = (
         lf.filter((pl.col("energy") >= emin) & (pl.col("energy") < emax))
         .select("energy", "passes_analysis", "passes_comparison")
@@ -179,6 +187,7 @@ def plot_background_partition_summary(
     *,
     exposure_by_partition: dict[tuple[str, str], float] | None = None,
     show_plot: bool = False,
+    usable: pl.DataFrame | None = None,
 ) -> tuple[Path, list[str]]:
     """Bar chart of event counts per (period, run) partition.
 
@@ -196,6 +205,9 @@ def plot_background_partition_summary(
     show_plot
         If ``True``, display the figure interactively instead of
         closing it after saving.
+    usable
+        Optional ``(period, run, detector_name)`` table from
+        ``build_usability_table``; events outside it are dropped.
 
     Returns
     -------
@@ -204,6 +216,8 @@ def plot_background_partition_summary(
         with zero ``passes_analysis`` events.
     """
     lf = pl.scan_parquet(str(dataset_path), hive_partitioning=True)
+    if usable is not None:
+        lf = select_usable(lf, usable)
     summary = (
         lf.group_by("period", "run")
         .agg(
