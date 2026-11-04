@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Francesco Borra
+# Copyright (C) 2026 Francesco Borra
 #
 
 """Check statistical uncertainties of dark compton detection efficiencies.

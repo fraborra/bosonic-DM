@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Francesco Borra
+# Copyright (C) 2026 Francesco Borra
 #
 
 """Command-line wrapper around the Python API."""
@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import textwrap
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -24,6 +25,100 @@ _NOISY_LOGGERS = (
     "pyg4ometry.gdml",
     "pyg4ometry.gdml.Reader",
 )
+_BANNER_INNER_WIDTH = 76
+
+
+def _banner_rows(
+    command: str,
+    config: AnalysisConfig,
+    *,
+    interactions: Sequence[str] | None,
+    stages: Sequence[str],
+    overwrite: bool | None,
+) -> list[tuple[str, str]]:
+    """Build command-specific rows for the startup banner."""
+    effective_overwrite = (
+        overwrite if overwrite is not None else config.output.overwrite
+    )
+    rows = [("Command", command)]
+
+    if command in {"simulation", "all"}:
+        if interactions:
+            rows.append(("Interactions", ", ".join(interactions)))
+        rows.extend(
+            [
+                ("Simulation root", str(config.paths.simulation_root)),
+                (
+                    "Energies [keV]",
+                    ", ".join(str(energy) for energy in config.energies_keV),
+                ),
+                ("Selections", ", ".join(config.selections)),
+                (
+                    "FEP half-width",
+                    f"{config.fep_window.half_width_fwhm} FWHM",
+                ),
+                ("Detector groups", str(config.detector_groups)),
+            ]
+        )
+
+    if command in {"background", "all"}:
+        pet_glob = config.background.pet_glob or "from production config"
+        energy_ranges = ", ".join(
+            f"{lower}-{upper}" for lower, upper in config.background.energy_ranges_keV
+        )
+        rows.extend(
+            [
+                ("PET inputs", pet_glob),
+                ("Comparison cut", config.background.comparison_cut_profile),
+                ("Energy ranges [keV]", energy_ranges),
+                (
+                    "Bin widths [keV]",
+                    ", ".join(str(width) for width in config.background.bin_widths_keV),
+                ),
+            ]
+        )
+
+    rows.extend(
+        [
+            ("Stages", " → ".join(stages)),
+            ("Overwrite", str(effective_overwrite)),
+            ("Save plots", str(config.output.save_plots)),
+            ("Manifest", str(config.output.write_manifest)),
+            ("Data root", str(config.paths.data_root)),
+            ("LAr veto", str(config.apply_lar_veto)),
+        ]
+    )
+    return rows
+
+
+def _render_banner(rows: Sequence[tuple[str, str]]) -> str:
+    """Render a width-bounded Unicode banner, wrapping long values."""
+    label_width = max(len(label) for label, _ in rows)
+    rendered_lines: list[str] = []
+    for label, value in rows:
+        prefix = f"  {label:<{label_width}}: "
+        continuation = " " * len(prefix)
+        available_width = _BANNER_INNER_WIDTH - len(prefix)
+        wrapped_value = textwrap.wrap(
+            str(value),
+            width=available_width,
+            break_long_words=True,
+            break_on_hyphens=False,
+        ) or [""]
+        rendered_lines.append(prefix + wrapped_value[0])
+        rendered_lines.extend(
+            continuation + wrapped_line for wrapped_line in wrapped_value[1:]
+        )
+
+    border = "━" * (_BANNER_INNER_WIDTH + 2)
+    banner_lines = [
+        f"┏{border}┓",
+        f"┃ {'bosonic-DM pipeline':^{_BANNER_INNER_WIDTH}} ┃",
+        f"┣{border}┫",
+    ]
+    banner_lines.extend(f"┃ {line:<{_BANNER_INNER_WIDTH}} ┃" for line in rendered_lines)
+    banner_lines.append(f"┗{border}┛")
+    return "\n".join(banner_lines)
 
 
 def _print_banner(
@@ -32,34 +127,17 @@ def _print_banner(
     *,
     interactions: Sequence[str] | None = None,
     stages: Sequence[str],
-    overwrite: bool,
+    overwrite: bool | None,
 ) -> None:
     """Log a startup summary banner."""
-    lines: list[str] = []
-    lines.append(f"  Command       : {command}")
-    if interactions:
-        lines.append(f"  Interactions  : {', '.join(interactions)}")
-    energies_str = ", ".join(str(e) for e in config.energies_keV)
-    lines.append(f"  Energies [keV]: {energies_str}")
-    lines.append(f"  Stages        : {' → '.join(stages)}")
-    lines.append(f"  Overwrite     : {overwrite}")
-    lines.append(f"  Save plots    : {config.output.save_plots}")
-    lines.append(f"  Manifest      : {config.output.write_manifest}")
-    lines.append(f"  Data root     : {config.paths.data_root}")
-    lines.append(f"  LAr veto      : {config.apply_lar_veto}")
-    lines.append(f"  Selections    : {', '.join(config.selections)}")
-    lines.append(f"  FEP ½-width   : {config.fep_window.half_width_fwhm} FWHM")
-
-    width = max(len(line) for line in lines) + 2
-    border = "━" * (width + 2)
-
-    banner = f"\n┏{border}┓\n"
-    banner += f"┃  {'bosonic-DM pipeline':^{width}}┃\n"
-    banner += f"┣{border}┫\n"
-    for line in lines:
-        banner += f"┃ {line:<{width}} ┃\n"
-    banner += f"┗{border}┛"
-    logger.info(banner)
+    rows = _banner_rows(
+        command,
+        config,
+        interactions=interactions,
+        stages=stages,
+        overwrite=overwrite,
+    )
+    logger.info("\n%s", _render_banner(rows))
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -130,7 +208,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             config,
             interactions=[args.interaction],
             stages=stages,
-            overwrite=bool(overwrite),
+            overwrite=overwrite,
         )
         artifacts = run_simulation_analysis(
             config, interaction=args.interaction, stages=stages, overwrite=overwrite
@@ -145,7 +223,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "background",
             config,
             stages=stages,
-            overwrite=bool(overwrite),
+            overwrite=overwrite,
         )
         artifacts = run_background_analysis(config, stages=stages, overwrite=overwrite)
         logger.info("Background artifacts created: %s", artifacts)
@@ -158,7 +236,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             config,
             interactions=args.interactions,
             stages=list(dict.fromkeys([*sim_stages, *bg_stages])),
-            overwrite=bool(overwrite),
+            overwrite=overwrite,
         )
         # Run simulation for requested interactions
         for interaction in args.interactions:

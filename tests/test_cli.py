@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from bosonic_dm.cli import main
+from bosonic_dm.cli import _banner_rows, _render_banner, main
 from bosonic_dm.models import AnalysisArtifacts
 from bosonic_dm.pipeline.background import BACKGROUND_DEFAULT_STAGES
 
@@ -119,3 +119,73 @@ def test_background_command(mock_run, mock_load, mock_artifacts):
     kwargs = mock_run.call_args[1]
     assert kwargs["overwrite"] is None
     assert kwargs["stages"] == BACKGROUND_DEFAULT_STAGES
+
+
+def _banner_config() -> MagicMock:
+    """Return a concrete-enough config mock for banner rendering tests."""
+    config = MagicMock()
+    config.output.overwrite = True
+    config.output.save_plots = True
+    config.output.write_manifest = True
+    config.paths.simulation_root = "/simulation"
+    config.paths.data_root = "data/v4"
+    config.energies_keV = tuple(range(100, 1030, 10))
+    config.selections = ("all", "valid-psd", "sse", "mse")
+    config.fep_window.half_width_fwhm = 2.0
+    config.detector_groups = "data/inputs/groups.yaml"
+    config.background.pet_glob = "/data/pet/phy/*.lh5"
+    config.background.comparison_cut_profile = "without-bb-like"
+    config.background.energy_ranges_keV = [(20, 300), (20, 1000)]
+    config.background.bin_widths_keV = [1, 5, 10]
+    config.apply_lar_veto = True
+    return config
+
+
+def test_background_banner_excludes_simulation_settings() -> None:
+    rows = _banner_rows(
+        "background",
+        _banner_config(),
+        interactions=None,
+        stages=("build-dataset",),
+        overwrite=None,
+    )
+    labels = {label for label, _ in rows}
+
+    assert "PET inputs" in labels
+    assert "Comparison cut" in labels
+    assert "Energies [keV]" not in labels
+    assert "Selections" not in labels
+    assert "FEP half-width" not in labels
+    assert dict(rows)["Overwrite"] == "True"
+
+
+def test_simulation_banner_excludes_background_settings() -> None:
+    rows = _banner_rows(
+        "simulation",
+        _banner_config(),
+        interactions=("axio-electric",),
+        stages=("efficiencies",),
+        overwrite=False,
+    )
+    labels = {label for label, _ in rows}
+
+    assert "Energies [keV]" in labels
+    assert "Selections" in labels
+    assert "PET inputs" not in labels
+    assert "Comparison cut" not in labels
+    assert "Energy ranges [keV]" not in labels
+    assert dict(rows)["Overwrite"] == "False"
+
+
+def test_banner_wraps_long_values_to_fixed_width() -> None:
+    rows = _banner_rows(
+        "simulation",
+        _banner_config(),
+        interactions=("axio-electric",),
+        stages=("plots",),
+        overwrite=None,
+    )
+    banner = _render_banner(rows)
+
+    assert max(len(line) for line in banner.splitlines()) == 80
+    assert len(banner.splitlines()) > len(rows) + 4

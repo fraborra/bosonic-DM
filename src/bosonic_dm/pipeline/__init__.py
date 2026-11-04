@@ -1,3 +1,6 @@
+# Copyright (C) 2026 Francesco Borra
+#
+
 """Pipeline modules for bosonic DM analysis."""
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Francesco Borra
+# Copyright (C) 2026 Francesco Borra
 #
 
 """HPGe detector geometry utilities for vertex-to-detector assignment."""

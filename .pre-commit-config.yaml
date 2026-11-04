@@ -2,6 +2,11 @@ exclude: ^.*\.ipynb$
 default_language_version:
   node: "22.21.1"   # pin: nodeenv crashes on node 27 pre-release tags when using "latest"
 
+# Pin node: nodeenv's "latest" resolution crashes on node pre-release tags
+# (e.g. 27.0.0-alpha), breaking the prettier hook environment.
+default_language_version:
+  node: "22.21.1"
+
 ci:
   autoupdate_commit_msg: "chore: update pre-commit hooks"
   autoupdate_schedule: "quarterly"

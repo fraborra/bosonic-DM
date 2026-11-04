@@ -2,7 +2,12 @@
 
 ## Python
 
-- License statement at the top of every Python file (see existing files)
+- License statement at the top of every Python file, exactly these two lines
+  (followed by a blank line):
+  ```python
+  # Copyright (C) 2026 Francesco Borra
+  #
+  ```
 - Follow scientific Python conventions (naming, structure, docstrings)
 - Type annotations required on all function signatures
 - Arguments: most generic type (`Sequence`, `Mapping` from `collections.abc`);
