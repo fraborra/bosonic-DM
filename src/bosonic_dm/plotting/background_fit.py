@@ -168,6 +168,7 @@ def plot_background_fit_residuals(
         for ax in (ax_spec, ax_res):
             ax.axvspan(edges[idx[0]], edges[idx[-1] + 1], color="grey", alpha=0.2, lw=0)
     ax_spec.set(ylabel="Counts / bin", yscale=yscale)
+    ax_spec.set_ylim(10**-2, np.max(values) * 1.3)
     ax_spec.legend(loc="upper right", fontsize=9)
 
     for k, color in ((2, "#f2e6a0"), (1, "#c9dfa0")):
@@ -196,8 +197,6 @@ def plot_background_fit_residuals(
 
     draw(used, "black", "fitted bins")
 
-    chi2 = np.nansum(pulls[used] ** 2)
-    stats = rf"fitted bins: $\chi^2$/n = {chi2:.0f}/{used.sum()}"
     if include_excluded and (~used).any():
         draw(~used, "C3", "excluded bins")
         table = excluded_window_excess(summary, n)
@@ -215,7 +214,6 @@ def plot_background_fit_residuals(
                 color="C3",
             )
         ax_res.legend(loc="upper right", fontsize=8, ncols=2)
-    ax_res.text(0.01, 0.95, stats, transform=ax_res.transAxes, va="top", fontsize=8)
 
     if residual_limit is not None:
         ax_res.set_ylim(-residual_limit, residual_limit)
