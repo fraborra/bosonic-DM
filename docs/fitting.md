@@ -64,14 +64,21 @@ of this requirement on every call.
 shape, a linear continuum, and a modified-beta Ar39 shape. The helper functions
 in `bosonic_dm.fitting.background_fit` are used in this order:
 
-| Function                                      | Purpose                                                                   |
-| --------------------------------------------- | ------------------------------------------------------------------------- |
-| `priors_from_prefit`                          | Lognormal priors centred on a `curve_fit` prefit (`fit_ar` entry).        |
-| `inits_from_prefit`                           | Per-chain initial values near the prefit, with multiplicative jitter.     |
-| `build_stan_data`                             | Stan data from a prepared spectrum; `fit_mask` becomes `use_bin`.         |
-| `run_background_fit`                          | Sample with CmdStan (4 chains, 1000 warmup and 1000 sampling by default). |
-| `summarize_background_fit`                    | Parameter summaries, sampler diagnostics, and the frozen `B_hat`.         |
-| `save_background_fit` / `load_background_fit` | Write and read the fit products below.                                    |
+| Function                                      | Purpose                                                                                    |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `priors_from_prefit`                          | Lognormal priors centred on a `curve_fit` prefit (`fit_ar` entry).                         |
+| `inits_from_prefit`                           | Per-chain initial values near the prefit, with multiplicative jitter.                      |
+| `build_stan_data`                             | Stan data from a prepared spectrum; `fit_mask` becomes `use_bin`. `fixed` fixes `c0`/`cQ`. |
+| `run_background_fit`                          | Sample with CmdStan (4 chains, 1000 warmup and 1000 sampling by default).                  |
+| `summarize_background_fit`                    | Parameter summaries, sampler diagnostics, and the frozen `B_hat`.                          |
+| `save_background_fit` / `load_background_fit` | Write and read the fit products below.                                                     |
+
+The linear coefficients can be fixed for a run with
+`build_stan_data(..., fixed={"c0": 0.0, "cQ": 0.0})` (`NO_LINEAR`), which gives
+the model without the linear continuum from the same compiled Stan model. A
+fixed parameter is removed from the sampled space and has no prior, as in BAT;
+`stan/README.md` describes the mechanism and how to make other parameters
+fixable.
 
 Sampler checks are shared with the signal fit through
 `bosonic_dm.fitting.diagnostics`. A fit passes when it has no divergences and no
@@ -94,7 +101,26 @@ excluded peak windows, trace plots, and corner plots.
 | `summary.yaml`              | Parameter summaries, diagnostics, sampler settings, and provenance. |
 
 Pass `provenance` (group name, input dataset, peak list, fit window) so the
-summary records how the fit was made.
+summary records how the fit was made. `summary.yaml` also records the fixed
+parameters (`fixed_parameters`).
+
+### Model comparison
+
+`bosonic_dm.fitting.model_comparison` compares two variants of the background
+fit on the same spectrum, typically the full model against `NO_LINEAR`:
+
+| Function                             | Purpose                                                                   |
+| ------------------------------------ | ------------------------------------------------------------------------- |
+| `compare_background_models`          | Bayes factor from bridge-sampling estimates of both log evidences.        |
+| `loo_compare_background_models`      | PSIS-LOO comparison (leave-one-bin-out) with `arviz.compare`.             |
+| `background_log_marginal_likelihood` | Log evidence of one fit, after checking the NumPy density against `lp__`. |
+| `bridge_sampling`                    | Generic bridge-sampling estimator for draws on an unconstrained scale.    |
+
+The Bayes factor depends on the priors of the parameters that differ between the
+variants, here the `c0`/`cQ` widths. Priors centred on a prefit of the same data
+favour the larger model. See
+[`stan/README.md`](../stan/README.md#compare-models) for the method, the number
+of draws to use, and the checks to make before quoting a result.
 
 ## Signal fit
 

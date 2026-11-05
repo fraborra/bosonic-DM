@@ -190,3 +190,22 @@ def test_chain_and_corner_plots_are_saved(short_fit, tmp_path: Path) -> None:
     assert (tmp_path / "chains.png").stat().st_size > 0
     assert (tmp_path / "corner.png").stat().st_size > 0
     plt.close("all")
+
+
+def test_default_parameters_skip_fixed_ones() -> None:
+    """Fixed coefficients are written as constants and left out by default."""
+    import xarray as xr  # noqa: PLC0415
+
+    rng = np.random.default_rng(0)
+    draws = {
+        name: (("chain", "draw"), rng.lognormal(size=(2, 30)))
+        for name in BACKGROUND_PARAMETERS
+    }
+    draws["c0"] = (("chain", "draw"), np.zeros((2, 30)))
+    draws["cQ"] = (("chain", "draw"), np.zeros((2, 30)))
+    posterior = {"posterior": xr.Dataset(draws)}
+
+    assert posterior_draws(posterior).shape == (2, 30, len(BACKGROUND_PARAMETERS) - 2)
+    chains = plot_background_chains(posterior)
+    assert len(chains.axes) == 2 * (len(BACKGROUND_PARAMETERS) - 2)
+    plt.close("all")

@@ -231,15 +231,7 @@ def plot_background_fit_residuals(
     return fig
 
 
-def posterior_draws(
-    posterior: Any, var_names: Sequence[str] = BACKGROUND_PARAMETERS
-) -> np.ndarray:
-    """Draws of scalar parameters, shaped ``(chains, draws, parameters)``.
-
-    ``posterior`` is a ``cmdstanpy.CmdStanMCMC`` or an ArviZ object with a
-    ``posterior`` group (e.g. ``to_inference_data(...)`` or a reloaded
-    ``posterior.nc``).
-    """
+def _draws(posterior: Any, var_names: Sequence[str]) -> np.ndarray:
     if hasattr(posterior, "draws") and hasattr(posterior, "column_names"):
         draws = posterior.draws(concat_chains=False)  # (draws, chains, columns)
         columns = list(posterior.column_names)
@@ -249,9 +241,39 @@ def posterior_draws(
     return np.stack([np.asarray(group[name].values) for name in var_names], axis=-1)
 
 
+def _sampled_parameters(posterior: Any) -> list[str]:
+    """Background parameters in ``posterior`` whose draws are not constant.
+
+    Fixed parameters (e.g. ``c0 = cQ = 0`` in the model without the linear
+    term) are still written by Stan, but with a constant value.
+    """
+    if hasattr(posterior, "draws") and hasattr(posterior, "column_names"):
+        present = set(posterior.column_names)
+    else:
+        present = set(posterior["posterior"].data_vars)
+    names = [name for name in BACKGROUND_PARAMETERS if name in present]
+    draws = _draws(posterior, names)
+    return [name for k, name in enumerate(names) if np.ptp(draws[..., k]) > 0]
+
+
+def posterior_draws(
+    posterior: Any, var_names: Sequence[str] | None = None
+) -> np.ndarray:
+    """Draws of scalar parameters, shaped ``(chains, draws, parameters)``.
+
+    ``posterior`` is a ``cmdstanpy.CmdStanMCMC`` or an ArviZ object with a
+    ``posterior`` group (e.g. ``to_inference_data(...)`` or a reloaded
+    ``posterior.nc``). ``var_names = None`` selects the sampled background
+    parameters, skipping fixed ones.
+    """
+    if var_names is None:
+        var_names = _sampled_parameters(posterior)
+    return _draws(posterior, var_names)
+
+
 def plot_background_chains(
     posterior: Any,
-    var_names: Sequence[str] = BACKGROUND_PARAMETERS,
+    var_names: Sequence[str] | None = None,
     *,
     title: str | None = None,
     output_path: Path | None = None,
@@ -259,8 +281,11 @@ def plot_background_chains(
     """Trace (left) and per-chain marginal (right) for each parameter.
 
     Well-mixed chains overlap as stationary noise on the left and give
-    matching histograms on the right.
+    matching histograms on the right. ``var_names = None`` plots the sampled
+    background parameters, skipping fixed ones.
     """
+    if var_names is None:
+        var_names = _sampled_parameters(posterior)
     draws = posterior_draws(posterior, var_names)
     n_chains = draws.shape[0]
     fig, axes = plt.subplots(
@@ -304,7 +329,7 @@ def plot_background_chains(
 
 def plot_background_corner(
     posterior: Any,
-    var_names: Sequence[str] = BACKGROUND_PARAMETERS,
+    var_names: Sequence[str] | None = None,
     *,
     title: str | None = None,
     output_path: Path | None = None,
@@ -314,9 +339,13 @@ def plot_background_corner(
 
     Titles show the median and the 16th-84th percentile range;
     ``corner_kwargs`` is passed on to ``corner.corner`` and overrides these
-    defaults.
+    defaults. ``var_names = None`` uses the sampled background parameters,
+    skipping fixed ones.
     """
     import corner  # noqa: PLC0415
+
+    if var_names is None:
+        var_names = _sampled_parameters(posterior)
 
     samples = posterior_draws(posterior, var_names).reshape(-1, len(var_names))
     options = {

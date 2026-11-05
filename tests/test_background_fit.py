@@ -12,10 +12,13 @@ import pytest
 
 from bosonic_dm.fitting.background_fit import (
     BACKGROUND_PARAMETERS,
+    NO_LINEAR,
     STAN_FILE,
     USABILITY_REMINDER,
     _excluded_intervals,
     build_stan_data,
+    fixed_parameters,
+    free_parameters,
     inits_from_prefit,
     load_background_fit,
     priors_from_prefit,
@@ -71,17 +74,40 @@ def test_inits_start_near_prefit_and_differ_between_chains() -> None:
     exact = inits_from_prefit(PREFIT, chains=2, jitter=0.0)
 
     assert len(inits) == 3
-    assert set(inits[0]) == set(BACKGROUND_PARAMETERS)
+    assert set(inits[0]) == {
+        "N_2nu",
+        "N_ar39",
+        "c0_free",
+        "cQ_free",
+        "mu",
+        "sigma",
+        "tau",
+        "base_alpha",
+        "base_beta",
+    }
     assert inits[0] != inits[1]
     assert inits == inits_from_prefit(PREFIT, chains=3, jitter=0.1, seed=5)
     assert exact[0] == exact[1]
     assert exact[0]["N_2nu"] == 1200.0
     assert exact[0]["N_ar39"] == 750.0
-    assert exact[0]["cQ"] == 0.7
+    assert exact[0]["cQ_free"] == [0.7]
     assert exact[0]["base_beta"] == 3.2
     for init in inits:
         for name, value in exact[0].items():
-            assert 0.5 * value < init[name] < 2.0 * value
+            assert np.all(0.5 * np.asarray(value) < np.asarray(init[name]))
+            assert np.all(np.asarray(init[name]) < 2.0 * np.asarray(value))
+
+
+def test_inits_leave_out_fixed_parameters() -> None:
+    full = inits_from_prefit(PREFIT, chains=2, seed=5)
+    no_linear = inits_from_prefit(PREFIT, chains=2, seed=5, fixed=NO_LINEAR)
+    c0_only = inits_from_prefit(PREFIT, chains=2, seed=5, fixed={"cQ": 0.0})
+
+    assert "c0_free" not in no_linear[0]
+    assert "cQ_free" not in no_linear[0]
+    assert set(c0_only[0]) == set(full[0]) - {"cQ_free"}
+    # The other parameters start at the same jittered values in every variant.
+    assert no_linear[1]["tau"] == full[1]["tau"]
 
 
 @pytest.mark.parametrize("kwargs", [{"chains": 0}, {"jitter": -0.1}])
@@ -106,6 +132,37 @@ def test_stan_data_uses_fit_mask_and_keeps_real_counts() -> None:
     np.testing.assert_array_equal(data["use_bin"], [1, 1, 0, 0, 1, 1])
     assert data["Q"] == 2039.0
     assert data["scale"] == 565.8
+    assert (data["fit_c0"], data["fit_cQ"]) == (1, 1)
+    assert free_parameters(data) == BACKGROUND_PARAMETERS
+    assert fixed_parameters(data) == {}
+
+
+def test_stan_data_fixes_linear_coefficients() -> None:
+    priors = priors_from_prefit(PREFIT)
+    no_linear = build_stan_data(_spectrum(), priors, fixed=NO_LINEAR)
+    c0_only = build_stan_data(_spectrum(), priors, fixed={"cQ": 0.2})
+
+    assert (no_linear["fit_c0"], no_linear["fit_cQ"]) == (0, 0)
+    assert fixed_parameters(no_linear) == {"c0": 0.0, "cQ": 0.0}
+    assert "c0" not in free_parameters(no_linear)
+    assert len(free_parameters(no_linear)) == 7
+    assert (c0_only["fit_c0"], c0_only["fit_cQ"]) == (1, 0)
+    assert c0_only["cQ_fixed"] == 0.2
+    assert free_parameters(c0_only) == tuple(
+        name for name in BACKGROUND_PARAMETERS if name != "cQ"
+    )
+    # The priors are passed unchanged; entries of fixed parameters are ignored.
+    np.testing.assert_array_equal(
+        no_linear["log_rate_prior_mean"], priors["log_rate_prior_mean"]
+    )
+
+
+@pytest.mark.parametrize("fixed", [{"tau": 1.0}, {"c0": -1.0}, {"cQ": np.nan}])
+def test_invalid_fixed_parameters_are_rejected(fixed: dict) -> None:
+    with pytest.raises(ValueError):
+        build_stan_data(_spectrum(), priors_from_prefit(PREFIT), fixed=fixed)
+    with pytest.raises(ValueError):
+        inits_from_prefit(PREFIT, fixed=fixed)
 
 
 @pytest.mark.parametrize(
@@ -140,8 +197,12 @@ def background_model(tmp_path_factory: pytest.TempPathFactory):
     return cmdstanpy.CmdStanModel(stan_file=str(target))
 
 
+@pytest.mark.parametrize("fixed", [None, NO_LINEAR])
 def test_fit_summary_and_outputs(
-    background_model, tmp_path: Path, caplog: pytest.LogCaptureFixture
+    background_model,
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+    fixed: dict | None,
 ) -> None:
     """A short fit yields B_hat on every bin and writes all products."""
     rng = np.random.default_rng(3)
@@ -159,7 +220,7 @@ def test_fit_summary_and_outputs(
         "linear_parameters": [0.3, 0.3],
         "ar39_parameters": [1.0, 1.0, 1.0, 2.0, 3.0],
     }
-    data = build_stan_data(spectrum, priors_from_prefit(prefit))
+    data = build_stan_data(spectrum, priors_from_prefit(prefit), fixed=fixed)
 
     fit = run_background_fit(
         background_model,
@@ -169,9 +230,16 @@ def test_fit_summary_and_outputs(
         iter_warmup=200,
         iter_sampling=200,
         output_dir=tmp_path / "csv",
-        inits=inits_from_prefit(prefit, chains=2),
+        inits=inits_from_prefit(prefit, chains=2, fixed=fixed),
     )
     summary = summarize_background_fit(fit, data, n_saved_draws=50)
+
+    assert list(summary.parameters) == list(free_parameters(data))
+    assert summary.fixed == (fixed or {})
+    linear = "expected_linear" in summary.component_medians
+    assert linear == (fixed is None)
+    if fixed is not None:
+        np.testing.assert_array_equal(fit.stan_variable("c0"), 0.0)
 
     assert USABILITY_REMINDER in caplog.text
     assert summary.b_hat.shape == (len(centres),)
@@ -191,12 +259,15 @@ def test_fit_summary_and_outputs(
     np.testing.assert_allclose(table["B_hat"].to_numpy(), summary.b_hat)
     record = read_yaml(paths["summary"])
     assert record["provenance"] == {"group": "toy"}
+    assert record["fixed_parameters"] == (fixed or {})
     assert record["n_fit_bins"] == int(mask.sum())
     assert record["excluded_intervals_keV"] == [[580.0, 600.0]]
     assert record["sampler"]["seed"] == 11
     assert len(record["software"]["stan_file_sha256"]) == 64
 
     loaded = load_background_fit(tmp_path / "out")
+    assert loaded.fixed == summary.fixed
+    assert set(loaded.component_medians) == set(summary.component_medians)
     assert loaded.passed == summary.passed
     assert loaded.parameters == summary.parameters
     assert loaded.diagnostics == summary.diagnostics
