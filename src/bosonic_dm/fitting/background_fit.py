@@ -24,6 +24,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import polars as pl
+from numpy.typing import ArrayLike
 from scipy.stats import norm, poisson
 
 from bosonic_dm.fitting.background_shapes import (
@@ -603,68 +604,149 @@ def background_log_density(
         msg = f"Expected draws of shape (n, {len(names)}) for {names}."
         raise ValueError(msg)
 
-    prior_mean = dict(
-        zip(
-            BACKGROUND_PARAMETERS,
-            np.concatenate(
-                [stan_data["log_rate_prior_mean"], stan_data["log_shape_prior_mean"]]
-            ),
-            strict=True,
-        )
-    )
-    prior_sd = dict(
-        zip(
-            BACKGROUND_PARAMETERS,
-            np.concatenate(
-                [stan_data["log_rate_prior_sd"], stan_data["log_shape_prior_sd"]]
-            ),
-            strict=True,
-        )
-    )
+    prior_mean, prior_sd = _log_priors(stan_data)
     log_prior = norm.logpdf(
         theta,
         [prior_mean[name] for name in names],
         [prior_sd[name] for name in names],
     ).sum(axis=1)
 
-    edges = np.asarray(stan_data["edges"], dtype=float)
-    q_value = float(stan_data["Q"])
-    loc, scale = float(stan_data["loc"]), float(stan_data["scale"])
     used = np.asarray(stan_data["use_bin"], dtype=bool)
     counts = np.asarray(stan_data["counts"], dtype=float)[used]
-    width = np.diff(edges)
-    midpoint_fraction = (edges[1:] + edges[:-1]) / (2 * q_value)
-    pr_probability = np.diff(primakoff_rosen_cdf(edges, q_value))
-    linear_c0 = width * (1 - midpoint_fraction)
-    linear_cq = width * midpoint_fraction
-
     values = np.exp(theta)
-    columns = {name: values[:, [k]] for k, name in enumerate(names)}
-    for name, value in fixed_parameters(stan_data).items():
-        columns[name] = np.full((len(theta), 1), value)
-
     log_lik = np.empty(len(theta))
     for start in range(0, len(theta), chunk_size):
-        p = {
-            name: column[start : start + chunk_size] for name, column in columns.items()
-        }
-        ar39_cdf = modified_beta_g_cdf(
-            edges[None, :],
-            p["mu"],
-            p["sigma"],
-            p["tau"],
-            p["base_alpha"],
-            p["base_beta"],
-            loc,
-            scale,
+        chunk = values[start : start + chunk_size]
+        components = expected_components(
+            {name: chunk[:, k] for k, name in enumerate(names)}, stan_data
         )
-        expected = (
-            p["N_2nu"] * pr_probability
-            + p["c0"] * linear_c0
-            + p["cQ"] * linear_cq
-            + p["N_ar39"] * np.diff(ar39_cdf, axis=1)
-        )
+        expected = sum(components[name] for name in COMPONENTS)
         log_lik[start : start + chunk_size] = poisson.logpmf(
             counts, expected[:, used]
         ).sum(axis=1)
     return log_prior + log_lik
+
+
+def _log_priors(
+    stan_data: Mapping[str, Any],
+) -> tuple[dict[str, float], dict[str, float]]:
+    """Lognormal prior location and scale (log space) of every parameter."""
+    means = np.concatenate(
+        [stan_data["log_rate_prior_mean"], stan_data["log_shape_prior_mean"]]
+    )
+    sds = np.concatenate(
+        [stan_data["log_rate_prior_sd"], stan_data["log_shape_prior_sd"]]
+    )
+    return (
+        dict(zip(BACKGROUND_PARAMETERS, map(float, means), strict=True)),
+        dict(zip(BACKGROUND_PARAMETERS, map(float, sds), strict=True)),
+    )
+
+
+def expected_components(
+    parameters: Mapping[str, ArrayLike], stan_data: Mapping[str, Any]
+) -> dict[str, np.ndarray]:
+    """Expected counts per bin of each background component.
+
+    NumPy mirror of Stan's ``expected_2nu``, ``expected_linear`` and
+    ``expected_ar39`` (keys of ``COMPONENTS``), over all bins.
+
+    Parameters
+    ----------
+    parameters
+        Values of the free parameters of ``stan_data``: scalars or arrays of
+        shape ``(n,)``. Fixed parameters take their values from
+        ``stan_data``, as in Stan.
+    stan_data
+        Output of ``build_stan_data``.
+
+    Returns
+    -------
+    dict[str, np.ndarray]
+        Shape ``(n, n_bins)`` for each component (``n = 1`` for scalars).
+    """
+    values = {**parameters, **fixed_parameters(stan_data)}
+    missing = [name for name in BACKGROUND_PARAMETERS if name not in values]
+    if missing:
+        msg = f"Missing values for {missing}."
+        raise ValueError(msg)
+    p = {
+        name: np.asarray(values[name], dtype=float).reshape(-1, 1)
+        for name in BACKGROUND_PARAMETERS
+    }
+    n = max(len(column) for column in p.values())
+
+    edges = np.asarray(stan_data["edges"], dtype=float)
+    q_value = float(stan_data["Q"])
+    width = np.diff(edges)
+    midpoint_fraction = (edges[1:] + edges[:-1]) / (2 * q_value)
+    pr_probability = np.diff(primakoff_rosen_cdf(edges, q_value))
+    ar39_cdf = modified_beta_g_cdf(
+        edges[None, :],
+        p["mu"],
+        p["sigma"],
+        p["tau"],
+        p["base_alpha"],
+        p["base_beta"],
+        float(stan_data["loc"]),
+        float(stan_data["scale"]),
+    )
+    components = {
+        "expected_2nu": p["N_2nu"] * pr_probability,
+        "expected_linear": p["c0"] * (width * (1 - midpoint_fraction))
+        + p["cQ"] * (width * midpoint_fraction),
+        "expected_ar39": p["N_ar39"] * np.diff(ar39_cdf, axis=1),
+    }
+    return {
+        name: np.broadcast_to(value, (n, len(width))).copy()
+        for name, value in components.items()
+    }
+
+
+@dataclass(frozen=True)
+class PriorPredictive:
+    """Draws from the prior and the prior-predictive distribution of a fit."""
+
+    # Free parameters, shape (draws,) each.
+    parameters: dict[str, np.ndarray]
+    # Expected counts per component and in total, shape (draws, n_bins).
+    components: dict[str, np.ndarray]
+    expected_counts: np.ndarray
+    # Poisson counts drawn from expected_counts, shape (draws, n_bins).
+    counts_rep: np.ndarray
+    # Prior draws dropped because their expected counts were not finite.
+    n_rejected: int
+
+
+def sample_prior_predictive(
+    stan_data: Mapping[str, Any], n_draws: int = 1000, *, seed: int = 0
+) -> PriorPredictive:
+    """Draw from the lognormal priors of ``stan_data`` and predict the spectrum.
+
+    Free parameters are drawn from their priors; fixed parameters (e.g.
+    ``NO_LINEAR``) keep their values, as in the fit. The expected counts use
+    the same NumPy mirror of ``background.stan`` as ``background_log_density``,
+    so no Stan run is needed. Draws whose expected counts are not finite are
+    dropped and counted in ``n_rejected``.
+    """
+    names = free_parameters(stan_data)
+    prior_mean, prior_sd = _log_priors(stan_data)
+    rng = np.random.default_rng(seed)
+    draws = rng.lognormal(
+        [prior_mean[name] for name in names],
+        [prior_sd[name] for name in names],
+        size=(int(n_draws), len(names)),
+    )
+    components = expected_components(
+        {name: draws[:, k] for k, name in enumerate(names)}, stan_data
+    )
+    expected = sum(components[name] for name in COMPONENTS)
+    keep = np.all(np.isfinite(expected) & (expected >= 0), axis=1)
+    expected = expected[keep]
+    return PriorPredictive(
+        parameters={name: draws[keep, k] for k, name in enumerate(names)},
+        components={name: value[keep] for name, value in components.items()},
+        expected_counts=expected,
+        counts_rep=rng.poisson(expected),
+        n_rejected=int((~keep).sum()),
+    )

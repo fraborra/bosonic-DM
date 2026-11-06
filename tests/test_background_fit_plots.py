@@ -18,6 +18,7 @@ from scipy.integrate import quad
 from bosonic_dm.fitting import background_shapes as shapes
 from bosonic_dm.fitting.background_fit import (
     BACKGROUND_PARAMETERS,
+    NO_LINEAR,
     STAN_FILE,
     BackgroundFitSummary,
     build_stan_data,
@@ -31,6 +32,7 @@ from bosonic_dm.plotting.background_fit import (
     plot_background_chains,
     plot_background_corner,
     plot_background_fit_residuals,
+    plot_prior_predictive,
     posterior_draws,
 )
 
@@ -209,3 +211,21 @@ def test_default_parameters_skip_fixed_ones() -> None:
     chains = plot_background_chains(posterior)
     assert len(chains.axes) == 2 * (len(BACKGROUND_PARAMETERS) - 2)
     plt.close("all")
+
+
+@pytest.mark.parametrize("fixed", [None, NO_LINEAR])
+def test_plot_prior_predictive(
+    toy_spectrum: dict, toy_prefit: dict, fixed: dict | None, tmp_path: Path
+) -> None:
+    data = build_stan_data(
+        toy_spectrum, priors_from_prefit(toy_prefit, rate_sd=0.3), fixed=fixed
+    )
+    output = tmp_path / "prior.png"
+
+    fig = plot_prior_predictive(data, n_draws=200, output_path=output)
+
+    assert len(fig.axes) == 4  # spectrum, ratio, totals below and above Ar39
+    labels = fig.axes[0].get_legend_handles_labels()[1]
+    assert ("linear (median)" in labels) == (fixed is None)
+    assert output.exists()
+    plt.close(fig)

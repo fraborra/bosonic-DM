@@ -17,12 +17,14 @@ from bosonic_dm.fitting.background_fit import (
     USABILITY_REMINDER,
     _excluded_intervals,
     build_stan_data,
+    expected_components,
     fixed_parameters,
     free_parameters,
     inits_from_prefit,
     load_background_fit,
     priors_from_prefit,
     run_background_fit,
+    sample_prior_predictive,
     save_background_fit,
     summarize_background_fit,
 )
@@ -281,3 +283,61 @@ def test_fit_summary_and_outputs(
         np.testing.assert_array_equal(getattr(loaded, name), getattr(summary, name))
     for name, values in summary.component_medians.items():
         np.testing.assert_array_equal(loaded.component_medians[name], values)
+
+
+def test_prior_predictive_follows_priors_and_fixed_parameters(
+    toy_spectrum: dict, toy_prefit: dict
+) -> None:
+    priors = priors_from_prefit(toy_prefit, rate_sd=0.3, shape_sd=0.5)
+    data = build_stan_data(toy_spectrum, priors, fixed=NO_LINEAR)
+
+    prior = sample_prior_predictive(data, 4000, seed=1)
+
+    assert set(prior.parameters) == set(free_parameters(data))
+    log_n2nu = np.log(prior.parameters["N_2nu"])
+    assert np.median(log_n2nu) == pytest.approx(np.log(toy_prefit["N_2nu"]), abs=0.02)
+    assert np.std(log_n2nu) == pytest.approx(0.3, rel=0.05)
+    assert prior.n_rejected == 0
+    assert prior.expected_counts.shape == (4000, data["n_bins"])
+    assert not prior.components["expected_linear"].any()
+    np.testing.assert_allclose(
+        prior.expected_counts,
+        prior.components["expected_2nu"] + prior.components["expected_ar39"],
+    )
+    assert prior.counts_rep.dtype.kind == "i"
+    assert np.all(prior.counts_rep >= 0)
+    # Same seed, same draws.
+    again = sample_prior_predictive(data, 4000, seed=1)
+    np.testing.assert_array_equal(again.counts_rep, prior.counts_rep)
+
+
+def test_expected_components_broadcast_and_fixed_values(
+    toy_spectrum: dict, toy_prefit: dict
+) -> None:
+    data = build_stan_data(
+        toy_spectrum, priors_from_prefit(toy_prefit), fixed={"c0": 2.0, "cQ": 0.0}
+    )
+    point = {
+        "N_2nu": 2e4,
+        "N_ar39": np.array([3e4, 4e4]),
+        "mu": 1.2,
+        "sigma": 1.5,
+        "tau": 1.0,
+        "base_alpha": 2.0,
+        "base_beta": 3.0,
+    }
+
+    components = expected_components(point, data)
+
+    widths = np.diff(data["edges"])
+    midpoint_fraction = 0.5 * (data["edges"][1:] + data["edges"][:-1]) / data["Q"]
+    for values in components.values():
+        assert values.shape == (2, data["n_bins"])
+    np.testing.assert_allclose(
+        components["expected_linear"][1], 2.0 * widths * (1 - midpoint_fraction)
+    )
+    np.testing.assert_allclose(
+        components["expected_ar39"][1], components["expected_ar39"][0] * 4 / 3
+    )
+    with pytest.raises(ValueError, match="Missing"):
+        expected_components({"N_2nu": 1.0}, data)

@@ -37,6 +37,7 @@ import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.patches import Ellipse
+from matplotlib.ticker import MaxNLocator
 from scipy.stats import norm, skew
 
 from bosonic_dm.fitting.background_fit import BackgroundFitSummary, free_parameters
@@ -150,7 +151,7 @@ def plot_model_difference(
         )
     ax_spec.set(ylabel="Counts / bin", yscale="log")
     ax_spec.set_ylim(1e-2, 1.5 * max(np.max(n), np.max(b_a)))
-    ax_spec.legend(loc="upper right", fontsize=9)
+    ax_spec.legend(loc="lower left", fontsize=9)
 
     ax_diff.axhspan(-1, 1, color="#c9dfa0", lw=0, zorder=0)
     ax_diff.axhline(0.0, color="grey", lw=0.7)
@@ -491,7 +492,7 @@ def plot_shared_parameters(
         )
         ax.tick_params(axis="x", labelsize=8)
     handles = [Line2D([], [], color=c, lw=3.5) for c in _MODEL_COLORS]
-    axes[0, 0].legend(handles, labels, loc="lower right", fontsize=8, ncols=2)
+    fig.legend(handles, labels, loc="outside upper right", fontsize=8, ncols=2)
     fig.suptitle(title or "Shared parameters: median, 68% and 95% intervals")
     return _save(fig, output_path)
 
@@ -599,9 +600,9 @@ def plot_bridge_diagnostics(
     ``check`` is the output of ``check_bridge_sampling``. Top row:
     ``ln q - ln g`` at the posterior and at the proposal draws (the two
     histograms must overlap, or the estimate rests on few draws); ``ln Z``
-    for other proposal seeds, whose spread should match the quoted standard
-    deviation (grey band); ``ln Z`` against the draws per chain used, which
-    should settle. Bottom: each free parameter on the log scale, posterior
+    for other proposal seeds, relative to the reference estimate, whose
+    spread should match the quoted standard deviation (grey band); the same
+    against the draws per chain used, which should settle. Bottom: each free parameter on the log scale, posterior
     against the normal proposal; strong skewness or heavy tails make the
     proposal a poor bridge.
     """
@@ -616,43 +617,43 @@ def plot_bridge_diagnostics(
     top, bottom = fig.subfigures(2, 1, height_ratios=[1, 1.1])
     ax_w, ax_seed, ax_n = top.subplots(1, 3)
 
-    both = np.r_[l_post, l_prop]
-    bins = np.linspace(np.percentile(both, 0.5), np.percentile(both, 99.9), 80)
-    ax_w.hist(
-        l_post,
-        bins,
-        density=True,
-        histtype="step",
-        color=_MODEL_COLORS[0],
-        label="posterior draws",
-    )
-    ax_w.hist(
-        l_prop,
-        bins,
-        density=True,
-        histtype="step",
-        color=_MODEL_COLORS[1],
-        label="proposal draws",
-    )
+    # Range set by the posterior side: the proposal's long left tail (draws
+    # where the posterior is negligible) carries no weight and would squash
+    # the plot; the fraction of proposal draws left of the range is reported.
+    lo = float(np.percentile(l_post, 0.5) - 3 * np.std(l_post))
+    hi = float(max(np.percentile(l_post, 99.9), np.percentile(l_prop, 99.9)))
+    hi += 0.05 * (hi - lo)
+    bins = np.linspace(lo, hi, 80)
+    for values, color, label in (
+        (l_post, _MODEL_COLORS[0], "posterior draws"),
+        (l_prop, _MODEL_COLORS[1], "proposal draws"),
+    ):
+        ax_w.hist(
+            values,
+            bins,
+            weights=np.full(len(values), 1.0 / len(values)),
+            histtype="step",
+            color=color,
+            label=label,
+        )
     ax_w.axvline(ref.log_ml, color="black", ls="--", lw=0.8, label=r"$\ln Z$")
-    ax_w.set(xlabel=r"$\ln q - \ln g$", ylabel="density")
-    note = f"{n_zero} proposal draws with q = 0" if n_zero else None
-    ax_w.legend(fontsize=8, title=note, title_fontsize=7)
+    ax_w.set(xlabel=r"$\ln q - \ln g$", ylabel="fraction of draws", xlim=(lo, hi))
+    n_prop = len(l_prop) + n_zero
+    outside = (np.sum(l_prop < lo) + n_zero) / n_prop
+    ax_w.legend(
+        fontsize=8,
+        title=f"{outside:.0%} of proposal draws left of range",
+        title_fontsize=7,
+    )
 
     for ax in (ax_seed, ax_n):
-        ax.axhspan(
-            ref.log_ml - ref.log_ml_sd,
-            ref.log_ml + ref.log_ml_sd,
-            color="grey",
-            alpha=0.25,
-            lw=0,
-        )
-        ax.axhline(ref.log_ml, color="grey", lw=0.8)
-        ax.ticklabel_format(axis="y", useOffset=ref.log_ml)
+        ax.axhspan(-ref.log_ml_sd, ref.log_ml_sd, color="grey", alpha=0.25, lw=0)
+        ax.axhline(0.0, color="grey", lw=0.8)
+    delta_label = r"$\ln Z - \ln Z_\mathrm{ref}$"
     values = np.array([r.log_ml for r in check.by_seed])
     ax_seed.errorbar(
         check.seeds,
-        values,
+        values - ref.log_ml,
         [r.log_ml_sd for r in check.by_seed],
         fmt="o",
         ms=3,
@@ -660,14 +661,15 @@ def plot_bridge_diagnostics(
         color=_MODEL_COLORS[0],
     )
     spread = float(np.std(values, ddof=1)) if len(values) > 1 else float("nan")
+    ax_seed.set_xticks(check.seeds)
     ax_seed.set(
         xlabel="proposal seed",
-        ylabel=r"$\ln Z$",
+        ylabel=delta_label,
         title=f"seed spread {spread:.3f}, quoted sd {ref.log_ml_sd:.3f}",
     )
     ax_n.errorbar(
         check.n_draws,
-        [r.log_ml for r in check.by_draws],
+        [r.log_ml - ref.log_ml for r in check.by_draws],
         [r.log_ml_sd for r in check.by_draws],
         fmt="o-",
         ms=3,
@@ -678,7 +680,9 @@ def plot_bridge_diagnostics(
     ax_n.set_xticks(check.n_draws, labels=[str(n) for n in check.n_draws])
     ax_n.minorticks_off()
     ax_n.set(
-        xlabel="draws per chain used", ylabel=r"$\ln Z$", title="convergence with draws"
+        xlabel="draws per chain used",
+        ylabel=delta_label,
+        title="convergence with draws",
     )
 
     dim = len(check.parameters)
@@ -715,6 +719,8 @@ def plot_bridge_diagnostics(
         )
         ax.set_xlabel(f"ln {PARAMETER_LABELS.get(name, name)}")
         ax.set_yticks([])
+        ax.xaxis.set_major_locator(MaxNLocator(4))
+        ax.tick_params(axis="x", labelsize=8)
     for ax in axes.flat[dim:]:
         ax.set_visible(False)
     axes.flat[0].legend(fontsize=7, loc="upper right")
