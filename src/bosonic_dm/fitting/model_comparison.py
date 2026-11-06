@@ -17,8 +17,9 @@ of the raw number of draws, so autocorrelated MCMC draws are accounted for.
 from __future__ import annotations
 
 import logging
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass
+from functools import partial
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -35,7 +36,6 @@ from bosonic_dm.fitting.background_fit import (
 )
 
 if TYPE_CHECKING:
-    import cmdstanpy
     import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -99,58 +99,74 @@ def _iterate(
     return log_r + lstar, max_iter, False
 
 
-def bridge_sampling(
-    log_density: Callable[[np.ndarray], np.ndarray],
-    draws: np.ndarray,
-    *,
-    seed: int = 0,
-    tol: float = 1e-10,
-    max_iter: int = 1000,
-) -> BridgeSamplingResult:
-    """Estimate ``log ∫ q(θ) dθ`` from posterior draws by bridge sampling.
+@dataclass(frozen=True)
+class BridgeSamplingTerms:
+    """Log densities that enter a bridge-sampling estimate.
 
-    Parameters
-    ----------
-    log_density
-        Unnormalized log posterior ``log q`` on the same (unconstrained)
-        scale as ``draws``, including all constants and any Jacobian. It maps
-        an ``(n, dim)`` array to ``(n,)``.
-    draws
-        Posterior draws on the unconstrained scale, shape
-        ``(chains, draws, dim)``. In each chain the first half fits the
-        multivariate-normal proposal and the second half enters the iterative
-        scheme, as in the R ``bridgesampling`` package.
-    seed
-        Seed of the proposal draws.
-    tol, max_iter
-        Convergence tolerance on ``log r`` and maximum number of iterations.
-
-    Returns
-    -------
-    BridgeSamplingResult
-        ``log_ml`` and its approximate standard deviation.
+    ``q`` is the unnormalized log posterior and ``g`` the normal proposal.
+    The ``*_posterior`` arrays are evaluated at the posterior draws of the
+    iterative scheme (second half of each chain, chain-major), the
+    ``*_proposal`` arrays at the proposal draws. For a reliable estimate the
+    distributions of ``log q - log g`` at the two sets of draws overlap.
     """
+
+    log_q_posterior: np.ndarray
+    log_g_posterior: np.ndarray
+    log_q_proposal: np.ndarray
+    log_g_proposal: np.ndarray
+    # Second half of each chain, shape (chains, draws // 2, dim).
+    posterior_draws: np.ndarray
+    proposal_mean: np.ndarray
+    proposal_cov: np.ndarray
+    n_effective: float
+
+
+def _validated_draws(draws: np.ndarray) -> np.ndarray:
     draws = np.asarray(draws, dtype=float)
     if draws.ndim != 3:
         msg = "draws must have shape (chains, draws, dim)."
         raise ValueError(msg)
-    n_chains, n_draws, dim = draws.shape
-    if n_draws < 4:
+    if draws.shape[1] < 4:
         msg = "Need at least 4 draws per chain."
         raise ValueError(msg)
+    return draws
+
+
+def bridge_sampling_terms(
+    log_density: Callable[[np.ndarray], np.ndarray],
+    draws: np.ndarray,
+    *,
+    seed: int = 0,
+    log_q_posterior: np.ndarray | None = None,
+) -> BridgeSamplingTerms:
+    """Fit the proposal and evaluate both densities at both sets of draws.
+
+    Arguments are those of :func:`bridge_sampling`. ``log_q_posterior``, if
+    given, replaces the evaluation of ``log_density`` at the posterior draws,
+    e.g. to repeat the estimate with another proposal ``seed`` at the cost of
+    the proposal draws only.
+    """
+    draws = _validated_draws(draws)
+    _, n_draws, dim = draws.shape
     half = n_draws // 2
     fit_part = draws[:, :half].reshape(-1, dim)
     iter_part = draws[:, half:]
     posterior = iter_part.reshape(-1, dim)
 
-    proposal = multivariate_normal(
-        mean=fit_part.mean(axis=0), cov=np.atleast_2d(np.cov(fit_part, rowvar=False))
-    )
-    n1 = n2 = len(posterior)
+    mean = fit_part.mean(axis=0)
+    cov = np.atleast_2d(np.cov(fit_part, rowvar=False))
+    proposal = multivariate_normal(mean=mean, cov=cov)
+    n2 = len(posterior)
     proposal_draws = proposal.rvs(size=n2, random_state=np.random.default_rng(seed))
     proposal_draws = np.reshape(proposal_draws, (n2, dim))
 
-    q11 = np.asarray(log_density(posterior), dtype=float)
+    if log_q_posterior is None:
+        q11 = np.asarray(log_density(posterior), dtype=float)
+    else:
+        q11 = np.asarray(log_q_posterior, dtype=float)
+        if q11.shape != (n2,):
+            msg = f"log_q_posterior must have shape ({n2},)."
+            raise ValueError(msg)
     q12 = np.atleast_1d(proposal.logpdf(posterior))
     q21 = np.asarray(log_density(proposal_draws), dtype=float)
     q22 = np.atleast_1d(proposal.logpdf(proposal_draws))
@@ -163,7 +179,30 @@ def bridge_sampling(
     ess = np.atleast_1d(
         array_stats.ess(iter_part, chain_axis=0, draw_axis=1, method="bulk")
     )
-    n_effective = float(min(np.median(ess), n1))
+    return BridgeSamplingTerms(
+        log_q_posterior=q11,
+        log_g_posterior=q12,
+        log_q_proposal=q21,
+        log_g_proposal=q22,
+        posterior_draws=iter_part,
+        proposal_mean=mean,
+        proposal_cov=cov,
+        n_effective=float(min(np.median(ess), len(posterior))),
+    )
+
+
+def bridge_sampling_estimate(
+    terms: BridgeSamplingTerms,
+    *,
+    tol: float = 1e-10,
+    max_iter: int = 1000,
+) -> BridgeSamplingResult:
+    """Run the iterative scheme and its error estimate on ``terms``."""
+    q11, q12 = terms.log_q_posterior, terms.log_g_posterior
+    q21, q22 = terms.log_q_proposal, terms.log_g_proposal
+    n_chains = terms.posterior_draws.shape[0]
+    n1, n2 = len(q11), len(q21)
+    n_effective = terms.n_effective
     log_ml, n_iterations, converged = _iterate(
         q11 - q12, q21 - q22, n_effective, tol=tol, max_iter=max_iter
     )
@@ -200,15 +239,108 @@ def bridge_sampling(
     )
 
 
-def _parameter_draws(fit: cmdstanpy.CmdStanMCMC, names: list[str]) -> np.ndarray:
-    """Draws of ``names`` (CmdStan columns), shaped ``(chains, draws, len(names))``."""
-    columns = list(fit.column_names)
-    draws = fit.draws(concat_chains=False)  # (draws, chains, columns)
-    return np.moveaxis(draws[:, :, [columns.index(name) for name in names]], 0, 1)
+def bridge_sampling(
+    log_density: Callable[[np.ndarray], np.ndarray],
+    draws: np.ndarray,
+    *,
+    seed: int = 0,
+    tol: float = 1e-10,
+    max_iter: int = 1000,
+) -> BridgeSamplingResult:
+    """Estimate ``log ∫ q(θ) dθ`` from posterior draws by bridge sampling.
+
+    Parameters
+    ----------
+    log_density
+        Unnormalized log posterior ``log q`` on the same (unconstrained)
+        scale as ``draws``, including all constants and any Jacobian. It maps
+        an ``(n, dim)`` array to ``(n,)``.
+    draws
+        Posterior draws on the unconstrained scale, shape
+        ``(chains, draws, dim)``. In each chain the first half fits the
+        multivariate-normal proposal and the second half enters the iterative
+        scheme, as in the R ``bridgesampling`` package.
+    seed
+        Seed of the proposal draws.
+    tol, max_iter
+        Convergence tolerance on ``log r`` and maximum number of iterations.
+
+    Returns
+    -------
+    BridgeSamplingResult
+        ``log_ml`` and its approximate standard deviation.
+    """
+    terms = bridge_sampling_terms(log_density, draws, seed=seed)
+    return bridge_sampling_estimate(terms, tol=tol, max_iter=max_iter)
+
+
+def _is_cmdstan_fit(posterior: Any) -> bool:
+    return hasattr(posterior, "draws") and hasattr(posterior, "column_names")
+
+
+def _parameter_draws(posterior: Any, names: Sequence[str]) -> np.ndarray:
+    """Draws of ``names``, shaped ``(chains, draws, len(names))``.
+
+    ``posterior`` is a ``cmdstanpy.CmdStanMCMC`` (CmdStan column names) or an
+    ArviZ object with a ``posterior`` group, such as a ``posterior.nc`` from
+    ``save_background_fit`` opened with ``xarray.open_datatree``. There,
+    ``lp__`` is read from ``sample_stats.lp``.
+    """
+    if _is_cmdstan_fit(posterior):
+        columns = list(posterior.column_names)
+        draws = posterior.draws(concat_chains=False)  # (draws, chains, columns)
+        return np.moveaxis(draws[:, :, [columns.index(name) for name in names]], 0, 1)
+    arrays = []
+    for name in names:
+        if name == "lp__":
+            values = posterior["sample_stats"]["lp"]
+        else:
+            values = posterior["posterior"][name]
+        arrays.append(np.asarray(values.transpose("chain", "draw").values, dtype=float))
+    return np.stack(arrays, axis=-1)
+
+
+def background_unconstrained_draws(
+    posterior: Any,
+    stan_data: Mapping[str, Any],
+    *,
+    seed: int = 0,
+    n_checked: int = 200,
+    lp_atol: float = 0.05,
+    lp_rtol: float = 1e-5,
+) -> np.ndarray:
+    """Log of the free-parameter draws, checked against Stan's ``lp__``.
+
+    Returns shape ``(chains, draws, len(free_parameters(stan_data)))``.
+    ``posterior`` is a ``CmdStanMCMC`` or a reloaded ``posterior.nc``. The
+    NumPy ``background_log_density`` is compared with ``lp__`` on
+    ``n_checked`` random draws; a mismatch beyond
+    ``lp_atol + lp_rtol * |lp__|`` raises. This catches fits from a model
+    whose ``lp__`` drops constants (``~`` statements) or ``stan_data`` that
+    differs from the fitted data. The tolerance allows for the precision of
+    the CmdStan output (6 significant figures by default).
+    """
+    names = list(free_parameters(stan_data))
+    draws = _parameter_draws(posterior, [*names, "lp__"])
+    theta = np.log(draws[..., :-1])
+    lp = draws[..., -1].ravel()
+
+    flat = theta.reshape(-1, len(names))
+    rng = np.random.default_rng(seed)
+    idx = rng.choice(len(flat), size=min(n_checked, len(flat)), replace=False)
+    mismatch = np.abs(background_log_density(flat[idx], stan_data) - lp[idx])
+    if np.any(mismatch > lp_atol + lp_rtol * np.abs(lp[idx])):
+        msg = (
+            "NumPy background_log_density disagrees with Stan lp__ "
+            f"(max difference {mismatch.max():.3g}). Was the fit made with the "
+            "current background.stan and this stan_data?"
+        )
+        raise ValueError(msg)
+    return theta
 
 
 def background_log_marginal_likelihood(
-    fit: cmdstanpy.CmdStanMCMC,
+    posterior: Any,
     stan_data: Mapping[str, Any],
     *,
     seed: int = 0,
@@ -218,34 +350,97 @@ def background_log_marginal_likelihood(
 ) -> BridgeSamplingResult:
     """Log marginal likelihood of one background fit by bridge sampling.
 
-    The free parameters are taken on the log scale. Before sampling, the
-    NumPy ``background_log_density`` is compared with Stan's ``lp__`` on
-    ``n_checked`` posterior draws; a mismatch beyond
-    ``lp_atol + lp_rtol * |lp__|`` raises. This catches fits from a model
-    whose ``lp__`` drops constants (``~`` statements) or ``stan_data`` that
-    differs from the fitted data. The tolerance allows for the precision of
-    the CmdStan output (6 significant figures by default).
+    ``posterior`` is a ``cmdstanpy.CmdStanMCMC`` or a reloaded
+    ``posterior.nc``. The free parameters are taken on the log scale and
+    checked against ``lp__`` first (see
+    :func:`background_unconstrained_draws`).
     """
-    names = list(free_parameters(stan_data))
-    draws = _parameter_draws(fit, [*names, "lp__"])
-    theta = np.log(draws[..., :-1])
-    lp = draws[..., -1].ravel()
+    theta = background_unconstrained_draws(
+        posterior,
+        stan_data,
+        seed=seed,
+        n_checked=n_checked,
+        lp_atol=lp_atol,
+        lp_rtol=lp_rtol,
+    )
+    return bridge_sampling(
+        partial(background_log_density, stan_data=stan_data), theta, seed=seed
+    )
 
-    def log_density(x: np.ndarray) -> np.ndarray:
-        return background_log_density(x, stan_data)
 
-    flat = theta.reshape(-1, len(names))
-    rng = np.random.default_rng(seed)
-    idx = rng.choice(len(flat), size=min(n_checked, len(flat)), replace=False)
-    mismatch = np.abs(log_density(flat[idx]) - lp[idx])
-    if np.any(mismatch > lp_atol + lp_rtol * np.abs(lp[idx])):
-        msg = (
-            "NumPy background_log_density disagrees with Stan lp__ "
-            f"(max difference {mismatch.max():.3g}). Was the fit made with the "
-            "current background.stan and this stan_data?"
-        )
-        raise ValueError(msg)
-    return bridge_sampling(log_density, theta, seed=seed)
+@dataclass(frozen=True)
+class BridgeSamplingCheck:
+    """Bridge-sampling estimate of one fit, with its stability checks.
+
+    ``by_seed`` repeats the estimate with other proposal seeds on the same
+    draws; its spread should match ``result.log_ml_sd``. ``by_draws`` uses
+    only the first ``n_draws`` draws of each chain; the estimate should
+    settle as the number of draws grows.
+    """
+
+    parameters: tuple[str, ...]
+    terms: BridgeSamplingTerms
+    result: BridgeSamplingResult
+    seeds: tuple[int, ...]
+    by_seed: tuple[BridgeSamplingResult, ...]
+    n_draws: tuple[int, ...]
+    by_draws: tuple[BridgeSamplingResult, ...]
+
+
+def check_bridge_sampling(
+    posterior: Any,
+    stan_data: Mapping[str, Any],
+    *,
+    seed: int = 0,
+    seeds: Sequence[int] = tuple(range(1, 11)),
+    n_draws: Sequence[int] | None = None,
+) -> BridgeSamplingCheck:
+    """Repeat the bridge-sampling estimate of one fit to test its stability.
+
+    Parameters
+    ----------
+    posterior
+        A ``cmdstanpy.CmdStanMCMC`` or a reloaded ``posterior.nc``.
+    stan_data
+        The fitted data, e.g. from ``load_stan_data``.
+    seed
+        Proposal seed of the reference estimate (as in
+        :func:`compare_background_models`).
+    seeds
+        Further proposal seeds. Each reuses the log posterior at the
+        posterior draws, so it costs one evaluation at the proposal draws.
+    n_draws
+        Draws per chain for the truncated estimates; ``None`` uses 1/8, 1/4,
+        1/2 and all of them.
+    """
+    theta = background_unconstrained_draws(posterior, stan_data, seed=seed)
+    log_density = partial(background_log_density, stan_data=stan_data)
+    terms = bridge_sampling_terms(log_density, theta, seed=seed)
+    total = theta.shape[1]
+    if n_draws is None:
+        n_draws = sorted({max(4, total // k) for k in (8, 4, 2, 1)})
+    n_draws = tuple(int(n) for n in n_draws if 4 <= n <= total)
+    return BridgeSamplingCheck(
+        parameters=free_parameters(stan_data),
+        terms=terms,
+        result=bridge_sampling_estimate(terms),
+        seeds=tuple(int(s) for s in seeds),
+        by_seed=tuple(
+            bridge_sampling_estimate(
+                bridge_sampling_terms(
+                    log_density,
+                    theta,
+                    seed=int(s),
+                    log_q_posterior=terms.log_q_posterior,
+                )
+            )
+            for s in seeds
+        ),
+        n_draws=n_draws,
+        by_draws=tuple(
+            bridge_sampling(log_density, theta[:, :n], seed=seed) for n in n_draws
+        ),
+    )
 
 
 def model_label(stan_data: Mapping[str, Any]) -> str:
@@ -341,9 +536,9 @@ class BayesFactorResult:
 
 
 def compare_background_models(
-    fit_a: cmdstanpy.CmdStanMCMC,
+    fit_a: Any,
     data_a: Mapping[str, Any],
-    fit_b: cmdstanpy.CmdStanMCMC,
+    fit_b: Any,
     data_b: Mapping[str, Any],
     *,
     seed: int = 0,
@@ -354,7 +549,8 @@ def compare_background_models(
     fixed inputs, and the parameters free in both must have identical priors,
     so the comparison only concerns the fixed parameters. Typical use is the
     full model (``a``) against ``build_stan_data(..., fixed=NO_LINEAR)``
-    (``b``).
+    (``b``). Each fit is a ``cmdstanpy.CmdStanMCMC`` or a reloaded
+    ``posterior.nc``.
 
     The result depends on the priors of the parameters that differ, here the
     lognormal widths of ``c0`` and ``cQ``; check how it changes with them.
@@ -368,26 +564,55 @@ def compare_background_models(
     )
 
 
+def as_inference_data(posterior: Any, stan_data: Mapping[str, Any]) -> Any:
+    """ArviZ data of a fit: converted from CmdStan, or returned unchanged."""
+    if _is_cmdstan_fit(posterior):
+        return to_inference_data(posterior, stan_data)
+    return posterior
+
+
+def pointwise_loo(
+    posterior: Any, stan_data: Mapping[str, Any]
+) -> tuple[np.ndarray, np.ndarray]:
+    """PSIS-LOO ``elpd_i`` and Pareto ``k`` of each fitted bin.
+
+    Both arrays follow the fitted bins in energy order
+    (``np.flatnonzero(stan_data["use_bin"])``). ``posterior`` is a
+    ``CmdStanMCMC`` or a reloaded ``posterior.nc``.
+    """
+    import arviz as az  # noqa: PLC0415
+
+    result = az.loo(as_inference_data(posterior, stan_data), pointwise=True)
+    return (
+        np.asarray(result.elpd_i.values, dtype=float).ravel(),
+        np.asarray(result.pareto_k.values, dtype=float).ravel(),
+    )
+
+
 def loo_compare_background_models(
-    fit_a: cmdstanpy.CmdStanMCMC,
+    fit_a: Any,
     data_a: Mapping[str, Any],
-    fit_b: cmdstanpy.CmdStanMCMC,
+    fit_b: Any,
     data_b: Mapping[str, Any],
 ) -> pd.DataFrame:
     """PSIS-LOO comparison of two background variants with ``arviz.compare``.
 
     Each fitted bin is one observation, so this is leave-one-bin-out over the
     bins with ``use_bin = 1``. The table gives each model's ELPD, the
-    difference to the best model (``elpd_diff``) and its standard error
-    (``dse``), and a ``warning`` flag for unreliable Pareto-k values.
-    Unlike the Bayes factor, it depends only weakly on the priors.
+    difference to the best model (``elpd_diff``, negative for the worse
+    model) and its standard error (``dse``), the probability that a model is
+    worse than the best (``p_worse``), and diagnostic messages
+    (``diag_diff``, ``diag_elpd``). Values are not rounded. Unlike the Bayes
+    factor, it depends only weakly on the priors. Each fit is a
+    ``CmdStanMCMC`` or a reloaded ``posterior.nc``.
     """
     import arviz as az  # noqa: PLC0415
 
     _check_comparable(data_a, data_b)
     return az.compare(
         {
-            model_label(data_a): to_inference_data(fit_a, data_a),
-            model_label(data_b): to_inference_data(fit_b, data_b),
-        }
+            model_label(data_a): as_inference_data(fit_a, data_a),
+            model_label(data_b): as_inference_data(fit_b, data_b),
+        },
+        round_to="none",
     )

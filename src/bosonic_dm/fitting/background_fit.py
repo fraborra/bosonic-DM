@@ -531,6 +531,44 @@ def load_background_fit(output_dir: str | Path) -> BackgroundFitSummary:
     )
 
 
+def load_stan_data(output_dir: str | Path) -> dict[str, Any]:
+    """Rebuild the fitted ``stan_data`` from ``save_background_fit`` files.
+
+    Reads ``summary.yaml`` (fixed inputs, priors, fixed parameters) and
+    ``bhat.parquet`` (bin edges, counts, ``used_in_fit``) in ``output_dir``.
+    The result has the keys and values of the ``build_stan_data`` output that
+    was fitted, so a saved fit can be compared or plotted without rerunning
+    the spectrum preparation.
+    """
+    output = Path(output_dir)
+    record = read_yaml(output / "summary.yaml")
+    table = pl.read_parquet(output / "bhat.parquet")
+    lo, hi = table["bin_lo_keV"].to_numpy(), table["bin_hi_keV"].to_numpy()
+    held = _validated_fixed(record.get("fixed_parameters"))
+    inputs = record["fixed_inputs"]
+    priors = record["priors"]
+    return {
+        "n_bins": len(table),
+        "edges": np.append(lo, hi[-1]).astype(float),
+        "counts": table["counts"].to_numpy().astype(int),
+        "use_bin": table["used_in_fit"].to_numpy().astype(int),
+        "Q": float(inputs["Q_keV"]),
+        "loc": float(inputs["ar39_loc_keV"]),
+        "scale": float(inputs["ar39_scale_keV"]),
+        **{f"fit_{name}": int(name not in held) for name in FIXABLE_PARAMETERS},
+        **{f"{name}_fixed": held.get(name, 0.0) for name in FIXABLE_PARAMETERS},
+        **{
+            key: np.asarray(priors[key], dtype=float)
+            for key in (
+                "log_rate_prior_mean",
+                "log_rate_prior_sd",
+                "log_shape_prior_mean",
+                "log_shape_prior_sd",
+            )
+        },
+    }
+
+
 def background_log_density(
     theta_unconstrained: np.ndarray | Sequence[Sequence[float]],
     stan_data: Mapping[str, Any],
