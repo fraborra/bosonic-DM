@@ -123,11 +123,15 @@ def test_residual_plot_is_saved(tmp_path: Path, include_excluded: bool) -> None:
     fig = plot_background_fit_residuals(
         summary, counts, include_excluded=include_excluded, output_path=output
     )
-    n_points = sum(
-        len(line.get_xdata()) for line in fig.axes[1].lines[1:]
-    )  # skip y=0 line
+    n_points = sum(  # marker-only lines; the reference lines at 0, ±1, ±2 are styled
+        len(line.get_xdata())
+        for line in fig.axes[1].lines
+        if line.get_linestyle() == "None"
+    )
+    n_hist = len(fig.axes[2].patches)  # pull histogram beside the residuals
     plt.close(fig)
 
+    assert n_hist == (2 if include_excluded else 1)
     assert output.stat().st_size > 0
     n_fit = int(summary.used_in_fit.sum())
     assert n_points == (len(counts) if include_excluded else n_fit)

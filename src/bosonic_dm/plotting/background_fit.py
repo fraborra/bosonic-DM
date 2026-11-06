@@ -23,6 +23,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from matplotlib.figure import Figure
+from scipy.interpolate import PchipInterpolator
+from scipy.stats import norm
 
 from bosonic_dm.fitting.background_fit import (
     BACKGROUND_PARAMETERS,
@@ -57,6 +59,32 @@ def normalized_residuals(
     variance = summary.b_hat + summary.expected_counts_draws.var(axis=0)
     with np.errstate(divide="ignore", invalid="ignore"):
         return np.where(variance > 0, (n - summary.b_hat) / np.sqrt(variance), np.nan)
+
+
+def _smooth_curve(
+    edges: np.ndarray, values: np.ndarray, points_per_bin: int = 5
+) -> tuple[np.ndarray, np.ndarray]:
+    """Smooth line through per-bin values, on a grid finer than the bins.
+
+    Monotone cubic (PCHIP) interpolation of ``log(values)`` between bin
+    centres, so the line passes through every bin's value, cannot overshoot,
+    and follows steep falls on a log axis. It reaches half a bin beyond the
+    first and last positive bins and is ``nan`` where the values are zero
+    (e.g. the Ar39 component above its endpoint).
+    """
+    centres = 0.5 * (edges[:-1] + edges[1:])
+    grid = np.linspace(edges[0], edges[-1], points_per_bin * len(centres) + 1)
+    curve = np.full_like(grid, np.nan)
+    positive = np.flatnonzero(values > 0)
+    if positive.size < 2:
+        return grid, np.interp(grid, centres, values)
+    first, last = positive[0], positive[-1]
+    inside = (grid >= edges[first]) & (grid <= edges[last + 1])
+    interpolator = PchipInterpolator(
+        centres[positive], np.log(values[positive]), extrapolate=True
+    )
+    curve[inside] = np.exp(interpolator(grid[inside]))
+    return grid, curve
 
 
 def _excluded_windows(used: np.ndarray) -> list[np.ndarray]:
@@ -116,6 +144,7 @@ def plot_background_fit_residuals(
     title: str | None = None,
     yscale: str = "log",
     residual_limit: float | None = 5.0,
+    points_per_bin: int = 5,
     output_path: Path | None = None,
 ) -> Figure:
     """Spectrum with the fitted model and a normalized-residual panel.
@@ -138,6 +167,9 @@ def plot_background_fit_residuals(
     residual_limit
         Symmetric y-limit of the residual panel; points beyond it are drawn
         as triangles on the edge. Automatic (no clipping) if ``None``.
+    points_per_bin
+        Points per bin of the smooth model lines, which interpolate the
+        per-bin ``B_hat`` and component medians (see ``_smooth_curve``).
     output_path
         If given, the figure is also saved there.
 
@@ -152,19 +184,30 @@ def plot_background_fit_residuals(
     used = summary.used_in_fit
     pulls = normalized_residuals(summary, n)
 
-    fig, (ax_spec, ax_res) = plt.subplots(
-        2,
-        1,
-        figsize=(11, 7),
-        sharex=True,
-        gridspec_kw={"height_ratios": [3, 1.3], "hspace": 0.06},
+    fig = plt.figure(figsize=(12, 7))
+    grid = fig.add_gridspec(
+        2, 2, height_ratios=[3, 1.3], width_ratios=[7, 1], hspace=0.06, wspace=0.03
     )
+    ax_spec = fig.add_subplot(grid[0, 0])
+    ax_res = fig.add_subplot(grid[1, 0], sharex=ax_spec)
+    ax_hist = fig.add_subplot(grid[1, 1], sharey=ax_res)
+    ax_spec.tick_params(labelbottom=False)
 
-    ax_spec.stairs(n, edges, color="black", lw=0.8, label="data")
     for name, values in summary.component_medians.items():
         color, label = _COMPONENT_STYLE.get(name, (None, name))
-        ax_spec.stairs(values, edges, color=color, lw=1.0, label=label)
-    ax_spec.stairs(summary.b_hat, edges, color="C3", lw=1.4, label=r"$\hat{B}$")
+        ax_spec.plot(
+            *_smooth_curve(edges, values, points_per_bin),
+            color=color,
+            lw=1.0,
+            label=label,
+        )
+    ax_spec.plot(
+        *_smooth_curve(edges, summary.b_hat, points_per_bin),
+        color="C3",
+        lw=1.4,
+        label=r"$\hat{B}$",
+    )
+    ax_spec.plot(centres, n, ".", ms=2.5, color="black", label="data", zorder=3)
     for idx in _excluded_windows(used):
         for ax in (ax_spec, ax_res):
             ax.axvspan(edges[idx[0]], edges[idx[-1] + 1], color="grey", alpha=0.2, lw=0)
@@ -172,9 +215,11 @@ def plot_background_fit_residuals(
     ax_spec.set_ylim(10**-2, np.max(values) * 1.3)
     ax_spec.legend(loc="upper right", fontsize=9)
 
-    for k, color in ((2, "#f2e6a0"), (1, "#c9dfa0")):
-        ax_res.axhspan(-k, k, color=color, lw=0, zorder=0)
-    ax_res.axhline(0.0, color="grey", lw=0.7)
+    for ax in (ax_res, ax_hist):
+        ax.axhline(0.0, color="grey", lw=0.7)
+        for k, color in ((1, "#8cc152"), (2, "#e6c229")):  # green 1, yellow 2 sigma
+            for sign in (1, -1):
+                ax.axhline(sign * k, color=color, lw=1.2, ls="--", zorder=0)
 
     def draw(mask: np.ndarray, color: str, label: str) -> None:
         y = pulls[mask]
@@ -223,6 +268,12 @@ def plot_background_fit_residuals(
         ylabel=r"$(n - \hat{B}) / \sigma$",
         xlim=(edges[0], edges[-1]),
     )
+    _pull_histogram(
+        ax_hist,
+        pulls[used],
+        pulls[~used] if include_excluded else None,
+        residual_limit,
+    )
     suffix = "all bins" if include_excluded else "fitted bins"
     ax_spec.set_title(f"{title} — {suffix}" if title else suffix)
 
@@ -230,6 +281,54 @@ def plot_background_fit_residuals(
         output_path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(output_path, dpi=200, bbox_inches="tight")
     return fig
+
+
+def _pull_histogram(
+    ax: Any,
+    fitted: np.ndarray,
+    excluded: np.ndarray | None,
+    limit: float | None,
+) -> None:
+    """Horizontal pull histogram with the standard normal density.
+
+    Pulls beyond ``limit`` are left out of the histogram and counted in the
+    text, which also gives the mean and standard deviation of the fitted-bin
+    pulls (0 and 1 for a good fit).
+    """
+    fitted = fitted[np.isfinite(fitted)]
+    if limit is None:
+        limit = max(3.0, float(np.max(np.abs(fitted))) if fitted.size else 3.0)
+    bins = np.linspace(-limit, limit, round(2 * limit / 0.25) + 1)
+    ax.hist(
+        fitted,
+        bins=bins,
+        density=True,
+        orientation="horizontal",
+        histtype="stepfilled",
+        color="0.6",
+        alpha=0.7,
+    )
+    if excluded is not None:
+        excluded = excluded[np.isfinite(excluded)]
+        if excluded.size:
+            ax.hist(
+                excluded,
+                bins=bins,
+                density=True,
+                orientation="horizontal",
+                histtype="step",
+                color="C3",
+            )
+    y = np.linspace(-limit, limit, 300)
+    ax.plot(norm.pdf(y), y, color="C0", lw=1.0)
+    outside = int(np.sum(np.abs(fitted) > limit))
+    text = f"mean {fitted.mean():+.2f}\nsd {fitted.std():.2f}"
+    if outside:
+        text += f"\n{outside} beyond ±{limit:g}"
+    ax.text(0.95, 0.97, text, transform=ax.transAxes, ha="right", va="top", fontsize=7)
+    ax.set_xlabel("density", fontsize=8)
+    ax.tick_params(labelleft=False, labelsize=7)
+    ax.set_xlim(left=0)
 
 
 def _draws(posterior: Any, var_names: Sequence[str]) -> np.ndarray:
