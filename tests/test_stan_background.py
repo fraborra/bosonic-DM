@@ -208,3 +208,24 @@ def test_masked_bins_do_not_enter_likelihood(
 def test_all_masked_bins_are_rejected(background_model: cmdstanpy.CmdStanModel) -> None:
     with pytest.raises(RuntimeError):
         background_model.log_prob(_POINT, _masked_data([0] * 7, [1] * 7))
+
+
+def test_subnormal_ar39_cdf_argument_keeps_gradient_finite(
+    background_model: cmdstanpy.CmdStanModel,
+) -> None:
+    """A subnormal argument of the outer Ar-39 beta CDF must not crash the gradient.
+
+    With ``base_alpha = 100`` the base CDF at ``loc + 1e-3 scale`` is
+    ``u ~ 1e-296``, and ``tau = 1e-14`` maps it to ``r ~ 1e-310``. For
+    ``mu < 1`` Boost's ``ibeta_derivative`` overflows at such ``r`` and throws
+    an error that Stan cannot recover from, which stops the chain.
+    """
+    point = {**_POINT, "mu": 0.8, "tau": 1e-14, "base_alpha": 100.0}
+    data = {
+        **_masked_data([1] * 7, [10] * 7),
+        "edges": [0.0, 0.5658, 100.0, 200.0, 300.0, 565.8, 800.0, 1100.0],
+    }
+    r = point["tau"] * beta_dist.cdf(1e-3, point["base_alpha"], point["base_beta"])
+    assert 0 < r < np.finfo(float).tiny
+    log_prob = background_model.log_prob(point, data)
+    assert np.isfinite(log_prob.to_numpy()).all()

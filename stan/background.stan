@@ -23,15 +23,20 @@ functions {
                            real base_alpha, real base_beta,
                            real loc, real scale) {
     real u;
-    real r;
+    real logit_r;
     if (E <= loc) return 0;
     if (E >= loc + scale) return 1;
     u = beta_cdf((E - loc) / scale | base_alpha, base_beta);
     // Explicit endpoints avoid undefined derivatives at saturated CDF values.
     if (u <= 0) return 0;
     if (u >= 1) return 1;
-    r = inv_logit(log(tau) + logit(u));
-    return beta_cdf(r | mu, sigma);
+    logit_r = log(tau) + logit(u);
+    // Below r ~ 1e-304 the CDF is effectively 0 (about r^mu), while the
+    // gradient of beta_cdf (Boost ibeta_derivative) overflows for mu < 1 once r
+    // is subnormal. That overflow is not a domain error, so Stan cannot reject
+    // the proposal and stops the chain instead.
+    if (logit_r < -700) return 0;
+    return beta_cdf(inv_logit(logit_r) | mu, sigma);
   }
 }
 data {
