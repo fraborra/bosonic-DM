@@ -84,8 +84,8 @@ derive the PET-tier path from the production `config.json`.
 ### A simulation energy is skipped
 
 Check that the configured `job_template` expands to the actual simulation job
-name and that the corresponding CVT and STP files exist. Missing inputs are
-reported per energy in the simulation manifest.
+name and that the per-job evt and STP files exist, with the same job numbers in
+both tiers. Missing inputs are reported per energy in the simulation manifest.
 
 ### An old product is reused
 

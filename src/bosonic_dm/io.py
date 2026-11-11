@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import logging
+import tempfile
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
@@ -16,8 +17,8 @@ import pandas as pd
 import polars as pl
 from tqdm.auto import tqdm
 
+from bosonic_dm.constants import DET_TYPE_MAP
 from bosonic_dm.cuts import compute_group_exposure
-from bosonic_dm.plotting.utils import _DET_TYPE_MAP
 from bosonic_dm.stats import compute_weighted_uncertainty, weighted_mean
 
 logger = logging.getLogger(__name__)
@@ -84,18 +85,25 @@ def ak_to_pandas(
     raise ValueError(msg)
 
 
-def get_rawid_lists(chmap, rawids):
-    rawid_by_det_type = {"ICPC": [], "BEGe": [], "PPC": [], "COAX": []}
+def get_rawid_lists(chmap: object, rawids: Sequence[int]) -> dict[str, list[int]]:
+    """Group the distinct DAQ raw IDs in ``rawids`` by detector type."""
+    rawid_by_det_type: dict[str, list[int]] = {
+        "ICPC": [],
+        "BEGe": [],
+        "PPC": [],
+        "COAX": [],
+    }
 
     for rid in np.unique(rawids):
         ge = chmap.map("daq.rawid")[rid]["name"]
-        rawid_by_det_type[_DET_TYPE_MAP[ge[0]]].append(rid)
+        rawid_by_det_type[DET_TYPE_MAP[ge[0]]].append(rid)
 
     return rawid_by_det_type
 
 
-def get_rawids_map(chmap, ges):
-    rawids_map = {}
+def get_rawids_map(chmap: Mapping, ges: Sequence[str]) -> dict[str, int]:
+    """Map every detector name in ``ges`` to its DAQ raw ID."""
+    rawids_map: dict[str, int] = {}
 
     for ge in ges:
         rawids_map[ge] = chmap[ge].daq.rawid
@@ -189,7 +197,7 @@ def get_mean_fcc_det_type(
         ratio_dict_means[ene] = {}
 
         type_data: dict[str, dict[str, list]] = {
-            label: {"vals": [], "w": [], "unc": []} for label in _DET_TYPE_MAP.values()
+            label: {"vals": [], "w": [], "unc": []} for label in DET_TYPE_MAP.values()
         }
 
         for ge, data_dict in ge_dict.items():
@@ -197,7 +205,7 @@ def get_mean_fcc_det_type(
                 continue
 
             prefix = ge[0].upper()
-            det_type = _DET_TYPE_MAP.get(prefix)
+            det_type = DET_TYPE_MAP.get(prefix)
             if det_type is None:
                 continue
 
@@ -374,26 +382,50 @@ def get_mean_fcc_det_group(
     return ratio_dict_means
 
 
+def write_parquet_atomic(frame: pl.DataFrame, destination: Path) -> None:
+    """Write a Parquet frame atomically within its destination directory.
+
+    The frame goes to a temporary file next to ``destination`` and replaces it
+    only after a complete write, so a failed write leaves no partial file.
+    """
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            dir=destination.parent,
+            prefix=f".{destination.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as stream:
+            temporary_path = Path(stream.name)
+        frame.write_parquet(temporary_path)
+        temporary_path.replace(destination)
+    finally:
+        if temporary_path is not None and temporary_path.exists():
+            temporary_path.unlink()
+
+
 def build_parquet_dataset(
     *,
     energies: Sequence[int],
-    cvt_files: Mapping[int, Sequence[Path]],
+    evt_files: Mapping[int, Sequence[Path]],
     output_dir: Path,
     overwrite: bool = False,
 ) -> None:
     """Build a parquet dataset partitioned by simulated energy.
 
     For each energy, the function reads the event data from the
-    provided CVT files, selects multiplicity-1 events, appends
+    per-job evt-tier files, selects multiplicity-1 events, appends
     `sim_e` and `coincident_spms` columns, and concatenates the
-    results into a partitioned Parquet dataset.
+    results into a partitioned Parquet dataset. The merged cvt file is
+    not read: the evt files hold the same events.
 
     Parameters
     ----------
     energies : Sequence[int]
         List of simulated energies in keV.
-    cvt_files : Mapping[int, Sequence[Path]]
-        Mapping from energy to a sequence of LH5 CVT file paths.
+    evt_files : Mapping[int, Sequence[Path]]
+        Mapping from energy to the evt-tier LH5 files of its jobs.
     output_dir : Path
         Final name of the parquet output directory.
     overwrite : bool, default=False
@@ -404,9 +436,9 @@ def build_parquet_dataset(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     for ene in tqdm(energies):
-        files_for_ene = cvt_files.get(ene, [])
+        files_for_ene = evt_files.get(ene, [])
         if not files_for_ene:
-            logger.warning("No CVT files provided for %d keV", ene)
+            logger.warning("No evt files provided for %d keV", ene)
             continue
 
         partition_dir = output_dir / f"sim_e={ene}"
@@ -422,11 +454,10 @@ def build_parquet_dataset(
             outfile.unlink()
 
         dfs = []
-        for cvt_path in files_for_ene:
-            cvt_file = str(cvt_path)
+        for evt_path in files_for_ene:
             data = lh5.read_as(
                 "evt",
-                cvt_file,
+                str(evt_path),
                 field_mask=["coincident", "geds", "trigger"],
                 library="ak",
             )

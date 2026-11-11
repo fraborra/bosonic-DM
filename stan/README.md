@@ -1,5 +1,9 @@
 # Binned background fit
 
+This directory holds two models. `background.stan` is documented here.
+`signal.stan`, the fixed-background signal fit at one mass, is documented in
+[`docs/fitting.md`](../docs/fitting.md#signal-fit).
+
 `background.stan` fits independent, raw histogram counts with
 
 $

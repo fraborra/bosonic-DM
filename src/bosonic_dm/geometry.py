@@ -9,16 +9,20 @@ import argparse
 import logging
 from collections import Counter
 from collections.abc import Mapping, Sequence
+from itertools import pairwise
 from pathlib import Path
 
 import lgdo
 import lh5
 import numpy as np
+import polars as pl
 import pyg4ometry as pg4
 import pygeomhpges as hpges
 from dbetto import Props
 from numpy.typing import NDArray
 from pygeomtools import get_sensvol_metadata
+
+from bosonic_dm.utils import period_name, run_name
 
 logger = logging.getLogger(__name__)
 
@@ -257,6 +261,120 @@ def aggregate_vertex_counts(
                 total[name_str] += int(count)
 
     return dict(sorted(total.items()))
+
+
+def read_run_ranges(
+    evt_file: str | Path, evt_group: str = "evt/trigger"
+) -> list[tuple[str, str, int, int]]:
+    """Read which ``evtid`` range of one simulation job belongs to each run.
+
+    The simulation assigns the primaries of a job to period/runs in contiguous
+    ``evtid`` blocks. The evt tier of the same job stores the period and run of
+    every event, so the blocks are recovered from it.
+
+    Parameters
+    ----------
+    evt_file
+        Evt-tier LH5 file of one job (not the merged cvt file, where ``evtid``
+        repeats across jobs).
+    evt_group
+        Table holding ``evtid``, ``period`` and ``run``.
+
+    Returns
+    -------
+    list[tuple[str, str, int, int]]
+        ``(period, run, first_evtid, last_evtid)`` sorted by ``first_evtid``,
+        e.g. ``("p03", "r000", 0, 871171)``.
+
+    Raises
+    ------
+    ValueError
+        If the blocks of two runs overlap, which means the file does not hold
+        a single job or runs are not assigned in contiguous blocks.
+    """
+    table = lh5.read_as(
+        evt_group, str(evt_file), field_mask=["evtid", "period", "run"], library="ak"
+    )
+    frame = pl.DataFrame(
+        {
+            "evtid": np.asarray(table["evtid"]).astype(np.int64),
+            "period": np.asarray(table["period"]).astype(np.int64),
+            "run": np.asarray(table["run"]).astype(np.int64),
+        }
+    )
+    blocks = (
+        frame.group_by("period", "run")
+        .agg(first=pl.col("evtid").min(), last=pl.col("evtid").max())
+        .sort("first")
+    )
+    ranges = [
+        (period_name(period), run_name(run), int(first), int(last))
+        for period, run, first, last in blocks.iter_rows()
+    ]
+    for earlier, later in pairwise(ranges):
+        if later[2] <= earlier[3]:
+            msg = (
+                f"evtid blocks of {earlier[0]}-{earlier[1]} and {later[0]}-{later[1]} "
+                f"overlap in {evt_file}."
+            )
+            raise ValueError(msg)
+    return ranges
+
+
+def aggregate_vertex_counts_by_run(
+    det_name_arrays: Sequence[NDArray],
+    evtid_arrays: Sequence[NDArray],
+    run_ranges: Sequence[Sequence[tuple[str, str, int, int]]],
+) -> dict[str, dict[str, dict[str, int]]]:
+    """Count the primaries generated in each detector for each period/run.
+
+    Parameters
+    ----------
+    det_name_arrays, evtid_arrays
+        Detector name and event ID of every vertex, one array per job, as
+        returned by :func:`assign_detectors_to_vertices` with
+        ``return_evtids=True``. Several vertices of one event in the same
+        detector count once.
+    run_ranges
+        Output of :func:`read_run_ranges` for the same jobs, in the same order.
+
+    Returns
+    -------
+    dict
+        ``{detector: {period: {run: n_primaries}}}``, sorted by detector.
+        A primary belongs to the run whose block starts at or before its
+        ``evtid``; the few ``evtid`` values absent from the evt tier between
+        two blocks go to the earlier run. Primaries before the first block of
+        a job are not counted.
+    """
+    total: Counter[tuple[str, str, str]] = Counter()
+    for names, evtids, ranges in zip(
+        det_name_arrays, evtid_arrays, run_ranges, strict=True
+    ):
+        if len(names) == 0 or not ranges:
+            continue
+        starts = np.array([first for _, _, first, _ in ranges], dtype=np.int64)
+        evtid = np.asarray(evtids).astype(np.int64)
+        vertices = pl.DataFrame(
+            {
+                "evtid": evtid,
+                "detector": np.asarray(names).astype(str),
+                "block": np.searchsorted(starts, evtid, side="right") - 1,
+            }
+        )
+        per_block = (
+            vertices.filter((pl.col("detector") != "none") & (pl.col("block") >= 0))
+            .unique()
+            .group_by("detector", "block")
+            .len()
+        )
+        for name, block, count in per_block.iter_rows():
+            period, run, _, _ = ranges[block]
+            total[(name, period, run)] += int(count)
+    counts: dict[str, dict[str, dict[str, int]]] = {}
+    for (name, period, run), count in sorted(total.items()):
+        counts.setdefault(name, {}).setdefault(period, {})[run] = int(count)
+    return counts
 
 
 def assign_detectors_to_vertices(

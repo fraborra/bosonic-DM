@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-import tempfile
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -26,6 +25,7 @@ from bosonic_dm.cuts import (
     select_multiplicity_one,
     select_usable,
 )
+from bosonic_dm.io import write_parquet_atomic
 
 if TYPE_CHECKING:
     from bosonic_dm.pipeline.context import AnalysisContext
@@ -268,25 +268,6 @@ def background_partition_path(source: Path, output_dir: Path) -> Path:
     return output_dir / f"period={period}" / f"run={run}" / f"{source.stem}.parquet"
 
 
-def _write_parquet_atomic(frame: pl.DataFrame, destination: Path) -> None:
-    """Write a Parquet frame atomically within its destination directory."""
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    temporary_path: Path | None = None
-    try:
-        with tempfile.NamedTemporaryFile(
-            dir=destination.parent,
-            prefix=f".{destination.name}.",
-            suffix=".tmp",
-            delete=False,
-        ) as stream:
-            temporary_path = Path(stream.name)
-        frame.write_parquet(temporary_path)
-        temporary_path.replace(destination)
-    finally:
-        if temporary_path is not None and temporary_path.exists():
-            temporary_path.unlink()
-
-
 def build_background_dataset(
     pet_files: Sequence[Path],
     output_dir: Path,
@@ -326,7 +307,7 @@ def build_background_dataset(
             apply_lar_veto=apply_lar_veto,
             comparison_cut_profile=comparison_cut_profile,
         )
-        _write_parquet_atomic(frame, destination)
+        write_parquet_atomic(frame, destination)
         written_paths.append(destination)
 
     return BackgroundDatasetBuildResult(

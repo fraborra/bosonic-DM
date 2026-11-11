@@ -83,8 +83,9 @@ fixable.
 Sampler checks are shared with the signal fit through
 `bosonic_dm.fitting.diagnostics`. A fit passes when it has no divergences and no
 maximum-tree-depth hits, E-BFMI is at least 0.3, R-hat is below 1.01, and bulk
-and tail effective sample sizes are at least 400. Check the summary's
-diagnostics before using `B_hat`.
+and tail effective sample sizes are at least 400. A fit with a non-finite
+E-BFMI, R-hat, or effective sample size fails. Check the summary's diagnostics
+before using `B_hat`.
 
 `bosonic_dm.plotting.background_fit` plots normalized residuals with the
 excluded peak windows, trace plots, and corner plots.
@@ -140,13 +141,17 @@ here.
 `bosonic_dm.fitting.signal_template` builds the inputs:
 
 - `load_background_prediction` reads `B_hat` from a background fit directory.
-- `group_efficiency` aggregates the run-level simulation efficiencies
-  (`<interaction>_efficiency.yaml`) into detector groups. The `"all"` selection
-  matches `passes_analysis` in the background data.
+- `group_efficiency` aggregates the run-level simulation efficiencies into
+  detector groups. Pass it the efficiency table
+  (`<interaction>_efficiency.parquet`, read with
+  `bosonic_dm.efficiency.load_efficiency_table`). The `"all"` selection matches
+  `passes_analysis` in the background data.
 - `group_fwhm` and `group_centroid_offset` give the resolution and an optional
   calibration offset per group.
 - `build_signal_window` cuts the fit window (default half-width 12.5 keV, 24
-  bins of 1 keV) and builds each group's template.
+  bins of 1 keV) and builds each group's template. If the background spectra
+  were prepared with a non-default `exposure_key`, pass the same key here so the
+  group exposure and the resolution weights use the same field.
 
 `bosonic_dm.fitting.signal_fit` then runs the fit:
 

@@ -13,7 +13,7 @@ from bosonic_dm.efficiency import build_selection_metadata
 from bosonic_dm.yaml_io import read_yaml
 
 MANIFEST_SCHEMA_VERSION = 2
-EFFICIENCY_OUTPUT_SCHEMA_VERSION = 2
+EFFICIENCY_OUTPUT_SCHEMA_VERSION = 3
 BACKGROUND_DATASET_SCHEMA_VERSION = 1
 BACKGROUND_STORED_FLAGS = (
     "passes_baseline",

@@ -17,8 +17,3 @@ class AnalysisArtifacts:
     manifest_path: Path | None = None
     stage_status: dict[str, str] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
-
-
-@dataclass(frozen=True)
-class PrimaryCounts:
-    counts: dict[int, dict[str, int]]

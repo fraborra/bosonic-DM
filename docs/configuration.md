@@ -125,7 +125,7 @@ flags default to `false`.
 The simulation pipeline looks for the expanded job name below:
 
 ```text
-<simulation_root>/generated/tier/cvt/
+<simulation_root>/generated/tier/evt/<job-name>/
 <simulation_root>/generated/tier/stp/<job-name>/
 ```
 

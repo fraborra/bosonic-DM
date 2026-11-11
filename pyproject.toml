@@ -74,7 +74,7 @@ dependencies = [
 [project.scripts]
 bosonic-dm = "bosonic_dm.cli:main"
 generate-gps-macros = "bosonic_dm.generators:main"
-check-dark-compton-stats = "bosonic_dm.check_dark_compton_stats:main"
+check-efficiency-stats = "bosonic_dm.check_efficiency_stats:main"
 generate-dark-compton-kin = "bosonic_dm.generate_dark_compton_kin:main"
 assign-detectors = "bosonic_dm.geometry:main"
 migrate-yaml = "bosonic_dm.yaml_io:main"
@@ -148,10 +148,9 @@ pydocstyle.convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["T20"]
-"noxfile.py" = ["T20"]
 
 [tool.pylint]
-py-version = "3.9"
+py-version = "3.11"
 ignore-paths = [".*/_version.py"]
 reports.output-format = "colorized"
 similarities.ignore-imports = "yes"

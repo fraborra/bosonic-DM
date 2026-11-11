@@ -44,7 +44,6 @@ background:
 output:
   overwrite: false
   save_plots: true
-  show_plots: false
   write_manifest: true
 """,
         encoding="utf-8",

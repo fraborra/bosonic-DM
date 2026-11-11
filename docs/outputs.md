@@ -13,8 +13,7 @@ data/v1/
     background/
       period=<period>/run=<run>/<source>.parquet
   dictionaries/
-    <interaction>_primary-counts.yaml
-    <interaction>_efficiency.yaml
+    <interaction>_efficiency.parquet
   <interaction>_manifest.yaml
   background_manifest.yaml
 
@@ -24,7 +23,11 @@ plots/
   background/...
 ```
 
-Only products for workflows and energies that have valid inputs appear.
+Only products for workflows and energies that have valid inputs appear. The
+efficiency product is a Parquet table with one row per energy, detector, run,
+and selection; its columns are listed in
+[Simulation pipeline](simulation-pipeline.md#efficiencies). It also holds the
+primary counts (`n_primaries`); there is no separate primary-counts file.
 
 Fit products are not part of this tree. `save_background_fit` and
 `save_signal_fit` write to the directory passed by the caller and record their

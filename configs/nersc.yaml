@@ -58,5 +58,4 @@ background:
 output:
   overwrite: false
   save_plots: true
-  show_plots: true
   write_manifest: true

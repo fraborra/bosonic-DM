@@ -6,11 +6,11 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Sequence
+import re
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import numpy as np
 import polars as pl
 from dbetto import Props
 from tqdm.auto import tqdm
@@ -19,15 +19,22 @@ from bosonic_dm.config import AnalysisConfig
 from bosonic_dm.efficiency import (
     build_labels_dicts,
     compute_efficiency_from_lazyframe,
+    efficiency_table,
+    efficiency_table_path,
+    load_efficiency_table,
+    load_primary_counts,
+    write_efficiency_table,
 )
 from bosonic_dm.geometry import (
-    aggregate_vertex_counts,
+    aggregate_vertex_counts_by_run,
     assign_detectors_to_vertices,
+    read_run_ranges,
 )
 from bosonic_dm.io import build_parquet_dataset
 from bosonic_dm.models import AnalysisArtifacts
 from bosonic_dm.pipeline.context import build_analysis_context
 from bosonic_dm.pipeline.manifest import (
+    EFFICIENCY_OUTPUT_SCHEMA_VERSION,
     current_cut_setup,
     current_plot_setup,
     load_simulation_manifest,
@@ -48,17 +55,17 @@ from bosonic_dm.yaml_io import write_yaml
 
 logger = logging.getLogger(__name__)
 
+# Primary counts have no stage of their own: the efficiencies stage counts
+# them when needed and stores them in the efficiency table.
 SIMULATION_STAGE_ORDER = (
-    "count-vertices",
     "build-dataset",
     "efficiencies",
     "plots",
 )
 SIMULATION_DEFAULT_STAGES = SIMULATION_STAGE_ORDER
 SIMULATION_STAGE_DEPENDENCIES = {
-    "count-vertices": (),
     "build-dataset": (),
-    "efficiencies": ("count-vertices", "build-dataset"),
+    "efficiencies": ("build-dataset",),
     "plots": ("efficiencies",),
 }
 SIMULATION_PLOT_GROUPS = ("detector_type", "detector_group")
@@ -111,6 +118,114 @@ def _warn(
     rendered = message % args if args else message
     logger.warning(rendered)
     artifacts.warnings.append(rendered)
+
+
+def _job_index(path: Path) -> str:
+    """Return the job number in a per-job simulation file name."""
+    match = re.search(r"-job_(\d+)-", path.name)
+    if match is None:
+        msg = f"No job number in simulation file name {path.name}."
+        raise ValueError(msg)
+    return match.group(1)
+
+
+def _job_files(directory: Path, pattern: str) -> dict[str, Path]:
+    """Return the per-job files matching a pattern, keyed and sorted by job number."""
+    files = {_job_index(path): path for path in directory.glob(pattern)}
+    return dict(sorted(files.items()))
+
+
+def _reusable_primary_counts(
+    efficiency_path: Path,
+    efficiency_record: Mapping[str, object] | None,
+    *,
+    overwrite: bool,
+) -> dict[int, dict[str, dict[str, dict[str, int]]]]:
+    """Return the primary counts kept in an existing efficiency table.
+
+    The counts do not depend on the cut setup, so they survive a change of
+    FEP window or selections. They are reused only from a table written in
+    the current output format, and never when overwrite is enabled.
+    """
+    if overwrite or efficiency_record is None or not efficiency_path.exists():
+        return {}
+    recorded_setup = efficiency_record.get("cut_setup")
+    recorded_version = (
+        recorded_setup.get("efficiency_output_schema_version")
+        if isinstance(recorded_setup, Mapping)
+        else None
+    )
+    if recorded_version != EFFICIENCY_OUTPUT_SCHEMA_VERSION:
+        return {}
+    return load_primary_counts(efficiency_path)
+
+
+def _count_primaries(
+    config: AnalysisConfig,
+    interaction: str,
+    energies: Sequence[int],
+    stp_files: Mapping[int, Mapping[str, Path]],
+    evt_files: Mapping[int, Mapping[str, Path]],
+    artifacts: AnalysisArtifacts,
+) -> dict[int, dict[str, dict[str, dict[str, int]]]]:
+    """Count the primaries generated in each detector for each period/run.
+
+    Vertices come from the STP files and the ``evtid`` block of each run from
+    the evt file of the same job. An energy is skipped, with a warning, when
+    its STP and evt jobs do not match.
+
+    Returns
+    -------
+    dict
+        ``{energy: {detector: {period: {run: n_primaries}}}}`` for the
+        energies that could be counted.
+    """
+    counts: dict[int, dict[str, dict[str, dict[str, int]]]] = {}
+    if not energies:
+        return counts
+
+    job_template = config.interactions[interaction].job_template
+    first_job = job_template.format(energy=config.energies_keV[0])
+    gdml_path = (
+        config.paths.simulation_root
+        / "generated"
+        / "pars"
+        / "geom"
+        / f"l200cfg01-{first_job}-tier_stp-geom.gdml"
+    )
+    if not gdml_path.exists():
+        _warn(artifacts, "Skipping primary counts: GDML not found at %s", gdml_path)
+        return counts
+
+    for energy in tqdm(energies, desc="Primary counts", position=0):
+        stp_jobs = stp_files.get(energy, {})
+        evt_jobs = evt_files.get(energy, {})
+        if not stp_jobs:
+            _warn(artifacts, "Skipping primary counts for %d keV: no STP files", energy)
+            continue
+        if set(stp_jobs) != set(evt_jobs):
+            _warn(
+                artifacts,
+                "Skipping primary counts for %d keV: STP and evt jobs differ (%s)",
+                energy,
+                ", ".join(sorted(set(stp_jobs) ^ set(evt_jobs))),
+            )
+            continue
+
+        jobs = sorted(stp_jobs)
+        detector_arrays, evtid_arrays = assign_detectors_to_vertices(
+            gdml=gdml_path,
+            lh5_files=[stp_jobs[job] for job in jobs],
+            vtx_group="vtx",
+            save=False,
+            return_evtids=True,
+        )
+        counts[energy] = aggregate_vertex_counts_by_run(
+            detector_arrays,
+            evtid_arrays,
+            [read_run_ranges(evt_jobs[job]) for job in jobs],
+        )
+    return counts
 
 
 def _dataset_partition_path(dataset_dir: Path, energy: int) -> Path:
@@ -215,111 +330,22 @@ def run_simulation_analysis(
     cut_setup = current_cut_setup(config)
     plot_setup = current_plot_setup(config, interaction)
 
-    cvt_files: dict[int, list[Path]] = {}
-    stp_files: dict[int, list[Path]] = {}
+    # Old manifests carry a record of the former count-vertices stage.
+    stages_manifest.pop("count-vertices", None)
+
+    stp_files: dict[int, dict[str, Path]] = {}
+    evt_files: dict[int, dict[str, Path]] = {}
+    tier_root = config.paths.simulation_root / "generated" / "tier"
     for energy in config.energies_keV:
         job_string = int_cfg.job_template.format(energy=energy)
-        cvt_dir = config.paths.simulation_root / "generated" / "tier" / "cvt"
-        cvt_matches = sorted(cvt_dir.glob(f"l200cfg01-{job_string}-tier_cvt.lh5"))
-        if cvt_matches:
-            cvt_files[energy] = cvt_matches
-
-        stp_dir = (
-            config.paths.simulation_root / "generated" / "tier" / "stp" / job_string
+        stp_files[energy] = _job_files(
+            tier_root / "stp" / job_string,
+            f"l200cfg01-{job_string}-job_*-tier_stp.lh5",
         )
-        stp_matches = sorted(stp_dir.glob(f"l200cfg01-{job_string}-job_*-tier_stp.lh5"))
-        if stp_matches:
-            stp_files[energy] = stp_matches
-
-    counts_yaml_path = (
-        config.paths.dictionaries_root / f"{interaction}_primary-counts.yaml"
-    )
-    vertex_counts: dict = {}
-
-    if "count-vertices" in resolved_stages:
-        if counts_yaml_path.exists() and not do_overwrite:
-            vertex_counts = Props.read_from(str(counts_yaml_path))
-            artifacts.stage_status["count-vertices"] = "cached"
-            artifacts.yaml_paths.append(counts_yaml_path)
-            stages_manifest["count-vertices"] = {
-                "status": "cached",
-                "outputs": [str(counts_yaml_path)],
-            }
-            logger.info("Stage count-vertices: cached")
-        else:
-            first_energy = config.energies_keV[0]
-            first_job = int_cfg.job_template.format(energy=first_energy)
-            gdml_path = (
-                config.paths.simulation_root
-                / "generated"
-                / "pars"
-                / "geom"
-                / f"l200cfg01-{first_job}-tier_stp-geom.gdml"
-            )
-
-            if not gdml_path.exists():
-                _warn(
-                    artifacts,
-                    "Skipping vertex counting: GDML not found at %s",
-                    gdml_path,
-                )
-                artifacts.stage_status["count-vertices"] = (
-                    "partial" if vertex_counts else "blocked"
-                )
-                if vertex_counts:
-                    artifacts.yaml_paths.append(counts_yaml_path)
-                stages_manifest["count-vertices"] = {
-                    "status": artifacts.stage_status["count-vertices"],
-                    "outputs": (
-                        [str(counts_yaml_path)] if counts_yaml_path.exists() else []
-                    ),
-                }
-            else:
-                vertex_counts = {}
-
-                for energy in tqdm(config.energies_keV, desc="Energies", position=0):
-                    files = stp_files.get(energy, [])
-                    if not files:
-                        _warn(
-                            artifacts,
-                            "Skipping primary counts for %d keV: no STP files",
-                            energy,
-                        )
-                        continue
-
-                    detector_arrays, evtid_arrays = assign_detectors_to_vertices(
-                        gdml=gdml_path,
-                        lh5_files=files,
-                        vtx_group="vtx",
-                        save=False,
-                        return_evtids=True,
-                    )
-                    if isinstance(detector_arrays, np.ndarray):
-                        detector_arrays = [detector_arrays]
-                        evtid_arrays = [evtid_arrays]
-                    vertex_counts[energy] = aggregate_vertex_counts(
-                        detector_arrays, evtid_arrays
-                    )
-
-                if vertex_counts:
-                    write_yaml(vertex_counts, counts_yaml_path)
-                    artifacts.yaml_paths.append(counts_yaml_path)
-                    mark_stages_stale(manifest, ("efficiencies", "plots"))
-
-                still_missing = set(config.energies_keV) - set(vertex_counts)
-                if not vertex_counts:
-                    artifacts.stage_status["count-vertices"] = "blocked"
-                elif still_missing:
-                    artifacts.stage_status["count-vertices"] = "partial"
-                else:
-                    artifacts.stage_status["count-vertices"] = "completed"
-
-                stages_manifest["count-vertices"] = {
-                    "status": artifacts.stage_status["count-vertices"],
-                    "outputs": (
-                        [str(counts_yaml_path)] if counts_yaml_path.exists() else []
-                    ),
-                }
+        evt_files[energy] = _job_files(
+            tier_root / "evt" / job_string,
+            f"l200cfg01-{job_string}-job_*-tier_evt.lh5",
+        )
 
     dataset_dir = config.paths.parquet_root / dataset_name
     unrefreshed_dataset_energies: set[int] = set()
@@ -330,7 +356,7 @@ def run_simulation_analysis(
             if do_overwrite or not _dataset_partition_path(dataset_dir, energy).exists()
         ]
         available_to_build = [
-            energy for energy in energies_to_build if energy in cvt_files
+            energy for energy in energies_to_build if evt_files[energy]
         ]
         missing_build_inputs = set(energies_to_build) - set(available_to_build)
         if do_overwrite:
@@ -338,14 +364,17 @@ def run_simulation_analysis(
         for energy in sorted(missing_build_inputs):
             _warn(
                 artifacts,
-                "Skipping dataset partition for %d keV: no CVT files",
+                "Skipping dataset partition for %d keV: no evt files",
                 energy,
             )
 
         if available_to_build:
             build_parquet_dataset(
                 energies=available_to_build,
-                cvt_files=cvt_files,
+                evt_files={
+                    energy: list(evt_files[energy].values())
+                    for energy in available_to_build
+                },
                 output_dir=dataset_dir,
                 overwrite=do_overwrite,
             )
@@ -378,7 +407,7 @@ def run_simulation_analysis(
             "outputs": [str(dataset_dir)] if available_partitions else [],
         }
 
-    efficiency_path = config.paths.dictionaries_root / f"{interaction}_efficiency.yaml"
+    efficiency_path = efficiency_table_path(config.paths.dictionaries_root, interaction)
     efficiency_is_current = False
     if "efficiencies" in resolved_stages:
         efficiency_record = stage_record(manifest, "efficiencies")
@@ -390,7 +419,7 @@ def run_simulation_analysis(
             and efficiency_record.get("cut_setup") == cut_setup
         )
         if reusable_efficiency:
-            artifacts.yaml_paths.append(efficiency_path)
+            artifacts.dataset_paths.append(efficiency_path)
             artifacts.stage_status["efficiencies"] = "cached"
             stages_manifest["efficiencies"] = {
                 **efficiency_record,
@@ -401,18 +430,16 @@ def run_simulation_analysis(
             efficiency_is_current = True
             logger.info("Stage efficiencies: cached")
         else:
-            ready_energies = [
+            dataset_energies = [
                 energy
                 for energy in config.energies_keV
                 if _dataset_partition_path(dataset_dir, energy).exists()
                 and energy not in unrefreshed_dataset_energies
-                and energy in vertex_counts
             ]
-            skipped_energies = set(config.energies_keV) - set(ready_energies)
-            for energy in sorted(skipped_energies):
+            for energy in sorted(set(config.energies_keV) - set(dataset_energies)):
                 _warn(
                     artifacts,
-                    "Skipping efficiency for %d keV: dataset or primary counts missing",
+                    "Skipping efficiency for %d keV: dataset partition missing",
                     energy,
                 )
 
@@ -425,7 +452,12 @@ def run_simulation_analysis(
                 / "config.json"
             )
 
-            if not ready_energies:
+            # Cheap input checks come first: counting primaries is slow.
+            ready_energies: list[int] = []
+            reused_energies: list[int] = []
+            counted: dict[int, dict[str, dict[str, dict[str, int]]]] = {}
+            vertex_counts: dict[int, dict[str, dict[str, dict[str, int]]]] = {}
+            if not dataset_energies:
                 artifacts.stage_status["efficiencies"] = "blocked"
             elif not calibration_path.exists():
                 _warn(
@@ -442,7 +474,53 @@ def run_simulation_analysis(
                 )
                 artifacts.stage_status["efficiencies"] = "blocked"
             else:
+                # The metadata is loaded before the slow count, so a wrong
+                # production path fails early.
                 context = build_analysis_context(config)
+
+                # Primary counts live only in the efficiency table. Reuse the
+                # ones already there and count the remaining energies.
+                vertex_counts = {
+                    energy: counts
+                    for energy, counts in _reusable_primary_counts(
+                        efficiency_path, efficiency_record, overwrite=do_overwrite
+                    ).items()
+                    if energy in dataset_energies
+                }
+                reused_energies = sorted(vertex_counts)
+                if reused_energies:
+                    logger.info(
+                        "Reusing primary counts of %d energies from %s",
+                        len(reused_energies),
+                        efficiency_path,
+                    )
+                counted = _count_primaries(
+                    config,
+                    interaction,
+                    [
+                        energy
+                        for energy in dataset_energies
+                        if energy not in vertex_counts
+                    ],
+                    stp_files,
+                    evt_files,
+                    artifacts,
+                )
+                vertex_counts.update(counted)
+                ready_energies = [
+                    energy for energy in dataset_energies if energy in vertex_counts
+                ]
+                for energy in sorted(set(dataset_energies) - set(ready_energies)):
+                    _warn(
+                        artifacts,
+                        "Skipping efficiency for %d keV: primary counts unavailable",
+                        energy,
+                    )
+                if not ready_energies:
+                    artifacts.stage_status["efficiencies"] = "blocked"
+
+            if ready_energies:
+                skipped_energies = set(config.energies_keV) - set(ready_energies)
                 chmap = context.get_channelmap_simulation()
                 lf = pl.scan_parquet(dataset_dir / "*/*.parquet")
                 efficiency_dict = compute_efficiency_from_lazyframe(
@@ -456,8 +534,23 @@ def run_simulation_analysis(
                     apply_lar_veto=config.apply_lar_veto,
                 )
 
-                write_yaml(efficiency_dict, efficiency_path)
-                artifacts.yaml_paths.append(efficiency_path)
+                efficiencies = efficiency_table(efficiency_dict)
+                write_efficiency_table(efficiencies, efficiency_path)
+                without_primaries = (
+                    efficiencies.filter(pl.col("n_primaries").fill_null(0) <= 0)
+                    .select("sim_e", "detector", "period", "run")
+                    .unique()
+                    .height
+                )
+                if without_primaries:
+                    _warn(
+                        artifacts,
+                        "%d detector/run entries have no primaries, so no "
+                        "efficiency; rerun with overwrite if the calibration "
+                        "input or the simulation changed",
+                        without_primaries,
+                    )
+                artifacts.dataset_paths.append(efficiency_path)
                 artifacts.stage_status["efficiencies"] = (
                     "partial" if skipped_energies else "completed"
                 )
@@ -465,6 +558,10 @@ def run_simulation_analysis(
                     "status": artifacts.stage_status["efficiencies"],
                     "outputs": [str(efficiency_path)],
                     "cut_setup": cut_setup,
+                    "primary_counts": {
+                        "reused_energies_keV": reused_energies,
+                        "counted_energies_keV": sorted(counted),
+                    },
                 }
                 mark_stages_stale(manifest, ("plots",))
                 efficiency_is_current = True
@@ -531,7 +628,7 @@ def run_simulation_analysis(
             }
 
         if should_generate_plots:
-            efficiency_dict = Props.read_from(str(efficiency_path))
+            efficiencies = load_efficiency_table(efficiency_path)
 
             # Avoid rebuilding context if already built in efficiencies stage
             if "context" not in locals():
@@ -559,7 +656,7 @@ def run_simulation_analysis(
 
             for group_by in SIMULATION_PLOT_GROUPS:
                 labels_dicts = build_labels_dicts(
-                    efficiency_dict,
+                    efficiencies,
                     eres_dict=context.eres_dict,
                     group_by=group_by,
                     detector_groups=detector_groups_by_plot_group[group_by],
