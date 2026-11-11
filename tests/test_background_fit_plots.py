@@ -18,6 +18,7 @@ from scipy.integrate import quad
 from bosonic_dm.fitting import background_shapes as shapes
 from bosonic_dm.fitting.background_fit import (
     BACKGROUND_PARAMETERS,
+    NO_LINEAR,
     STAN_FILE,
     BackgroundFitSummary,
     build_stan_data,
@@ -31,6 +32,7 @@ from bosonic_dm.plotting.background_fit import (
     plot_background_chains,
     plot_background_corner,
     plot_background_fit_residuals,
+    plot_prior_predictive,
     posterior_draws,
 )
 
@@ -121,11 +123,15 @@ def test_residual_plot_is_saved(tmp_path: Path, include_excluded: bool) -> None:
     fig = plot_background_fit_residuals(
         summary, counts, include_excluded=include_excluded, output_path=output
     )
-    n_points = sum(
-        len(line.get_xdata()) for line in fig.axes[1].lines[1:]
-    )  # skip y=0 line
+    n_points = sum(  # marker-only lines; the reference lines at 0, ±1, ±2 are styled
+        len(line.get_xdata())
+        for line in fig.axes[1].lines
+        if line.get_linestyle() == "None"
+    )
+    n_hist = len(fig.axes[2].patches)  # pull histogram beside the residuals
     plt.close(fig)
 
+    assert n_hist == (2 if include_excluded else 1)
     assert output.stat().st_size > 0
     n_fit = int(summary.used_in_fit.sum())
     assert n_points == (len(counts) if include_excluded else n_fit)
@@ -190,3 +196,40 @@ def test_chain_and_corner_plots_are_saved(short_fit, tmp_path: Path) -> None:
     assert (tmp_path / "chains.png").stat().st_size > 0
     assert (tmp_path / "corner.png").stat().st_size > 0
     plt.close("all")
+
+
+def test_default_parameters_skip_fixed_ones() -> None:
+    """Fixed coefficients are written as constants and left out by default."""
+    import xarray as xr  # noqa: PLC0415
+
+    rng = np.random.default_rng(0)
+    draws = {
+        name: (("chain", "draw"), rng.lognormal(size=(2, 30)))
+        for name in BACKGROUND_PARAMETERS
+    }
+    draws["c0"] = (("chain", "draw"), np.zeros((2, 30)))
+    draws["cQ"] = (("chain", "draw"), np.zeros((2, 30)))
+    posterior = {"posterior": xr.Dataset(draws)}
+
+    assert posterior_draws(posterior).shape == (2, 30, len(BACKGROUND_PARAMETERS) - 2)
+    chains = plot_background_chains(posterior)
+    assert len(chains.axes) == 2 * (len(BACKGROUND_PARAMETERS) - 2)
+    plt.close("all")
+
+
+@pytest.mark.parametrize("fixed", [None, NO_LINEAR])
+def test_plot_prior_predictive(
+    toy_spectrum: dict, toy_prefit: dict, fixed: dict | None, tmp_path: Path
+) -> None:
+    data = build_stan_data(
+        toy_spectrum, priors_from_prefit(toy_prefit, rate_sd=0.3), fixed=fixed
+    )
+    output = tmp_path / "prior.png"
+
+    fig = plot_prior_predictive(data, n_draws=200, output_path=output)
+
+    assert len(fig.axes) == 4  # spectrum, ratio, totals below and above Ar39
+    labels = fig.axes[0].get_legend_handles_labels()[1]
+    assert ("linear (median)" in labels) == (fixed is None)
+    assert output.exists()
+    plt.close(fig)
