@@ -27,6 +27,7 @@ from bosonic_dm.efficiency import (
     combine_run_efficiencies,
     efficiency_table_path,
     load_efficiency_table,
+    with_source_columns,
 )
 
 logger = logging.getLogger(__name__)
@@ -56,7 +57,8 @@ def efficiency_stat_table(table: pl.DataFrame, selection: str = "all") -> pl.Dat
         valid runs).
     """
     runs = (
-        table.filter(
+        with_source_columns(table)
+        .filter(
             (pl.col("selection") == selection)
             & (pl.col("status") == "valid")
             & (pl.col("exposure_kg_yr") > 0)
@@ -68,10 +70,16 @@ def efficiency_stat_table(table: pl.DataFrame, selection: str = "all") -> pl.Dat
     for (sim_e, detector), detector_runs in runs.group_by(
         ["sim_e", "detector"], maintain_order=True
     ):
+        sources = detector_runs.select("source_period", "source_run").rows()
         combined = combine_run_efficiencies(
             detector_runs["exposure_kg_yr"].to_numpy(),
             detector_runs["n_events"].to_numpy(),
             detector_runs["n_primaries"].to_numpy(),
+            samples=sources,
+        )
+        # A sample borrowed by another run counts once in the totals.
+        own_samples = detector_runs.unique(
+            ["source_period", "source_run"], keep="first", maintain_order=True
         )
         if combined is None:
             continue
@@ -85,8 +93,8 @@ def efficiency_stat_table(table: pl.DataFrame, selection: str = "all") -> pl.Dat
                 "efficiency": efficiency,
                 "efficiency_stat_unc": stat_unc,
                 "relative_unc": stat_unc / efficiency if efficiency > 0 else None,
-                "n_primaries": int(detector_runs["n_primaries"].sum()),
-                "n_events": int(detector_runs["n_events"].sum()),
+                "n_primaries": int(own_samples["n_primaries"].sum()),
+                "n_events": int(own_samples["n_events"].sum()),
             }
         )
     return pl.DataFrame(

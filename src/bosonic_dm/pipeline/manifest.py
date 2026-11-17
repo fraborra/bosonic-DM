@@ -75,6 +75,13 @@ def current_cut_setup(config: AnalysisConfig) -> dict[str, object]:
             apply_lar_veto=config.apply_lar_veto,
         ),
         "efficiency_output_schema_version": EFFICIENCY_OUTPUT_SCHEMA_VERSION,
+        "efficiency_run_substitutes": {
+            f"{period}-{run}": f"{source_period}-{source_run}"
+            for (period, run), (
+                source_period,
+                source_run,
+            ) in config.efficiency_run_substitutes.items()
+        },
     }
 
 

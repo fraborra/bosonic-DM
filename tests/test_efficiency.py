@@ -13,6 +13,7 @@ import pytest
 from bosonic_dm.efficiency import (
     EFFICIENCY_TABLE_KEYS,
     EFFICIENCY_TABLE_SCHEMA,
+    aggregate_run_aware_efficiencies,
     build_labels_dicts,
     combine_run_efficiencies,
     compute_efficiency_from_lazyframe,
@@ -819,3 +820,98 @@ def test_primaries_are_counted_in_the_run_block_of_their_evtid() -> None:
         "B00002A": {"p03": {"r001": 1}, "p04": {"r000": 1}},
         "V00001A": {"p03": {"r000": 1, "r001": 2}, "p04": {"r000": 1}},
     }
+
+
+def _substitution_inputs() -> tuple[pl.LazyFrame, dict, dict]:
+    """p01-r001 is simulated (3 of 10 in the window); p01-r002 is not."""
+    frame = pl.DataFrame(_events([1] * 3, [200.0] * 3)).lazy()
+    resolution = _resolution()
+    resolution["p01"]["r002"] = {
+        "V00001A": {**resolution["p01"]["r001"]["V00001A"], "expo": 3.0}
+    }
+    counts = {200: {"V00001A": {"p01": {"r001": 10}}}}
+    return frame, resolution, counts
+
+
+def _compute_with(
+    run_substitutes: dict[tuple[str, str], tuple[str, str]] | None,
+) -> dict:
+    frame, resolution, counts = _substitution_inputs()
+    return compute_efficiency_from_lazyframe(
+        lf=frame,
+        eres_dict=resolution,
+        simulated_energies=[200],
+        chmap=_channelmap(),
+        vertex_counts=counts,
+        selections=["all"],
+        run_substitutes=run_substitutes,
+    )
+
+
+def test_unsimulated_run_has_no_efficiency_without_a_substitute() -> None:
+    detector = _compute_with(None)[200]["V00001A"]
+
+    missing = detector["period_runs"]["p01"]["r002"]
+    assert missing["status"] == "missing-primaries"
+    assert (missing["source_period"], missing["source_run"]) == ("p01", "r002")
+    # Only the simulated run contributes: exposure 1 of 4.
+    assert detector["selections"]["all"]["exposure_kg_yr"] == pytest.approx(1.0)
+
+
+def test_substitute_run_borrows_the_sample_but_keeps_its_exposure() -> None:
+    detector = _compute_with({("p01", "r002"): ("p01", "r001")})[200]["V00001A"]
+
+    borrowed = detector["period_runs"]["p01"]["r002"]
+    own = detector["period_runs"]["p01"]["r001"]
+    assert (borrowed["source_period"], borrowed["source_run"]) == ("p01", "r001")
+    assert borrowed["expo"] == pytest.approx(3.0)
+    assert borrowed["n_primaries"] == own["n_primaries"] == 10
+    assert borrowed["selections"]["all"]["efficiency"] == pytest.approx(
+        own["selections"]["all"]["efficiency"]
+    )
+
+    # The shared sample counts once: same posterior as r001 alone, but the
+    # exposure of both runs.
+    combined = detector["selections"]["all"]
+    efficiency, stat_unc = bayesian_efficiency(3, 10)
+    assert combined["efficiency"] == pytest.approx(efficiency)
+    assert combined["efficiency_stat_unc"] == pytest.approx(stat_unc)
+    assert combined["exposure_kg_yr"] == pytest.approx(4.0)
+    assert combined["n_events"] == 3
+    assert detector["n_primaries"] == 10
+
+
+def test_substitute_run_counts_once_in_groups_and_stored_counts() -> None:
+    table = efficiency_table(_compute_with({("p01", "r002"): ("p01", "r001")}))
+
+    rows = table.filter(
+        (pl.col("selection") == "all") & (pl.col("detector") == "V00001A")
+    ).sort("run")
+    assert rows.select("run", "source_run").rows() == [
+        ("r001", "r001"),
+        ("r002", "r001"),
+    ]
+    # The borrowed n_primaries belongs to r001 and is not stored for r002.
+    assert primary_counts_from_table(table)[200]["V00001A"] == {"p01": {"r001": 10}}
+
+    group = aggregate_run_aware_efficiencies(
+        table, "all", group_by="detector_type", detector_groups=None
+    )[200]["ICPC"]
+    efficiency, stat_unc = bayesian_efficiency(3, 10)
+    assert group["value"] == pytest.approx(efficiency)
+    assert group["unc"] == pytest.approx(stat_unc)
+    assert group["exposure"] == pytest.approx(4.0)
+
+
+def test_tables_without_source_columns_are_read_as_own_samples(
+    tmp_path: Path,
+) -> None:
+    table = efficiency_table(_sample_result())
+    path = tmp_path / "old.parquet"
+    table.drop("source_period", "source_run").write_parquet(path)
+
+    loaded = load_efficiency_table(path)
+
+    assert loaded["source_period"].to_list() == loaded["period"].to_list()
+    assert loaded["source_run"].to_list() == loaded["run"].to_list()
+    assert load_primary_counts(path) == primary_counts_from_table(table)

@@ -44,6 +44,8 @@ analysis:
     half_width_fwhm: 2.0
   selections: [all, valid-psd, sse, mse]
   apply_lar_veto: true
+  efficiency_run_substitutes:
+    p09-r004: p09-r005
   detector_groups: dictionaries/detector-grouping/groups_dict.yaml
 
 interactions:
@@ -115,6 +117,15 @@ range's default step is 10 keV.
 | `selections`                 | Efficiency selections to compute.                                                    |
 | `apply_lar_veto`             | Apply the LAr veto to simulation efficiencies and the background analysis selection. |
 | `detector_groups`            | Detector-group dictionary; relative values are resolved below `inputs_root`.         |
+| `efficiency_run_substitutes` | Runs missing from the simulation, mapped to the run whose efficiency they use.       |
+
+`efficiency_run_substitutes` maps `period-run` labels, e.g.
+`p09-r004: p09-r005`. The replaced run keeps its own exposure and FEP window,
+but its events and primaries come from the source run, which counts only once
+when runs are combined. The background fit is not affected: it uses data counts
+and exposure, which the replaced run has. A source run cannot itself be
+replaced. Changing the map recomputes the efficiencies; stored primary counts
+are reused.
 
 ### `interactions`
 

@@ -67,6 +67,10 @@ EFFICIENCY_TABLE_SCHEMA: dict[str, type[pl.DataType]] = {
     "fwhm_keV": pl.Float64,
     "fwhm_unc_keV": pl.Float64,
     **dict.fromkeys(_SELECTION_RESULT_FIELDS, pl.Float64),
+    # Period/run whose simulated sample the row uses; differs from
+    # ``period``/``run`` only for runs listed in efficiency_run_substitutes.
+    "source_period": pl.String,
+    "source_run": pl.String,
 }
 
 
@@ -161,10 +165,47 @@ def _selection_result(
     return result
 
 
+def _merge_shared_samples(
+    exposure: np.ndarray,
+    events: np.ndarray,
+    primaries: np.ndarray,
+    samples: Sequence[object],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Merge entries that use the same simulated sample into one entry.
+
+    A run whose efficiency is borrowed from another run (see
+    ``efficiency_run_substitutes``) shares that run's events and primaries.
+    The merged entry keeps the primaries once, adds the exposures, and takes
+    the exposure-weighted mean of the selected events (the FEP windows of the
+    two runs can differ).
+    """
+    keys = list(samples)
+    if len(keys) != len(exposure):
+        msg = "Every efficiency entry needs a sample key."
+        raise ValueError(msg)
+    order: dict[object, int] = {}
+    for key in keys:
+        order.setdefault(key, len(order))
+    index = np.array([order[key] for key in keys], dtype=int)
+    n_samples = len(order)
+    merged_exposure = np.bincount(index, weights=exposure, minlength=n_samples)
+    merged_events = (
+        np.bincount(index, weights=exposure * events, minlength=n_samples)
+        / merged_exposure
+    )
+    merged_primaries = np.zeros(n_samples)
+    merged_primaries[index] = primaries
+    if not np.allclose(primaries, merged_primaries[index]):
+        msg = "Entries that share a simulated sample must have the same primaries."
+        raise ValueError(msg)
+    return merged_exposure, merged_events, merged_primaries
+
+
 def combine_run_efficiencies(
     exposures: Sequence[float] | np.ndarray,
     n_events: Sequence[float] | np.ndarray,
     n_primaries: Sequence[float] | np.ndarray,
+    samples: Sequence[object] | None = None,
 ) -> dict[str, float] | None:
     """Combine the counts of several runs into one exposure-weighted efficiency.
 
@@ -192,6 +233,10 @@ def combine_run_efficiencies(
     n_events, n_primaries
         Selected events and generated primaries of every run entry; entries
         without primaries are left out.
+    samples
+        Optional key of the simulated sample behind every entry. Entries with
+        the same key (a run and a run that borrows its efficiency) are merged
+        first, so their sample counts once.
 
     Returns
     -------
@@ -213,6 +258,13 @@ def combine_run_efficiencies(
     if not usable.any():
         return None
     exposure, events, primaries = exposure[usable], events[usable], primaries[usable]
+    if samples is not None:
+        exposure, events, primaries = _merge_shared_samples(
+            exposure,
+            events,
+            primaries,
+            [key for key, keep in zip(samples, usable, strict=True) if keep],
+        )
     weights = exposure / np.sum(exposure)
     # The clip only removes rounding: every run has events <= primaries.
     efficiency_mle = float(np.clip(np.sum(weights * events / primaries), 0.0, 1.0))
@@ -228,6 +280,21 @@ def combine_run_efficiencies(
     }
 
 
+def _run_source(run_result: Mapping[str, object]) -> tuple[str, str] | None:
+    """Return the period/run whose simulated sample a run result uses.
+
+    ``None`` marks a run that uses its own sample; the caller then supplies
+    the run's own key.
+    """
+    source_period = run_result.get("source_period")
+    source_run = run_result.get("source_run")
+    return (
+        (str(source_period), str(source_run))
+        if source_period is not None and source_run is not None
+        else None
+    )
+
+
 def _aggregate_run_selection(
     run_results: Sequence[Mapping[str, object]],
     selection: str,
@@ -239,8 +306,9 @@ def _aggregate_run_selection(
     the exposure-weighted mean of the run-level values.
     """
     valid: list[tuple[float, float, Mapping[str, object]]] = []
+    sources: list[object] = []
     statuses: list[str] = []
-    for run_result in run_results:
+    for index, run_result in enumerate(run_results):
         run_selections = run_result["selections"]
         if not isinstance(run_selections, Mapping):
             msg = "Run result selections must be a mapping."
@@ -254,11 +322,13 @@ def _aggregate_run_selection(
         exposure = float(run_result["expo"])
         if status == "valid" and exposure > 0:
             valid.append((exposure, float(run_result["n_primaries"]), selection_result))
+            sources.append(_run_source(run_result) or ("own", index))
 
     combined = combine_run_efficiencies(
         [item[0] for item in valid],
         [float(item[2]["n_events"]) for item in valid],
         [item[1] for item in valid],
+        samples=sources,
     )
     if combined is None:
         if "missing-primaries" in statuses:
@@ -296,7 +366,15 @@ def _aggregate_run_selection(
     )
     return {
         "status": "valid",
-        "n_events": int(sum(int(item[2]["n_events"]) for item in valid)),
+        # A borrowed sample counts once.
+        "n_events": int(
+            sum(
+                {
+                    source: int(item[2]["n_events"])
+                    for source, item in zip(sources, valid, strict=True)
+                }.values()
+            )
+        ),
         "efficiency_mle": efficiency_mle,
         "efficiency": efficiency,
         "efficiency_stat_unc": efficiency_stat_unc,
@@ -317,6 +395,7 @@ def compute_efficiency_from_lazyframe(
     half_width_fwhm: float = 2.0,
     selections: Sequence[str] = ("all", "valid-psd", "sse", "mse"),
     apply_lar_veto: bool = True,
+    run_substitutes: Mapping[tuple[str, str], tuple[str, str]] | None = None,
 ) -> dict:
     """Compute run-aware per-detector efficiencies for all selections.
 
@@ -365,6 +444,12 @@ def compute_efficiency_from_lazyframe(
     apply_lar_veto
         If true, require ``coincident_spms == False`` for every selection.
         Null SiPM-coincidence decisions are rejected conservatively.
+    run_substitutes
+        ``{(period, run): (source_period, source_run)}`` for runs missing from
+        the simulation. Such a run keeps its own exposure and FEP window but
+        uses the events and primaries of the source run. Every run result
+        records the run whose sample it used in ``source_period`` and
+        ``source_run``.
 
     Returns
     -------
@@ -405,6 +490,10 @@ def compute_efficiency_from_lazyframe(
     if unknown_selections:
         msg = f"Unknown efficiency selections: {sorted(unknown_selections)}"
         raise ValueError(msg)
+    substitutes = {
+        (str(period), str(run)): (str(source[0]), str(source[1]))
+        for (period, run), source in (run_substitutes or {}).items()
+    }
 
     ratio_dict: dict = {}
 
@@ -529,9 +618,14 @@ def compute_efficiency_from_lazyframe(
                 run = str(resolution_entry["run"])
                 fwhm = float(resolution_entry["fwhm"])
                 fwhm_unc = max(float(resolution_entry["fwhm_unc"]), 0.0)
-                n_primaries = int(detector_counts.get(period, {}).get(run, 0))
-                in_run = (event_period == period_run_number(period)) & (
-                    event_run == period_run_number(run)
+                source_period, source_run = substitutes.get(
+                    (period, run), (period, run)
+                )
+                n_primaries = int(
+                    detector_counts.get(source_period, {}).get(source_run, 0)
+                )
+                in_run = (event_period == period_run_number(source_period)) & (
+                    event_run == period_run_number(source_run)
                 )
                 windows = (
                     fwhm,
@@ -568,12 +662,20 @@ def compute_efficiency_from_lazyframe(
                     "expo": float(resolution_entry["expo"]),
                     "fwhm": fwhm,
                     "fwhm_unc": fwhm_unc,
+                    "source_period": source_period,
+                    "source_run": source_run,
                     "selections": run_selections,
                 }
                 period_runs.setdefault(period, {})[run] = run_result
                 flat_run_results.append(run_result)
 
-            n_primaries = sum(int(item["n_primaries"]) for item in flat_run_results)
+            # A borrowed sample counts once.
+            n_primaries = sum(
+                {
+                    _run_source(item) or ("own", index): int(item["n_primaries"])
+                    for index, item in enumerate(flat_run_results)
+                }.values()
+            )
             det_out = {
                 "status": "valid" if n_primaries > 0 else "missing-primaries",
                 "n_primaries": n_primaries,
@@ -758,11 +860,30 @@ def efficiency_table(efficiency_dict: Mapping) -> pl.DataFrame:
                         )
                         for field in _SELECTION_RESULT_FIELDS:
                             columns[field].append(_optional(result.get(field), float))
+                        source_period, source_run = _run_source(run_result) or (
+                            str(period),
+                            str(run),
+                        )
+                        columns["source_period"].append(source_period)
+                        columns["source_run"].append(source_run)
         # One frame per energy keeps the temporary Python lists small.
         frames.append(pl.DataFrame(columns, schema=EFFICIENCY_TABLE_SCHEMA))
     if not frames:
         return pl.DataFrame(schema=EFFICIENCY_TABLE_SCHEMA)
     return pl.concat(frames)
+
+
+def with_source_columns(table: pl.DataFrame) -> pl.DataFrame:
+    """Add ``source_period``/``source_run`` to a table written before they existed.
+
+    In such a table every run used its own simulated sample.
+    """
+    missing = [
+        pl.col(own).alias(f"source_{own}")
+        for own in ("period", "run")
+        if own in table.columns and f"source_{own}" not in table.columns
+    ]
+    return table.with_columns(missing) if missing else table
 
 
 def efficiency_table_path(dictionaries_root: str | Path, interaction: str) -> Path:
@@ -776,6 +897,7 @@ def write_efficiency_table(table: pl.DataFrame, path: str | Path) -> None:
     The file is written atomically, so an interrupted write never leaves a
     partial table that a later run would reuse.
     """
+    table = with_source_columns(table)
     missing = [name for name in EFFICIENCY_TABLE_SCHEMA if name not in table.columns]
     if missing:
         msg = f"Efficiency table lacks the columns {missing}."
@@ -807,7 +929,7 @@ def load_efficiency_table(
     if energy_range_keV is not None:
         low, high = energy_range_keV
         frame = frame.filter(pl.col("sim_e").is_between(low, high))
-    return frame.collect()
+    return with_source_columns(frame.collect())
 
 
 def primary_counts_from_table(
@@ -820,10 +942,16 @@ def primary_counts_from_table(
     takes as ``vertex_counts``:
     ``{energy: {detector: {period: {run: n_primaries}}}}``. It covers the
     detector/runs that have rows in the table, i.e. those an efficiency was
-    computed for.
+    computed for. Rows of a run that borrows another run's sample are left
+    out: their ``n_primaries`` belongs to the source run.
     """
     rows = (
-        table.select("sim_e", "detector", "period", "run", "n_primaries")
+        with_source_columns(table)
+        .filter(
+            (pl.col("source_period") == pl.col("period"))
+            & (pl.col("source_run") == pl.col("run"))
+        )
+        .select("sim_e", "detector", "period", "run", "n_primaries")
         .drop_nulls()
         .unique()
         .sort("sim_e", "detector", "period", "run")
@@ -845,18 +973,23 @@ def load_primary_counts(
     See ``primary_counts_from_table`` for the layout of the result.
     """
     columns = ["sim_e", "detector", "period", "run", "n_primaries"]
+    available = pl.read_parquet_schema(path)
+    columns += [name for name in ("source_period", "source_run") if name in available]
     return primary_counts_from_table(pl.read_parquet(path, columns=columns))
 
 
 def _summarize_run_entries(
     entries: Sequence[tuple[float, float, float, float]],
+    samples: Sequence[object] | None = None,
 ) -> dict[str, float] | None:
     """Summarize ``(exposure, events, primaries, FWHM syst)`` entries.
 
-    Every entry is one detector in one run, with its own simulated events and
-    primaries. The counts are combined by ``combine_run_efficiencies``, so the
-    prior enters once for the whole group; ``value`` and ``unc`` are the
-    posterior mean and standard deviation.
+    Every entry is one detector in one run. ``samples`` names the simulated
+    sample behind each entry; entries sharing one (a run and a run that
+    borrows its efficiency) are merged so the sample counts once. The counts
+    are combined by ``combine_run_efficiencies``, so the prior enters once for
+    the whole group; ``value`` and ``unc`` are the posterior mean and standard
+    deviation.
     """
     if not entries:
         return None
@@ -867,7 +1000,14 @@ def _summarize_run_entries(
     values = values[usable]
     if len(values) == 0:
         return None
-    combined = combine_run_efficiencies(values[:, 0], values[:, 1], values[:, 2])
+    combined = combine_run_efficiencies(
+        values[:, 0],
+        values[:, 1],
+        values[:, 2],
+        samples=None
+        if samples is None
+        else [key for key, keep in zip(samples, usable, strict=True) if keep],
+    )
     if combined is None:
         return None
     weights = values[:, 0]
@@ -972,7 +1112,7 @@ def aggregate_run_aware_efficiencies(
         (``combine_run_efficiencies``); the table must hold ``n_events`` and
         ``n_primaries`` for every run.
     """
-    table = (
+    table = with_source_columns(
         efficiency
         if isinstance(efficiency, pl.DataFrame)
         else efficiency_table(efficiency)
@@ -999,7 +1139,10 @@ def aggregate_run_aware_efficiencies(
     for (energy, group), rows in selected.group_by(
         ["sim_e", "group"], maintain_order=True
     ):
-        summary = _summarize_run_entries(rows.select(fields).rows())
+        summary = _summarize_run_entries(
+            rows.select(fields).rows(),
+            rows.select("detector", "source_period", "source_run").rows(),
+        )
         if summary is not None:
             output[int(energy)][str(group)] = summary
     return output

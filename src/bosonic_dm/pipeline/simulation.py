@@ -532,6 +532,7 @@ def run_simulation_analysis(
                     half_width_fwhm=config.fep_window.half_width_fwhm,
                     selections=config.selections,
                     apply_lar_veto=config.apply_lar_veto,
+                    run_substitutes=config.efficiency_run_substitutes,
                 )
 
                 efficiencies = efficiency_table(efficiency_dict)

@@ -547,3 +547,25 @@ def test_changed_plot_setup_regenerates_only_plots(tmp_path: Path) -> None:
     }
     assert mock_efficiency_plot.call_count == 4
     assert mock_survival_plot.call_count == 2
+
+
+@pytest.mark.usefixtures("mock_assign")
+def test_run_substitutes_reach_the_efficiency_computation(
+    tmp_path: Path, mock_compute: MagicMock
+) -> None:
+    config = replace(
+        _make_config(tmp_path),
+        efficiency_run_substitutes={("p09", "r004"): ("p09", "r005")},
+    )
+    _materialize_cached_inputs(config)
+    _write_simulation_manifest(config, efficiency_setup=None)
+    _materialize_simulation_inputs(config)
+    _materialize_calibration_inputs(config)
+
+    run_simulation_analysis(config, INTERACTION, stages=("efficiencies",))
+
+    assert mock_compute.call_args.kwargs["run_substitutes"] == {
+        ("p09", "r004"): ("p09", "r005")
+    }
+    record = _read_manifest(config)["stages"]["efficiencies"]
+    assert record["cut_setup"]["efficiency_run_substitutes"] == {"p09-r004": "p09-r005"}

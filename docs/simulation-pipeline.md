@@ -139,6 +139,15 @@ A run's efficiency uses only the events the simulation assigned to that run,
 inside the FEP window set by that run's resolution, divided by the primaries
 generated in the detector for that run.
 
+#### Runs missing from the simulation
+
+A run in the calibration input without simulated primaries gets the status
+`missing-primaries` and no efficiency. To give it the efficiency of another run
+instead, list it under `analysis.efficiency_run_substitutes` (see the
+[configuration reference](configuration.md#analysis)). Its rows then carry the
+source run in `source_period` and `source_run`; for every other row these equal
+`period` and `run`.
+
 #### Combining runs and detectors
 
 The run-level `efficiency` and `efficiency_stat_unc` are the Jeffreys posterior

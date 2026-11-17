@@ -25,6 +25,9 @@ analysis:
     - all
     - valid-psd
   apply_lar_veto: true
+  # Runs missing from the simulation, mapped to the run whose efficiency
+  # they use, e.g. p09-r004: p09-r005.
+  efficiency_run_substitutes: {}
   detector_groups: "dictionaries/detector-grouping/groups_dict.yaml"
 
 interactions:

@@ -7,8 +7,9 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from ruamel.yaml import YAML
@@ -73,6 +74,56 @@ class AnalysisConfig:
     background: BackgroundConfig
     output: OutputConfig
     detector_groups: Path
+    # Run whose simulated efficiency replaces that of a run missing from the
+    # simulation: {(period, run): (source_period, source_run)}.
+    efficiency_run_substitutes: Mapping[tuple[str, str], tuple[str, str]] = field(
+        default_factory=dict
+    )
+
+
+_PERIOD_RUN = re.compile(r"(p\d+)-(r\d+)")
+
+
+def _period_run(text: object) -> tuple[str, str]:
+    """Split a ``"p09-r004"`` label into ``("p09", "r004")``."""
+    match = _PERIOD_RUN.fullmatch(str(text).strip())
+    if match is None:
+        msg = f"Expected a period-run label such as 'p09-r004', got {text!r}."
+        raise ValueError(msg)
+    return match.group(1), match.group(2)
+
+
+def parse_run_substitutes(
+    raw: Mapping[str, str] | None,
+) -> dict[tuple[str, str], tuple[str, str]]:
+    """Parse ``analysis.efficiency_run_substitutes``.
+
+    Each entry maps a run without simulated primaries to the run whose
+    efficiency it uses, e.g. ``{"p09-r004": "p09-r005"}``.
+
+    Raises
+    ------
+    ValueError
+        If a label is malformed, a run replaces itself, or a source run is
+        itself replaced.
+    """
+    if raw is None:
+        return {}
+    if not isinstance(raw, Mapping):
+        msg = "analysis.efficiency_run_substitutes must be a mapping."
+        raise ValueError(msg)
+    substitutes = {_period_run(key): _period_run(value) for key, value in raw.items()}
+    for target, source in substitutes.items():
+        if target == source:
+            msg = f"Run {'-'.join(target)} cannot replace itself."
+            raise ValueError(msg)
+        if source in substitutes:
+            msg = (
+                f"Source run {'-'.join(source)} is itself replaced; "
+                "point every run at a simulated run."
+            )
+            raise ValueError(msg)
+    return dict(sorted(substitutes.items()))
 
 
 def _resolve_path(path_str: str) -> Path:
@@ -215,4 +266,7 @@ def load_analysis_config(path: str | Path) -> AnalysisConfig:
         background=background,
         output=output,
         detector_groups=bg_det_groups,
+        efficiency_run_substitutes=parse_run_substitutes(
+            raw_analysis.get("efficiency_run_substitutes")
+        ),
     )
