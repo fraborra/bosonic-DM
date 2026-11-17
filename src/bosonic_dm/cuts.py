@@ -69,7 +69,7 @@ DEFAULT_FIELD_MASK: list[str] = [
 ]
 
 
-def _parse_period_run(filepath: str | Path) -> tuple[str, str]:
+def parse_pet_period_run(filepath: str | Path) -> tuple[str, str]:
     """Extract the period and run identifiers from a pet-tier LH5 filename.
 
     Parameters
@@ -97,7 +97,7 @@ def _parse_period_run(filepath: str | Path) -> tuple[str, str]:
     return (match.group(1), match.group(2))
 
 
-def _build_rawid_name_map(chmap: object) -> dict[int, str]:
+def build_rawid_name_map(chmap: object) -> dict[int, str]:
     """Build a mapping from DAQ rawid to detector name using the channel map.
 
     Parameters
@@ -122,11 +122,6 @@ def _build_rawid_name_map(chmap: object) -> dict[int, str]:
             logger.debug("Skipping rawid %s", rid)
             continue
     return result
-
-
-def build_rawid_name_map(chmap: object) -> dict[int, str]:
-    """Return the DAQ raw-ID to detector-name mapping for a channel map."""
-    return _build_rawid_name_map(chmap)
 
 
 USABILITY_KEYS: tuple[str, str, str] = ("period", "run", "detector_name")
@@ -204,11 +199,6 @@ def select_usable(
     return lazy.with_columns(keys).join(
         usable.lazy().with_columns(keys), on=list(USABILITY_KEYS), how="semi"
     )
-
-
-def parse_pet_period_run(filepath: str | Path) -> tuple[str, str]:
-    """Return period and run identifiers parsed from a PET filename."""
-    return _parse_period_run(filepath)
 
 
 def read_pet_data(
@@ -457,12 +447,12 @@ def prepare_pet_dataset(
     """
     rawid_name_map: dict[int, str] | None = None
     if chmap is not None:
-        rawid_name_map = _build_rawid_name_map(chmap)
+        rawid_name_map = build_rawid_name_map(chmap)
 
     frames: list[pl.DataFrame] = []
 
     for filepath in lh5_files:
-        period, run = _parse_period_run(filepath)
+        period, run = parse_pet_period_run(filepath)
         data = read_pet_data(filepath, field_mask=field_mask)
 
         if len(data) == 0:
@@ -604,10 +594,10 @@ def filter_dataset(
     return df.filter(final_expr)
 
 
-def _matches_selection(
+def matches_period_run_selection(
     period: str,
     run: str,
-    det_sel: str | Mapping[str, str | Sequence[str]],
+    detector_selection: str | Mapping[str, str | Sequence[str]],
 ) -> bool:
     """Check whether a (period, run) pair is included by a detector selection.
 
@@ -628,7 +618,7 @@ def _matches_selection(
         Period identifier (e.g. ``"p03"``).
     run
         Run identifier (e.g. ``"r000"``).
-    det_sel
+    detector_selection
         Detector selection, in the same format accepted by
         ``filter_dataset``'s *det_selection* values.
 
@@ -637,18 +627,18 @@ def _matches_selection(
     bool
         ``True`` if the (period, run) pair is included by the selection.
     """
-    if isinstance(det_sel, str) and det_sel.lower() == "all":
+    if isinstance(detector_selection, str) and detector_selection.lower() == "all":
         return True
 
-    if not isinstance(det_sel, Mapping):
-        msg = f"Invalid detector selection: {det_sel}"
+    if not isinstance(detector_selection, Mapping):
+        msg = f"Invalid detector selection: {detector_selection}"
         raise ValueError(msg)
 
     included = False
     excluded = False
     has_inclusion_rule = False
 
-    for sel_period, runs_spec in det_sel.items():
+    for sel_period, runs_spec in detector_selection.items():
         is_exclusion = sel_period.startswith("~")
         clean_period = sel_period[1:] if is_exclusion else sel_period
 
@@ -693,15 +683,6 @@ def _matches_selection(
         included = True
 
     return included and not excluded
-
-
-def matches_period_run_selection(
-    period: str,
-    run: str,
-    detector_selection: str | Mapping[str, str | Sequence[str]],
-) -> bool:
-    """Return whether a period/run is selected by a detector-group rule."""
-    return _matches_selection(period, run, detector_selection)
 
 
 def compute_group_exposure(

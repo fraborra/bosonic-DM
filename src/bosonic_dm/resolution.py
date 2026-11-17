@@ -7,13 +7,14 @@ from __future__ import annotations
 
 import functools
 import logging
+from typing import Any
 
 import numpy as np
 from dbetto import Props
 from legendmeta import LegendMetadata
 from tqdm import tqdm
 
-from bosonic_dm.plotting.utils import _DET_TYPE_MAP
+from bosonic_dm.constants import DET_TYPE_MAP
 from bosonic_dm.stats import compute_weighted_uncertainty, weighted_mean
 
 logger = logging.getLogger(__name__)
@@ -260,17 +261,17 @@ def weighted_resolution_per_detector_type(data: dict) -> dict:
     )
 
     # Sum (not weight-average) exposure per detector type.
-    expo_by_type: dict[str, float] = dict.fromkeys(_DET_TYPE_MAP.values(), 0.0)
+    expo_by_type: dict[str, float] = dict.fromkeys(DET_TYPE_MAP.values(), 0.0)
     for det, d in data.items():
         prefix = det[0].upper()
-        det_type = _DET_TYPE_MAP.get(prefix)
+        det_type = DET_TYPE_MAP.get(prefix)
         if det_type is None:
             logger.warning("Unknown detector prefix '%s' for detector %s", prefix, det)
             continue
         expo_by_type[det_type] += d.get("expo", 0.0)
 
     result = {}
-    for det_type in _DET_TYPE_MAP.values():
+    for det_type in DET_TYPE_MAP.values():
         fwhm_data = fwhm_by_type.get(det_type, {}).get("fwhm")
         if fwhm_data is None:
             continue
@@ -329,7 +330,7 @@ def weighted_value_per_det_type(
     # accumulate lists per (detector type, key)
     type_data: dict[str, dict[str, dict[str, list]]] = {
         label: {k: {"vals": [], "w": [], "unc": []} for k in keys}
-        for label in _DET_TYPE_MAP.values()
+        for label in DET_TYPE_MAP.values()
     }
 
     for period, period_dict in data.items():
@@ -352,7 +353,7 @@ def weighted_value_per_det_type(
                     continue
 
                 prefix = det[0].upper()
-                det_type = _DET_TYPE_MAP.get(prefix)
+                det_type = DET_TYPE_MAP.get(prefix)
                 if det_type is None:
                     logger.warning(
                         "Unknown detector prefix '%s' for detector %s", prefix, det
@@ -414,7 +415,7 @@ def weighted_value_per_det_type(
         return {"value": mean, "unc": unc_total}
 
     result = {}
-    for det_type in _DET_TYPE_MAP.values():
+    for det_type in DET_TYPE_MAP.values():
         result[det_type] = {}
         if single_key:
             out = _compute_for_key(det_type, keys[0])
@@ -433,7 +434,7 @@ def weighted_value_per_det_type(
 
 
 @functools.cache
-def get_channelmap_cached(meta: LegendMetadata, start_key: str):
+def get_channelmap_cached(meta: LegendMetadata, start_key: str) -> Any:
     """Retrieve the channelmap, caching the result to avoid slow repeated filesystem queries."""
     return meta.channelmap(on=start_key)
 

@@ -5,7 +5,10 @@
 
 from __future__ import annotations
 
-_DET_TYPE_MAP = {"B": "BEGe", "C": "COAX", "V": "ICPC", "P": "PPC"}
+from bosonic_dm.constants import DET_TYPE_MAP
+
+# Kept under the old name for the plotting modules and notebooks.
+_DET_TYPE_MAP = DET_TYPE_MAP
 _DET_TYPE_COLOR = {
     "BEGe": "tab:blue",
     "COAX": "tab:orange",

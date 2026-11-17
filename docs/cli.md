@@ -25,8 +25,9 @@ pixi run bosonic-dm simulation \
 ```
 
 `--interaction` accepts a key declared under `interactions` in the
-configuration. Available stages are `count-vertices`, `build-dataset`,
-`efficiencies`, and `plots`.
+configuration. Available stages are `build-dataset`, `efficiencies`, and
+`plots`. Primaries are counted inside `efficiencies`; the former
+`count-vertices` stage no longer exists.
 
 Requesting a downstream stage also runs its dependencies:
 
@@ -107,12 +108,14 @@ It creates one `dark_compton_<mass>keV.lh5` FromFile input per mass point.
 pixi run assign-detectors \
   --gdml /path/to/l200.gdml \
   --lh5-file /path/to/input-1.lh5 /path/to/input-2.lh5 \
-  --counts-yaml data/v1/dictionaries/dark-compton_primary-counts.yaml
+  --counts-yaml tmp/vertex-counts.yaml
 ```
 
 Use `--save` to write the detector field back to the LH5 input. `--vtx-group`
 changes the vertex group from its `vtx` default, and `--verbose` enables debug
-logging.
+logging. `--counts-yaml` writes one total per detector for a quick check. The
+pipeline does not read it: it counts primaries per run itself and keeps them in
+the efficiency table.
 
 ## Data maintenance utilities
 
@@ -135,11 +138,26 @@ pixi run migrate-yaml one.yaml two.yaml \
 The migration writes atomically and verifies that the result can be read by the
 safe YAML loader.
 
-### Check Dark Compton statistics
+### Check efficiency statistics
+
+Rank detectors by the statistical uncertainty of their simulated efficiency, to
+decide whether more events must be simulated:
 
 ```bash
-pixi run check-dark-compton-stats
+pixi run check-efficiency-stats \
+  --config configs/local.yaml \
+  --interaction dark-compton
 ```
 
-This is a site-specific diagnostic. It currently assumes a hard-coded LEGEND
-production path and reads Dark Compton products below `data/v1/`.
+The command reads the efficiency table written by the `efficiencies` stage
+(`<data_root>/dictionaries/<interaction>_efficiency.parquet`); it needs no
+production metadata. For every simulated energy it lists the detectors with the
+largest relative and absolute statistical uncertainty, counts those above the
+target, and estimates how many more primaries the worst one needs.
+
+- `--selection` (default `all`): efficiency selection to check.
+- `--top` (default `5`): detectors listed per energy.
+- `--target` (default `0.01`): target relative statistical uncertainty.
+
+This command replaces `check-dark-compton-stats`. Reinstall the editable package
+once to register it: `pixi run pip install --editable .`

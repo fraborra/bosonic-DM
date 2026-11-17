@@ -5,10 +5,17 @@ The package provides reusable Python functions and command-line pipelines for
 simulation processing, efficiency estimation, diagnostic plots, and background
 studies, plus Stan-based background and signal fits.
 
-> **Status:** under active development. The run-aware background dataset and
-> diagnostic plots must be validated on production data before they are used for
-> inference. The Stan background fit is being validated, and the signal fit is a
-> first stage with the background and signal response held fixed.
+## Status
+
+Under active development; nothing here is ready for a published result.
+
+| Part                                             | State                                                  |
+| ------------------------------------------------ | ------------------------------------------------------ |
+| Simulation pipeline and efficiency table         | Implemented and unit-tested.                           |
+| Background dataset and diagnostic plots          | Implemented; validate on production before inference.  |
+| Stan background fit and model comparison         | In validation.                                         |
+| Signal fit at one mass                           | First stage: background and signal response are fixed. |
+| Mass scan, expected sensitivity, coupling limits | Not built yet.                                         |
 
 ## Quick start
 
@@ -56,6 +63,7 @@ The background and signal fits are run from Python rather than the CLI; see
 - `src/bosonic_dm/`: library and pipeline implementation.
 - `stan/`: Stan models for the background and signal fits.
 - `configs/`: default and local configuration examples.
+- `data/inputs/`: static inputs (resolution, exposure, detector groups).
 - `docs/`: user and contributor documentation.
 - `notebooks/`: exploratory and legacy analysis notebooks.
 - `tests/`: automated tests.

@@ -5,7 +5,8 @@
 
 The screening targets follow ``stan/README.md``: no divergences, no
 maximum-treedepth hits, E-BFMI of at least 0.3, ``r_hat`` below 1.01, and
-bulk and tail effective sample sizes of at least 400.
+bulk and tail effective sample sizes of at least 400. A fit with a
+non-finite E-BFMI, ``r_hat``, or effective sample size fails.
 """
 
 from __future__ import annotations
@@ -52,15 +53,21 @@ def sampler_diagnostics(
     treedepths = np.asarray(
         fit.max_treedepths if fit.max_treedepths is not None else [0], dtype=int
     )
+
+    def column(key: str) -> np.ndarray:
+        return np.array([float(p[key]) for p in parameters.values()], dtype=float)
+
+    # NumPy's max and min return NaN when any value is NaN; the built-in ones
+    # skip a NaN unless it comes first.
     return {
         "chains": int(fit.chains),
         "draws_per_chain": int(fit.num_draws_sampling),
         "divergences": int(divergences.sum()),
         "max_treedepth_hits": int(treedepths.sum()),
-        "e_bfmi_min": float(e_bfmi(energy).min()),
-        "r_hat_max": max(float(p["r_hat"]) for p in parameters.values()),
-        "ess_bulk_min": min(float(p["ess_bulk"]) for p in parameters.values()),
-        "ess_tail_min": min(float(p["ess_tail"]) for p in parameters.values()),
+        "e_bfmi_min": float(np.min(e_bfmi(energy))),
+        "r_hat_max": float(np.max(column("r_hat"))),
+        "ess_bulk_min": float(np.min(column("ess_bulk"))),
+        "ess_tail_min": float(np.min(column("ess_tail"))),
     }
 
 
@@ -71,7 +78,16 @@ def diagnostics_passed(
     ess_min: float = 400.0,
     e_bfmi_min: float = 0.3,
 ) -> bool:
-    """Return whether ``sampler_diagnostics`` output meets the screening targets."""
+    """Return whether ``sampler_diagnostics`` output meets the screening targets.
+
+    A non-finite E-BFMI, ``r_hat``, or effective sample size fails.
+    """
+    summaries = [
+        diagnostics[key]
+        for key in ("e_bfmi_min", "r_hat_max", "ess_bulk_min", "ess_tail_min")
+    ]
+    if not np.all(np.isfinite(np.asarray(summaries, dtype=float))):
+        return False
     return bool(
         diagnostics["divergences"] == 0
         and diagnostics["max_treedepth_hits"] == 0

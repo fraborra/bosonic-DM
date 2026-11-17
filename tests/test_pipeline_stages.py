@@ -26,7 +26,6 @@ from bosonic_dm.yaml_io import read_yaml
 
 def test_efficiency_stage_adds_its_dependencies() -> None:
     assert resolve_simulation_stages(["efficiencies"]) == (
-        "count-vertices",
         "build-dataset",
         "efficiencies",
     )
@@ -34,11 +33,15 @@ def test_efficiency_stage_adds_its_dependencies() -> None:
 
 def test_plot_stage_adds_transitive_dependencies() -> None:
     assert resolve_simulation_stages(["plots"]) == (
-        "count-vertices",
         "build-dataset",
         "efficiencies",
         "plots",
     )
+
+
+def test_primary_counts_are_not_a_stage_any_more() -> None:
+    with pytest.raises(ValueError, match="count-vertices"):
+        resolve_simulation_stages(["count-vertices"])
 
 
 def test_unknown_stage_is_rejected() -> None:
@@ -97,7 +100,6 @@ def test_missing_inputs_soft_block_dependent_stages(tmp_path: Path) -> None:
     )
 
     assert artifacts.stage_status == {
-        "count-vertices": "blocked",
         "build-dataset": "blocked",
         "efficiencies": "blocked",
     }
@@ -106,12 +108,11 @@ def test_missing_inputs_soft_block_dependent_stages(tmp_path: Path) -> None:
     assert manifest["schema_version"] == 2
     assert manifest["stages"]["efficiencies"]["status"] == "blocked"
     assert manifest["last_run"]["resolved_stages"] == [
-        "count-vertices",
         "build-dataset",
         "efficiencies",
     ]
     cut_setup = current_cut_setup(config)
-    assert cut_setup["efficiency_output_schema_version"] == 2
+    assert cut_setup["efficiency_output_schema_version"] == 3
     assert cut_setup["selection_metadata"] == {
         "energy_window": {
             "reconstructed_energy_column": "energy",

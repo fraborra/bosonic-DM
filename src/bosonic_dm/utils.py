@@ -9,6 +9,8 @@ import argparse
 
 import numpy as np
 
+from bosonic_dm.constants import M_E_KEV
+
 DEFAULT_MASS_POINTS_KEV: tuple[int, ...] = tuple(range(200, 1001, 100))
 
 
@@ -84,9 +86,8 @@ def calculate_energies(m_dm: float) -> tuple[float, float]:
         ``(T, omega_prime)`` — electron recoil kinetic energy and
         outgoing photon energy, both in keV.
     """
-    m_e = 510.99895  # electron mass [keV]
-    T = m_dm**2 / (2 * (m_e + m_dm))
-    omega_prime = np.sqrt(T**2 + 2 * m_e * T)
+    T = m_dm**2 / (2 * (M_E_KEV + m_dm))
+    omega_prime = np.sqrt(T**2 + 2 * M_E_KEV * T)
     return T, omega_prime
 
 
@@ -114,7 +115,11 @@ def get_energy_interval(m_dm: float, region: str) -> tuple[float, float]:
     raise ValueError(msg)
 
 
-def expand_range(item):
+def expand_range(item: str) -> list[str]:
+    """Expand a run range such as ``"r000..r003"`` into its run names.
+
+    A single name is returned as a one-element list.
+    """
     if ".." not in item:
         return [item]  # already single
     start, end = item.split("..")
@@ -127,11 +132,25 @@ def expand_range(item):
     return [f"{prefix}{i:0{width}d}" for i in range(s, e + 1)]
 
 
-def clean_array(arr):
-    arr = np.asarray(arr)
-    arr = arr.astype(float)
-    return arr[(arr != 0) & np.isfinite(arr)]
-
-
-def select_channel(energies, channels, rawid):
+def select_channel(
+    energies: np.ndarray, channels: np.ndarray, rawid: int
+) -> np.ndarray:
+    """Return the energies recorded in the channel with DAQ raw ID ``rawid``."""
     return energies[channels == rawid]
+
+
+def period_run_number(name: str | float) -> int:
+    """Return the number in a period or run name: ``"p03"`` or ``3.0`` give ``3``."""
+    if isinstance(name, str):
+        return int(name.lstrip("pr"))
+    return int(name)
+
+
+def period_name(number: float) -> str:
+    """Return the period name of a period number: ``3`` gives ``"p03"``."""
+    return f"p{int(number):02d}"
+
+
+def run_name(number: float) -> str:
+    """Return the run name of a run number: ``0`` gives ``"r000"``."""
+    return f"r{int(number):03d}"

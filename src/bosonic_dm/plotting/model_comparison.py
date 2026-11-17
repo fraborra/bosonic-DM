@@ -40,6 +40,7 @@ from matplotlib.patches import Ellipse
 from matplotlib.ticker import MaxNLocator
 from scipy.stats import norm, skew
 
+from bosonic_dm.constants import AR39_ENDPOINT_KEV
 from bosonic_dm.fitting.background_fit import BackgroundFitSummary, free_parameters
 from bosonic_dm.fitting.model_comparison import BridgeSamplingCheck, pointwise_loo
 from bosonic_dm.plotting.background_fit import (
@@ -50,7 +51,6 @@ from bosonic_dm.plotting.background_fit import (
     posterior_draws,
 )
 
-AR39_ENDPOINT_KEV = 565.8
 _LN10 = np.log(10.0)
 # Kass & Raftery (1995) bounds on 2 ln BF (2, 6, 10), expressed in |ln BF|.
 _KASS_RAFTERY_LN_BF = (

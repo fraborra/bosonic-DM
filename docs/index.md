@@ -18,7 +18,8 @@
 - [Command-line reference](cli.md) lists the main pipeline and utility commands.
 - [Development guide](development.md) explains the source layout and project
   checks.
-- [`stan/README.md`](../stan/README.md) documents the background Stan model.
+- [`stan/README.md`](../stan/README.md) documents the background Stan model; the
+  signal model is described in [Spectral fits](fitting.md#signal-fit).
 
 ## Scope and status
 

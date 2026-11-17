@@ -33,6 +33,7 @@ from bosonic_dm.plotting.background_fit import (
     plot_background_corner,
     plot_background_fit_residuals,
     plot_prior_predictive,
+    posterior_band,
     posterior_draws,
 )
 
@@ -137,6 +138,58 @@ def test_residual_plot_is_saved(tmp_path: Path, include_excluded: bool) -> None:
     assert n_points == (len(counts) if include_excluded else n_fit)
 
 
+def _fake_posterior(expected: np.ndarray, n_chains: int = 2, n_draws: int = 400):
+    """ArviZ-like posterior: ``expected`` scaled by a few-percent factor per draw."""
+    import xarray as xr  # noqa: PLC0415
+
+    rng = np.random.default_rng(5)
+    scale = rng.lognormal(0.0, 0.03, size=(n_chains, n_draws, 1))
+    draws = scale * expected
+    return {
+        "posterior": xr.Dataset(
+            {"expected_counts": (("chain", "draw", "energy_bin"), draws)}
+        )
+    }
+
+
+def test_posterior_band_brackets_the_median() -> None:
+    summary, _ = _summary()
+    posterior = _fake_posterior(summary.b_hat)
+    lo68, hi68 = posterior_band(posterior, 0.68)
+    lo95, hi95 = posterior_band(posterior, 0.95)
+
+    assert lo68.shape == hi68.shape == summary.b_hat.shape
+    assert np.all(lo68 <= summary.b_hat)
+    assert np.all(summary.b_hat <= hi68)
+    assert np.all(lo95 <= lo68)
+    assert np.all(hi68 <= hi95)
+    with pytest.raises(ValueError, match="prob"):
+        posterior_band(posterior, 1.0)
+
+
+@pytest.mark.parametrize("with_posterior", [False, True])
+def test_residual_plot_draws_band_only_with_posterior(with_posterior: bool) -> None:
+    from matplotlib.collections import PolyCollection  # noqa: PLC0415
+
+    summary, counts = _summary()
+    posterior = _fake_posterior(summary.b_hat) if with_posterior else None
+    fig = plot_background_fit_residuals(summary, counts, posterior=posterior)
+    bands = [c for c in fig.axes[0].collections if isinstance(c, PolyCollection)]
+    labels = fig.axes[0].get_legend_handles_labels()[1]
+    plt.close(fig)
+
+    assert len(bands) == (2 if with_posterior else 0)
+    assert ("68% posterior" in labels) == with_posterior
+
+
+def test_residual_plot_rejects_posterior_of_another_fit() -> None:
+    summary, counts = _summary()
+    posterior = _fake_posterior(summary.b_hat[:-10])
+    with pytest.raises(ValueError, match="same fit"):
+        plot_background_fit_residuals(summary, counts, posterior=posterior)
+    plt.close("all")
+
+
 @pytest.fixture(scope="module")
 def short_fit(tmp_path_factory: pytest.TempPathFactory):
     cmdstanpy = pytest.importorskip("cmdstanpy")
@@ -182,6 +235,15 @@ def test_posterior_draws_agree_between_cmdstan_and_arviz(short_fit) -> None:
     assert from_fit.shape == (2, 100, len(BACKGROUND_PARAMETERS))
     np.testing.assert_allclose(from_fit, from_idata)
     np.testing.assert_allclose(from_fit[..., 0].ravel(), fit.stan_variable("N_2nu"))
+
+
+def test_posterior_band_agrees_between_cmdstan_and_arviz(short_fit) -> None:
+    fit, data = short_fit
+    from_fit = posterior_band(fit, 0.9)
+    from_idata = posterior_band(to_inference_data(fit, data), 0.9)
+
+    assert from_fit[0].shape == (data["n_bins"],)
+    np.testing.assert_allclose(from_fit, from_idata)
 
 
 def test_chain_and_corner_plots_are_saved(short_fit, tmp_path: Path) -> None:

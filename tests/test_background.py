@@ -13,6 +13,7 @@ import pytest
 import bosonic_dm.background as background_module
 from bosonic_dm.background import build_background_dataset
 from bosonic_dm.cuts import add_background_cut_flags, pet_to_polars
+from bosonic_dm.io import write_parquet_atomic
 
 
 def _base_frame() -> pl.DataFrame:
@@ -207,7 +208,7 @@ def test_atomic_write_does_not_leave_partial_fragment(
     monkeypatch.setattr(pl.DataFrame, "write_parquet", fail_write)
 
     with pytest.raises(OSError, match="simulated write failure"):
-        background_module._write_parquet_atomic(_base_frame(), destination)
+        write_parquet_atomic(_base_frame(), destination)
 
     assert not destination.exists()
     assert list(destination.parent.glob(".*.tmp")) == []

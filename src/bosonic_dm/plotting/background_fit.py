@@ -136,6 +136,38 @@ def excluded_window_excess(
     return pl.DataFrame(rows, schema=schema)
 
 
+def _bin_draws(posterior: Any, name: str = "expected_counts") -> np.ndarray:
+    """All draws of a per-bin variable, chains pooled, shaped ``(draws, n_bins)``."""
+    if hasattr(posterior, "stan_variable"):
+        return np.asarray(posterior.stan_variable(name), dtype=float)
+    values = np.asarray(posterior["posterior"][name].values, dtype=float)
+    return values.reshape(-1, values.shape[-1])
+
+
+def posterior_band(posterior: Any, prob: float = 0.68) -> tuple[np.ndarray, np.ndarray]:
+    """Per-bin equal-tailed ``prob`` interval of ``expected_counts``.
+
+    ``posterior`` is a ``cmdstanpy.CmdStanMCMC`` or an ArviZ object with a
+    ``posterior`` group (e.g. a reloaded ``posterior.nc``). Every posterior
+    draw is used, not the thinned ``expected_counts_draws`` of the summary:
+    with 200 draws a 95% interval rests on about five draws per tail.
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        Lower and upper edges, one value per bin.
+    """
+    return _quantile_band(_bin_draws(posterior), prob)
+
+
+def _quantile_band(draws: np.ndarray, prob: float) -> tuple[np.ndarray, np.ndarray]:
+    if not 0 < prob < 1:
+        msg = f"prob must lie in (0, 1), got {prob}."
+        raise ValueError(msg)
+    lo, hi = np.quantile(draws, [(1 - prob) / 2, (1 + prob) / 2], axis=0)
+    return lo, hi
+
+
 def plot_background_fit_residuals(
     summary: BackgroundFitSummary,
     counts: Sequence[int] | np.ndarray,
@@ -145,6 +177,8 @@ def plot_background_fit_residuals(
     yscale: str = "log",
     residual_limit: float | None = 5.0,
     points_per_bin: int = 5,
+    posterior: Any | None = None,
+    band_probs: Sequence[float] = (0.68, 0.95),
     output_path: Path | None = None,
 ) -> Figure:
     """Spectrum with the fitted model and a normalized-residual panel.
@@ -170,6 +204,14 @@ def plot_background_fit_residuals(
     points_per_bin
         Points per bin of the smooth model lines, which interpolate the
         per-bin ``B_hat`` and component medians (see ``_smooth_curve``).
+    posterior
+        Full posterior of the same fit, a ``cmdstanpy.CmdStanMCMC`` or an
+        ArviZ object such as ``az.from_netcdf(".../posterior.nc")``. If given,
+        the spectrum panel shows the posterior bands of ``expected_counts``
+        around ``B_hat`` (see :func:`posterior_band`), computed from every
+        draw. If ``None``, no band is drawn.
+    band_probs
+        Probabilities of the bands drawn when ``posterior`` is given.
     output_path
         If given, the figure is also saved there.
 
@@ -201,6 +243,31 @@ def plot_background_fit_residuals(
             lw=1.0,
             label=label,
         )
+    top = max(float(n.max()), float(summary.b_hat.max()))
+    if posterior is not None and len(band_probs):
+        draws = _bin_draws(posterior)
+        if draws.shape[1] != summary.b_hat.size:
+            msg = (
+                f"Posterior has {draws.shape[1]} bins, the summary "
+                f"{summary.b_hat.size}; pass the posterior of the same fit."
+            )
+            raise ValueError(msg)
+        probs = sorted(band_probs, reverse=True)  # widest first, narrowest on top
+        alphas = np.linspace(0.15, 0.35, len(probs)) if len(probs) > 1 else [0.25]
+        for prob, alpha in zip(probs, alphas, strict=True):
+            lo, hi = _quantile_band(draws, prob)
+            grid_x, lo_curve = _smooth_curve(edges, lo, points_per_bin)
+            _, hi_curve = _smooth_curve(edges, hi, points_per_bin)
+            ax_spec.fill_between(
+                grid_x,
+                lo_curve,
+                hi_curve,
+                color="C3",
+                alpha=alpha,
+                lw=0,
+                label=f"{prob:.0%} posterior",
+            )
+            top = max(top, float(hi.max()))
     ax_spec.plot(
         *_smooth_curve(edges, summary.b_hat, points_per_bin),
         color="C3",
@@ -211,8 +278,8 @@ def plot_background_fit_residuals(
     for idx in _excluded_windows(used):
         for ax in (ax_spec, ax_res):
             ax.axvspan(edges[idx[0]], edges[idx[-1] + 1], color="grey", alpha=0.2, lw=0)
-    ax_spec.set(ylabel="Counts / bin", yscale=yscale)
-    ax_spec.set_ylim(10**-2, np.max(values) * 1.3)
+    ax_spec.set(ylabel="Events / keV", yscale=yscale)
+    ax_spec.set_ylim(10**-2, 1.5 * top)
     ax_spec.legend(loc="upper right", fontsize=9)
 
     for ax in (ax_res, ax_hist):
@@ -265,7 +332,7 @@ def plot_background_fit_residuals(
         ax_res.set_ylim(-residual_limit, residual_limit)
     ax_res.set(
         xlabel="Energy [keV]",
-        ylabel=r"$(n - \hat{B}) / \sigma$",
+        ylabel="Normalized residuals",
         xlim=(edges[0], edges[-1]),
     )
     _pull_histogram(

@@ -15,7 +15,6 @@ for marginal-likelihood estimates (``bosonic_dm.fitting.model_comparison``).
 
 from __future__ import annotations
 
-import hashlib
 import logging
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
@@ -27,11 +26,13 @@ import polars as pl
 from numpy.typing import ArrayLike
 from scipy.stats import norm, poisson
 
+from bosonic_dm.constants import AR39_ENDPOINT_KEV, Q_GE76_KEV
 from bosonic_dm.fitting.background_shapes import (
     modified_beta_g_cdf,
     primakoff_rosen_cdf,
 )
 from bosonic_dm.fitting.diagnostics import diagnostics_passed, sampler_diagnostics
+from bosonic_dm.fitting.stan_utils import STAN_DIR, sampler_record, software_record
 from bosonic_dm.yaml_io import read_yaml, write_yaml
 
 logger = logging.getLogger(__name__)
@@ -48,7 +49,7 @@ USABILITY_REMINDER = (
 if TYPE_CHECKING:
     import cmdstanpy
 
-STAN_FILE = Path(__file__).resolve().parents[3] / "stan" / "background.stan"
+STAN_FILE = STAN_DIR / "background.stan"
 
 RATE_PARAMETERS = ("N_2nu", "N_ar39", "c0", "cQ")
 SHAPE_PARAMETERS = ("mu", "sigma", "tau", "base_alpha", "base_beta")
@@ -58,6 +59,13 @@ COMPONENTS = ("expected_2nu", "expected_linear", "expected_ar39")
 # length-0/1 array ``<name>_free``; ``<name>`` is the value used by the model.
 FIXABLE_PARAMETERS = ("c0", "cQ")
 NO_LINEAR = {"c0": 0.0, "cQ": 0.0}
+# Stan data entries holding the lognormal prior locations and scales.
+_PRIOR_KEYS = (
+    "log_rate_prior_mean",
+    "log_rate_prior_sd",
+    "log_shape_prior_mean",
+    "log_shape_prior_sd",
+)
 
 
 @dataclass(frozen=True)
@@ -89,6 +97,19 @@ def _validated_fixed(fixed: Mapping[str, float] | None) -> dict[str, float]:
         msg = "Fixed values must be finite and nonnegative."
         raise ValueError(msg)
     return values
+
+
+def _fixable_entries(held: Mapping[str, float]) -> dict[str, int | float]:
+    """Stan data switches and values of the fixable parameters."""
+    return {
+        **{f"fit_{name}": int(name not in held) for name in FIXABLE_PARAMETERS},
+        **{f"{name}_fixed": held.get(name, 0.0) for name in FIXABLE_PARAMETERS},
+    }
+
+
+def _prior_entries(priors: Mapping[str, Any]) -> dict[str, np.ndarray]:
+    """Prior arrays of ``priors`` under the Stan data keys."""
+    return {key: np.asarray(priors[key], dtype=float) for key in _PRIOR_KEYS}
 
 
 def fixed_parameters(stan_data: Mapping[str, Any]) -> dict[str, float]:
@@ -198,9 +219,9 @@ def build_stan_data(
     priors: Mapping[str, Any],
     *,
     counts_key: str = "counts_analysis",
-    q_value_keV: float = 2039.0,
+    q_value_keV: float = Q_GE76_KEV,
     ar39_loc_keV: float = 0.0,
-    ar39_scale_keV: float = 565.8,
+    ar39_scale_keV: float = AR39_ENDPOINT_KEV,
     fixed: Mapping[str, float] | None = None,
 ) -> dict[str, Any]:
     """Build ``background.stan`` data from a prepared group spectrum.
@@ -240,17 +261,8 @@ def build_stan_data(
         "Q": float(q_value_keV),
         "loc": float(ar39_loc_keV),
         "scale": float(ar39_scale_keV),
-        **{f"fit_{name}": int(name not in held) for name in FIXABLE_PARAMETERS},
-        **{f"{name}_fixed": held.get(name, 0.0) for name in FIXABLE_PARAMETERS},
-        **{
-            key: np.asarray(priors[key], dtype=float)
-            for key in (
-                "log_rate_prior_mean",
-                "log_rate_prior_sd",
-                "log_shape_prior_mean",
-                "log_shape_prior_sd",
-            )
-        },
+        **_fixable_entries(held),
+        **_prior_entries(priors),
     }
 
 
@@ -419,8 +431,6 @@ def save_background_fit(
     ``(draws, bins)``), and ``summary.yaml``. ``provenance`` is copied into the
     YAML summary, e.g. group name, input dataset, peak list and window.
     """
-    import cmdstanpy  # noqa: PLC0415
-
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
     paths = {
@@ -447,7 +457,6 @@ def save_background_fit(
     ).write_parquet(paths["bhat"])
     np.save(paths["draws"], summary.expected_counts_draws)
 
-    config = fit.metadata.cmdstan_config
     write_yaml(
         {
             "b_hat_rule": "per-bin posterior median of expected_counts",
@@ -464,31 +473,9 @@ def save_background_fit(
                 "ar39_loc_keV": stan_data["loc"],
                 "ar39_scale_keV": stan_data["scale"],
             },
-            "priors": {
-                key: stan_data[key]
-                for key in (
-                    "log_rate_prior_mean",
-                    "log_rate_prior_sd",
-                    "log_shape_prior_mean",
-                    "log_shape_prior_sd",
-                )
-            },
-            "sampler": {
-                "seed": config.get("seed"),
-                "num_warmup": config.get("num_warmup"),
-                "num_samples": config.get("num_samples"),
-                "adapt_delta": config.get("delta"),
-            },
-            "software": {
-                "stan_file": Path(stan_file).name,
-                "stan_file_sha256": hashlib.sha256(
-                    Path(stan_file).read_bytes()
-                ).hexdigest(),
-                "cmdstan_version": ".".join(
-                    map(str, cmdstanpy.cmdstan_version() or ())
-                ),
-                "cmdstanpy_version": cmdstanpy.__version__,
-            },
+            "priors": {key: stan_data[key] for key in _PRIOR_KEYS},
+            "sampler": sampler_record(fit),
+            "software": software_record(stan_file),
             "provenance": dict(provenance or {}),
             "files": {name: path.name for name, path in paths.items()},
         },
@@ -556,17 +543,8 @@ def load_stan_data(output_dir: str | Path) -> dict[str, Any]:
         "Q": float(inputs["Q_keV"]),
         "loc": float(inputs["ar39_loc_keV"]),
         "scale": float(inputs["ar39_scale_keV"]),
-        **{f"fit_{name}": int(name not in held) for name in FIXABLE_PARAMETERS},
-        **{f"{name}_fixed": held.get(name, 0.0) for name in FIXABLE_PARAMETERS},
-        **{
-            key: np.asarray(priors[key], dtype=float)
-            for key in (
-                "log_rate_prior_mean",
-                "log_rate_prior_sd",
-                "log_shape_prior_mean",
-                "log_shape_prior_sd",
-            )
-        },
+        **_fixable_entries(held),
+        **_prior_entries(priors),
     }
 
 

@@ -16,8 +16,7 @@ from numpy.typing import ArrayLike
 from scipy.special import beta as beta_function
 from scipy.stats import beta as beta_dist
 
-M_E_KEV = 510.99895
-Q_GE76_KEV = 2039.0
+from bosonic_dm.constants import M_E_KEV, Q_GE76_KEV
 
 
 def primakoff_rosen(

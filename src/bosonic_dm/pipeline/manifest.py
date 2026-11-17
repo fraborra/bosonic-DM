@@ -13,7 +13,7 @@ from bosonic_dm.efficiency import build_selection_metadata
 from bosonic_dm.yaml_io import read_yaml
 
 MANIFEST_SCHEMA_VERSION = 2
-EFFICIENCY_OUTPUT_SCHEMA_VERSION = 2
+EFFICIENCY_OUTPUT_SCHEMA_VERSION = 3
 BACKGROUND_DATASET_SCHEMA_VERSION = 1
 BACKGROUND_STORED_FLAGS = (
     "passes_baseline",
@@ -75,6 +75,13 @@ def current_cut_setup(config: AnalysisConfig) -> dict[str, object]:
             apply_lar_veto=config.apply_lar_veto,
         ),
         "efficiency_output_schema_version": EFFICIENCY_OUTPUT_SCHEMA_VERSION,
+        "efficiency_run_substitutes": {
+            f"{period}-{run}": f"{source_period}-{source_run}"
+            for (period, run), (
+                source_period,
+                source_run,
+            ) in config.efficiency_run_substitutes.items()
+        },
     }
 
 

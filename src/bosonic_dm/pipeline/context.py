@@ -16,6 +16,8 @@ from legendmeta import LegendMetadata
 from bosonic_dm.config import AnalysisConfig
 from bosonic_dm.resolution import get_channelmap_cached
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class AnalysisContext:
@@ -52,7 +54,8 @@ class AnalysisContext:
 
     def get_channelmap_simulation(self) -> Any:
         """Return a representative channelmap for simulation by using the first available physics run."""
-        # TODO: check this logic tomorrow
+        # TODO: confirm that the first run is a valid stand-in for every
+        # simulated detector (tracked in OPEN_TODOS.md).
         try:
             runinfo = self.lmeta.dataprod.runinfo
             first_period = next(iter(runinfo))
@@ -62,9 +65,6 @@ class AnalysisContext:
             msg = "Could not determine a representative start_key for simulation from runinfo."
             raise ValueError(msg) from e
         return self.get_channelmap(start_key)
-
-
-logger = logging.getLogger(__name__)
 
 
 def build_analysis_context(

@@ -36,8 +36,8 @@ def weighted_mean(
 
 
 def bayesian_efficiency(
-    k: int,
-    n: int,
+    k: float,
+    n: float,
     alpha0: float = 0.5,
     beta0: float = 0.5,
 ) -> tuple[float, float]:
@@ -49,6 +49,8 @@ def bayesian_efficiency(
         Number of successes (events in the FEP window).
     n
         Number of originating vertices generated inside the detector.
+        Both can be effective, non-integer counts from a weighted
+        combination of samples.
     alpha0
         First shape parameter of the Beta prior (default: Jeffreys' 0.5).
     beta0
