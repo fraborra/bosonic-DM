@@ -77,6 +77,7 @@ def _make_config(tmp_path: Path) -> AnalysisConfig:
 # mocked geometry returns when primaries are counted again.
 CACHED_COUNTS = {"V00000A": {"p03": {"r000": 10}}}
 COUNTED = {"V00000A": {"p03": {"r000": 20}}}
+DET_MAP = {"V00000A": object()}
 SIMULATION = "bosonic_dm.pipeline.simulation"
 
 
@@ -211,13 +212,15 @@ def _basic_plot_paths(config: AnalysisConfig) -> list[Path]:
 def mock_assign() -> Iterator[MagicMock]:
     """Replace the geometry and evt readers used to count primaries."""
     with (
+        patch(f"{SIMULATION}.build_detector_map", return_value=DET_MAP) as build,
         patch(
             f"{SIMULATION}.assign_detectors_to_vertices",
-            return_value=([object()], [object()]),
+            return_value=(object(), object()),
         ) as assign,
         patch(f"{SIMULATION}.read_run_ranges", return_value=[("p03", "r000", 0, 99)]),
         patch(f"{SIMULATION}.aggregate_vertex_counts_by_run", return_value=COUNTED),
     ):
+        assign.build_detector_map = build
         yield assign
 
 
@@ -423,9 +426,9 @@ def test_new_energy_is_counted_while_stored_counts_are_reused(
     assert artifacts.stage_status["efficiencies"] == "completed"
     # Only the 300 keV STP files are opened.
     mock_assign.assert_called_once()
-    assert mock_assign.call_args.kwargs["lh5_files"] == [
-        _job_file(config, "stp", 300, "000")
-    ]
+    assert mock_assign.call_args.kwargs["lh5_files"] == _job_file(
+        config, "stp", 300, "000"
+    )
     assert mock_compute.call_args.kwargs["simulated_energies"] == [200, 300]
     assert mock_compute.call_args.kwargs["vertex_counts"] == {
         200: CACHED_COUNTS,
@@ -435,6 +438,136 @@ def test_new_energy_is_counted_while_stored_counts_are_reused(
         "reused_energies_keV": [200],
         "counted_energies_keV": [300],
     }
+
+
+def test_primaries_are_counted_one_job_at_a_time_with_one_geometry(
+    tmp_path: Path, mock_assign: MagicMock, mock_compute: MagicMock
+) -> None:
+    config = replace(_make_config(tmp_path), energies_keV=(200, 300))
+    for energy in config.energies_keV:
+        _touch(_simulation_paths(config)[0] / f"sim_e={energy}/data.parquet")
+        _materialize_simulation_inputs(
+            config, energy=energy, stp_jobs=("000", "001"), evt_jobs=("000", "001")
+        )
+    _materialize_calibration_inputs(config)
+
+    artifacts = run_simulation_analysis(config, INTERACTION, stages=("efficiencies",))
+
+    assert artifacts.stage_status["efficiencies"] == "completed"
+    mock_assign.build_detector_map.assert_called_once()
+    assert [call.kwargs["lh5_files"] for call in mock_assign.call_args_list] == [
+        _job_file(config, "stp", energy, job)
+        for energy in (200, 300)
+        for job in ("000", "001")
+    ]
+    assert all(call.kwargs["det_map"] is DET_MAP for call in mock_assign.call_args_list)
+    # The two jobs of each energy add up.
+    summed = {"V00000A": {"p03": {"r000": 40}}}
+    assert mock_compute.call_args.kwargs["vertex_counts"] == {200: summed, 300: summed}
+
+
+def _count_checkpoint(config: AnalysisConfig, energy: int = 200) -> Path:
+    return (
+        config.paths.temporary_root
+        / f"primary_counts/{INTERACTION}/{energy}keV.parquet"
+    )
+
+
+def test_primary_counts_survive_a_failure_after_counting(
+    tmp_path: Path, mock_assign: MagicMock, mock_compute: MagicMock
+) -> None:
+    config = _make_config(tmp_path)
+    _, partition_path, _ = _simulation_paths(config)
+    _touch(partition_path)
+    _materialize_simulation_inputs(config)
+    _materialize_calibration_inputs(config)
+    mock_compute.side_effect = RuntimeError("efficiency failed")
+
+    with pytest.raises(RuntimeError, match="efficiency failed"):
+        run_simulation_analysis(config, INTERACTION, stages=("efficiencies",))
+    assert _count_checkpoint(config).exists()
+
+    mock_assign.reset_mock()
+    mock_assign.build_detector_map.reset_mock()
+    mock_compute.side_effect = None
+    artifacts = run_simulation_analysis(config, INTERACTION, stages=("efficiencies",))
+
+    assert artifacts.stage_status["efficiencies"] == "completed"
+    # The second run takes the counts from the checkpoint, not the geometry.
+    mock_assign.assert_not_called()
+    mock_assign.build_detector_map.assert_not_called()
+    assert mock_compute.call_args.kwargs["vertex_counts"] == {200: COUNTED}
+    # Once the efficiency table holds the counts, the checkpoint goes.
+    assert not _count_checkpoint(config).parent.exists()
+
+
+def test_count_checkpoint_of_other_jobs_is_not_reused(
+    tmp_path: Path, mock_assign: MagicMock, mock_compute: MagicMock
+) -> None:
+    config = _make_config(tmp_path)
+    _, partition_path, _ = _simulation_paths(config)
+    _touch(partition_path)
+    _materialize_simulation_inputs(config)
+    _materialize_calibration_inputs(config)
+    mock_compute.side_effect = RuntimeError("efficiency failed")
+    with pytest.raises(RuntimeError):
+        run_simulation_analysis(config, INTERACTION, stages=("efficiencies",))
+
+    # A new job was simulated since the checkpoint was written.
+    _materialize_simulation_inputs(
+        config, stp_jobs=("000", "001"), evt_jobs=("000", "001")
+    )
+    mock_assign.reset_mock()
+    mock_compute.side_effect = None
+    run_simulation_analysis(config, INTERACTION, stages=("efficiencies",))
+
+    assert mock_assign.call_count == 2
+
+
+def test_failed_plots_keep_the_efficiency_record(
+    tmp_path: Path, mock_assign: MagicMock, mock_compute: MagicMock
+) -> None:
+    config = _make_config(tmp_path)
+    _, partition_path, efficiency_path = _simulation_paths(config)
+    _touch(partition_path)
+    _materialize_simulation_inputs(config)
+    _materialize_calibration_inputs(config)
+    write_yaml({}, config.detector_groups)
+
+    with (
+        patch(f"{SIMULATION}.build_labels_dicts", return_value={}),
+        patch(
+            f"{SIMULATION}.plot_efficiency_comparison",
+            side_effect=RuntimeError("plot failed"),
+        ),
+        pytest.raises(RuntimeError, match="plot failed"),
+    ):
+        run_simulation_analysis(config, INTERACTION)
+
+    stages = _read_manifest(config)["stages"]
+    assert stages["build-dataset"]["status"] == "cached"
+    assert stages["efficiencies"]["status"] == "completed"
+    assert stages["efficiencies"]["outputs"] == [str(efficiency_path)]
+    assert "plots" not in stages
+
+    # The next run reuses the efficiencies and only redoes the plots.
+    mock_assign.reset_mock()
+    mock_compute.reset_mock()
+    with (
+        patch(f"{SIMULATION}.build_labels_dicts", return_value={}),
+        patch(
+            f"{SIMULATION}.plot_efficiency_comparison", return_value=(object(), None)
+        ),
+        patch(
+            f"{SIMULATION}.plot_fep_survival_fraction", return_value=(object(), None)
+        ),
+        patch(f"{SIMULATION}.plt.close"),
+    ):
+        artifacts = run_simulation_analysis(config, INTERACTION)
+
+    assert artifacts.stage_status["efficiencies"] == "cached"
+    assert artifacts.stage_status["plots"] == "completed"
+    mock_compute.assert_not_called()
 
 
 def test_mismatched_stp_and_evt_jobs_block_the_efficiency(
