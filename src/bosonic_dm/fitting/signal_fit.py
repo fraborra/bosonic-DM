@@ -238,7 +238,8 @@ def save_signal_fit(
             },
             "signal_model": "single Gaussian per group, centroid = mass + fixed "
             "exposure-weighted calibration offset (zero if no residuals given), "
-            "FWHM = exposure-weighted mean of detector/run sqrt(a + b E)",
+            "FWHM**2 = exposure-weighted mean of detector/run (a + b E) "
+            "(moment matched)",
             "groups": groups,
             "prior": {"rate": "uniform", "rate_upper": float(stan_data["rate_upper"])},
             "sampler": sampler_record(fit),

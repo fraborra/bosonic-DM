@@ -147,8 +147,10 @@ def test_group_fwhm_uses_period_membership_and_exposure_weights() -> None:
         np.array([1.0 + 0.002 * energy, 2.0 + 0.003 * energy, 2.0 + 0.003 * energy])
     )
     weights = np.array([2.0, 1.0, 1.0])
-    mean, unc = group_fwhm(ERES, GROUPS["A"], energy)
-    assert mean == pytest.approx(np.average(fwhm, weights=weights))
+    matched, unc = group_fwhm(ERES, GROUPS["A"], energy)
+    # Moment matching: the variance of the summed Gaussians.
+    assert matched == pytest.approx(np.sqrt(np.average(fwhm**2, weights=weights)))
+    assert matched > np.average(fwhm, weights=weights)
     assert unc > 0  # weighted scatter between detectors
 
     mean_b, unc_b = group_fwhm(ERES, GROUPS["B"], energy)
@@ -174,7 +176,7 @@ def test_exposure_key_selects_the_weights_and_the_group_exposure() -> None:
     )
 
     mean, _ = group_fwhm(eres, GROUPS["A"], energy, exposure_key="expo_alt")
-    assert mean == pytest.approx(np.average(fwhm, weights=[1.0, 2.0, 2.0]))
+    assert mean == pytest.approx(np.sqrt(np.average(fwhm**2, weights=[1.0, 2.0, 2.0])))
 
     window = build_signal_window(
         energy,

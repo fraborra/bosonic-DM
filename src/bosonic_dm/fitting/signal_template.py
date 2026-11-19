@@ -13,8 +13,11 @@ where ``B_hat`` is the fixed background prediction from the broad Stan fit,
 kg yr, ``eps_g`` is the exposure-weighted group signal efficiency, and
 ``P_gi`` is the probability of a Gaussian centred on ``m + delta_g(m)`` in
 bin ``i``, integrated exactly over the bin edges. The Gaussian width is
-``FWHM_g(m) / (2 sqrt(2 ln 2))``, with ``FWHM_g`` the exposure-weighted mean of
-the detector/run resolutions ``sqrt(a + b m)`` of the group. The optional
+``FWHM_g(m) / (2 sqrt(2 ln 2))``. ``FWHM_g`` is moment matched: its square is
+the exposure-weighted mean of the squared detector/run resolutions
+``a + b m``, so the single Gaussian has the variance of the summed
+detector/run Gaussians (``fitting-decisions.md``, with equal efficiencies and
+equal centroids within a group). The optional
 calibration offset ``delta_g(m)`` is the exposure-weighted mean of the
 detector/run calibration residuals (calibrated minus literature peak energy)
 interpolated at ``m``; it is a fixed input, zero when no residuals are given.
@@ -150,14 +153,19 @@ def group_fwhm(
     energy_keV: float,
     exposure_key: str = "expo",
 ) -> tuple[float, float]:
-    """Return the exposure-weighted mean FWHM of a detector group and its uncertainty.
+    """Return the moment-matched FWHM of a detector group and its uncertainty.
 
     Every usable ``period/run/detector`` entry of ``eres_dict`` selected by
-    ``group_dict`` (same rules as ``compute_group_exposure``) contributes
-    ``sqrt(a + b E)`` with weight equal to its exposure. The uncertainty
-    combines the propagated calibration uncertainties (``ab_corr`` is the
-    a-b covariance) and the weighted scatter, as in
-    ``compute_weighted_uncertainty``.
+    ``group_dict`` (same rules as ``compute_group_exposure``) contributes a
+    Gaussian of width ``FWHM_j = sqrt(a + b E)`` with weight equal to its
+    exposure ``X_j``. The returned width matches the variance of their sum:
+    ``FWHM_g**2 = sum(X_j FWHM_j**2) / sum(X_j)``. It assumes equal
+    efficiencies and equal centroids within the group, and it is never smaller
+    than the exposure-weighted mean FWHM.
+
+    The uncertainty is the one of the exposure-weighted mean FWHM: the
+    propagated calibration uncertainties (``ab_corr`` is the a-b covariance)
+    combined with the weighted scatter, as in ``compute_weighted_uncertainty``.
 
     Parameters
     ----------
@@ -174,7 +182,7 @@ def group_fwhm(
     Returns
     -------
     tuple[float, float]
-        Weighted mean FWHM and its uncertainty, in keV.
+        Moment-matched FWHM and its uncertainty, in keV.
 
     Raises
     ------
@@ -208,11 +216,12 @@ def group_fwhm(
     expo, a, b, a_unc, b_unc, ab_cov = np.asarray(rows, dtype=float).T
     fwhm = compute_fwhm(a, b, energy_keV)
     fwhm_unc = propagate_resolution_uncertainty(a, b, a_unc, b_unc, ab_cov, energy_keV)
-    mean = weighted_mean(fwhm, expo)
-    if not np.isfinite(mean) or mean <= 0:
-        msg = f"Group FWHM at {energy_keV} keV is not positive: {mean}."
+    matched = float(np.sqrt(weighted_mean(fwhm**2, expo)))
+    if not np.isfinite(matched) or matched <= 0:
+        msg = f"Group FWHM at {energy_keV} keV is not positive: {matched}."
         raise ValueError(msg)
-    return float(mean), float(compute_weighted_uncertainty(expo, fwhm, mean, fwhm_unc))
+    mean = weighted_mean(fwhm, expo)
+    return matched, float(compute_weighted_uncertainty(expo, fwhm, mean, fwhm_unc))
 
 
 def calibration_offset(
