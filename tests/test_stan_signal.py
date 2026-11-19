@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 
 import numpy as np
@@ -26,19 +25,6 @@ from bosonic_dm.fitting.signal_template import (
 from bosonic_dm.yaml_io import read_yaml
 
 cmdstanpy = pytest.importorskip("cmdstanpy")
-
-
-@pytest.fixture(scope="module")
-def signal_model(tmp_path_factory: pytest.TempPathFactory) -> cmdstanpy.CmdStanModel:
-    """Compile in a temporary directory, leaving the source tree clean."""
-    try:
-        cmdstanpy.cmdstan_path()
-    except ValueError:
-        pytest.skip("CmdStan is not installed")
-    source = Path(__file__).resolve().parents[1] / "stan" / "signal.stan"
-    target = tmp_path_factory.mktemp("stan_signal") / source.name
-    shutil.copyfile(source, target)
-    return cmdstanpy.CmdStanModel(stan_file=str(target))
 
 
 EDGES = np.arange(488.0, 513.0)

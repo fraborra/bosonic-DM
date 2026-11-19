@@ -287,6 +287,34 @@ def _window(mass: float = 500.0, **backgrounds: BackgroundPrediction):
     )
 
 
+def test_with_counts_replaces_only_the_counts() -> None:
+    window = _window()
+    shape = window.stacked("counts").shape
+    toy = np.arange(np.prod(shape)).reshape(shape)
+    replaced = window.with_counts(toy)
+
+    np.testing.assert_array_equal(replaced.stacked("counts"), toy)
+    assert replaced.stacked("counts").dtype == np.int64
+    np.testing.assert_array_equal(replaced.stacked("b_hat"), window.stacked("b_hat"))
+    np.testing.assert_array_equal(
+        replaced.stacked("signal_template"), window.stacked("signal_template")
+    )
+    assert np.all(window.stacked("counts") == 7)  # the original is unchanged
+
+
+@pytest.mark.parametrize(
+    ("counts", "match"),
+    [
+        (np.zeros((1, 24)), "counts must have shape"),
+        (-np.ones((2, 24)), "nonnegative integers"),
+        (np.full((2, 24), 1.5), "nonnegative integers"),
+    ],
+)
+def test_with_counts_rejects_invalid_counts(counts: np.ndarray, match: str) -> None:
+    with pytest.raises(ValueError, match=match):
+        _window().with_counts(counts)
+
+
 def test_signal_window_template_normalization() -> None:
     window = _window(500.0)
 

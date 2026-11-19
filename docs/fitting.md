@@ -180,6 +180,35 @@ the grid. Counts can be non-integer (Asimov data) and have shape
 limit per dataset, in counts/(kg yr); it matches the Stan limit within its Monte
 Carlo error.
 
+### Checking one mass
+
+`scripts/signal_fit_one_mass.py` runs the chain above at one mass from the
+pipeline outputs named by a config: the background fits in
+`<data_root>/background_fits/`, `eres_dict.yaml` and the detector groups under
+`inputs_root`, and the efficiency table in `<data_root>/dictionaries/`.
+
+```bash
+PYTHONPATH=src pixi run python3 scripts/signal_fit_one_mass.py \
+    --config configs/nersc.yaml --mass 500 --outdir tmp/signal_500
+```
+
+It is blinded by default: the observed counts in the window are never fitted,
+plotted or written. The script:
+
+1. logs, per group, the exposure, efficiency, moment-matched FWHM, window
+   containment, and the window sums of `B_hat` and of the signal template;
+2. computes the upper limit on the Asimov dataset (counts = `B_hat`) with the
+   grid posterior; Stan needs integer counts, so the Asimov limit is grid only;
+3. draws one Poisson toy from `B_hat`, fits it with Stan and with the grid
+   posterior, and checks that the two limits agree within 4 Monte Carlo standard
+   errors;
+4. writes `summary.yaml` and `rate_draws.npy` (the Stan fit of the toy),
+   `checks.yaml`, and `window.png` (toy, `B_hat`, and `B_hat + R90 S`).
+
+`--inject R` adds `R * S` to the toy; the posterior should recover `R`
+(`injection_pull` in `checks.yaml`), which checks the units of the template.
+`--unblind` fits the observed counts instead of a toy.
+
 The reported limit is conditional on the fixed `B_hat` and the nominal response.
 A mass scan, pseudo-experiments, and the conversion to a coupling are not
 implemented yet.

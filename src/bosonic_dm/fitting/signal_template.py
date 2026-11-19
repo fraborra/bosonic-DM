@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Iterator, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import numpy as np
@@ -129,6 +129,36 @@ class SignalWindow:
     def stacked(self, field: str) -> np.ndarray:
         """Stack a per-bin field over groups, shape ``(groups, bins)``."""
         return np.vstack([getattr(inputs, field) for inputs in self.groups.values()])
+
+    def with_counts(self, counts: np.ndarray) -> SignalWindow:
+        """Return a copy of the window with other counts.
+
+        Used to fit a pseudo-dataset (an Asimov or toy spectrum) in place of
+        the observed counts, which stay blinded.
+
+        Parameters
+        ----------
+        counts
+            Nonnegative integer counts, shape ``(groups, bins)``, rows in the
+            order of ``group_names``.
+        """
+        values = np.asarray(counts)
+        shape = (len(self.groups), len(self.bin_edges) - 1)
+        if values.shape != shape:
+            msg = f"counts must have shape {shape}; got {values.shape}."
+            raise ValueError(msg)
+        if (
+            not np.all(np.isfinite(values))
+            or np.any(values < 0)
+            or np.any(values != np.round(values))
+        ):
+            msg = "counts must be nonnegative integers."
+            raise ValueError(msg)
+        groups = {
+            name: replace(inputs, counts=row.astype(np.int64))
+            for (name, inputs), row in zip(self.groups.items(), values, strict=True)
+        }
+        return replace(self, groups=groups)
 
 
 def _group_entries(
