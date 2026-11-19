@@ -184,6 +184,74 @@ def inits_from_prefit(
     return inits
 
 
+#: Expected 2vbb counts per unit exposure (counts / kg yr) before the
+#: correction factors below; the centre of the ``N_2nu`` rate prior scales
+#: linearly with the group exposure.
+N2NU_COUNTS_PER_EXPOSURE = 2.4e3
+#: Ge-76 enrichment renormalization ``0.90 / 0.88``: the 2vbb rate per exposure
+#: comes from GERDA (~88 % Ge-76); LEGEND detectors are ~90 % Ge-76.
+N2NU_RATIO_CORRECTION = 0.90 / 0.88
+#: Conservative ("bad case") effective-exposure fraction ``0.9`` for LEGEND,
+#: covering cut efficiencies, dead layer and similar losses.
+N2NU_EXTRA_FACTOR = 0.9
+#: Upper energy (keV) of the Ar39-dominated region; counts in bins starting
+#: below it estimate the Ar39 normalization (Ar39 endpoint is ~565 keV).
+AR39_PRIOR_ENDPOINT_KEV = 565.0
+
+
+def rate_prior_centres(
+    spectrum: Mapping[str, Any],
+    exposure: float,
+) -> tuple[float, float]:
+    """Centres of the ``N_2nu`` and ``N_ar39`` lognormal rate priors.
+
+    Parameters
+    ----------
+    spectrum
+        A ``spectrum_in_range`` group with ``bin_edges`` and
+        ``counts_analysis``.
+    exposure
+        Group exposure in kg yr, e.g. from
+        ``bosonic_dm.cuts.compute_group_exposure``.
+
+    Returns
+    -------
+    tuple[float, float]
+        ``(n2nu, ar39)`` in counts, with::
+
+            n2nu = N2NU_COUNTS_PER_EXPOSURE * exposure
+                   * N2NU_RATIO_CORRECTION * N2NU_EXTRA_FACTOR
+            ar39 = sum(counts_analysis[bin_lo < AR39_PRIOR_ENDPOINT_KEV])
+                   / (AR39_PRIOR_ENDPOINT_KEV - bin_edges[0])
+                   * AR39_PRIOR_ENDPOINT_KEV
+
+    Notes
+    -----
+    The counts from the spectrum start (the fit-range start, 100 keV by
+    default, giving the script's ``465`` keV window) up to the endpoint are
+    extrapolated flat to the full ``[0, 565]`` keV Ar39 spectrum. Bins inside
+    the peak-exclusion windows are counted too.
+    """
+    n2nu = (
+        N2NU_COUNTS_PER_EXPOSURE
+        * float(exposure)
+        * N2NU_RATIO_CORRECTION
+        * N2NU_EXTRA_FACTOR
+    )
+    edges = np.asarray(spectrum["bin_edges"], dtype=float)
+    counts = np.asarray(spectrum["counts_analysis"], dtype=float)
+    mask = edges[:-1] < AR39_PRIOR_ENDPOINT_KEV
+    window_width_keV = AR39_PRIOR_ENDPOINT_KEV - float(edges[0])
+    if window_width_keV <= 0:
+        msg = (
+            f"Spectrum starts at {edges[0]} keV, at or above the Ar39 endpoint "
+            f"{AR39_PRIOR_ENDPOINT_KEV} keV"
+        )
+        raise ValueError(msg)
+    ar39 = float(np.sum(counts[mask])) / window_width_keV * AR39_PRIOR_ENDPOINT_KEV
+    return float(n2nu), ar39
+
+
 def priors_from_prefit(
     prefit: Mapping[str, Any],
     *,

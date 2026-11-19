@@ -189,3 +189,52 @@ def test_banner_wraps_long_values_to_fixed_width() -> None:
 
     assert max(len(line) for line in banner.splitlines()) == 80
     assert len(banner.splitlines()) > len(rows) + 4
+
+
+@patch("bosonic_dm.cli.load_analysis_config")
+@patch("bosonic_dm.cli.run_background_analysis")
+def test_background_default_groups_is_none(mock_run, mock_load, mock_artifacts):
+    """Without --group the pipeline receives groups=None (all groups)."""
+    mock_load.return_value = MagicMock()
+    mock_run.return_value = mock_artifacts
+
+    assert main(["background", "--config", "dummy.yaml"]) == 0
+    assert mock_run.call_args[1]["groups"] is None
+
+
+@patch("bosonic_dm.cli.load_analysis_config")
+@patch("bosonic_dm.cli.run_background_analysis")
+@pytest.mark.parametrize(
+    "groups", [["BEGe"], ["ICPC group1", "PPC"]], ids=["one", "several"]
+)
+def test_background_group_forwarded(mock_run, mock_load, mock_artifacts, groups):
+    """--group names, including ones with spaces, are forwarded unchanged."""
+    mock_load.return_value = MagicMock()
+    mock_run.return_value = mock_artifacts
+
+    argv = ["background", "--config", "dummy.yaml", "--stage", "fit", "--group"]
+    assert main([*argv, *groups]) == 0
+    kwargs = mock_run.call_args[1]
+    assert kwargs["groups"] == groups
+    assert kwargs["stages"] == ["fit"]
+
+
+def test_all_subcommand_removed() -> None:
+    """The former `all` subcommand is rejected by argparse (exit code 2)."""
+    with pytest.raises(SystemExit) as exc:
+        main(["all", "--config", "x.yaml"])
+    assert exc.value.code == 2
+
+
+def test_background_banner_shows_groups() -> None:
+    rows = dict(
+        _banner_rows(
+            "background",
+            _banner_config(),
+            interactions=None,
+            groups=["ICPC group1"],
+            stages=["fit"],
+            overwrite=None,
+        )
+    )
+    assert rows["Fit groups"] == "ICPC group1"

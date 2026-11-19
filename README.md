@@ -38,12 +38,17 @@ pixi run bosonic-dm simulation \
   --interaction dark-compton
 
 pixi run bosonic-dm background --config configs/local.yaml
+
+# Background fit for selected detector groups (stages: build-dataset, fit, fit-plots)
+pixi run bosonic-dm background --config configs/local.yaml \
+  --stage fit fit-plots --group "ICPC group1"
 ```
 
 Use `pixi run` for every project command. Site-specific data paths and
 simulation inputs are intentionally not committed.
 
-The background and signal fits are run from Python rather than the CLI; see
+The background fit also runs from the CLI (`--stage fit`); on NERSC use
+`sbatch scripts/run_bkg.sh <group|all>`. The signal fit is run from Python; see
 [Spectral fits](docs/fitting.md).
 
 ## Documentation

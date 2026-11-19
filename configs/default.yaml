@@ -58,6 +58,46 @@ background:
     - 1
     - 5
     - 10
+  # Per-group Stan background fit (stages fit and fit-plots). Every key is
+  # optional; the values below are the defaults.
+  fit:
+    # Prepared group spectrum: energy range and bin width [keV].
+    spectrum_range_keV: [60, 2000]
+    spectrum_bin_width_keV: 1
+    # Range of the spectrum passed to Stan [keV].
+    fit_range_keV: [100, 1100]
+    # Gamma-line centres [keV] left out of the likelihood, with window width.
+    peaks_keV:
+      - 238.632  # Pb-212; merges 241.0 Ra-224, 242.0 Pb-214
+      - 295.224  # Pb-214
+      - 351.932  # Pb-214
+      - 511.0  # e+e- / Tl-208
+      - 583.187  # Tl-208
+      - 609.312  # Bi-214
+      - 727.330  # Bi-212
+      - 860.557  # Tl-208
+      - 911.204  # Ac-228
+      - 968.971  # Ac-228; merges 964.8
+      - 1120.29  # Bi-214
+      - 1238.11  # Bi-214
+      - 1377.67  # Bi-214
+      - 1460.82  # K-40
+      - 1524.6  # K-42; merges 1509.2, 1512.7
+      - 1588.2  # Ac-228; merges 1592.5 DEP
+      - 1620.50  # Bi-212; merges 1630.6
+      - 1729.6  # Bi-214
+      - 1764.49  # Bi-214
+      - 1847.42  # Bi-214
+    peak_exclusion_width_keV: 5.0
+    # Per-group curve_fit prefits; a relative path is under paths.inputs_root.
+    prefit_dictionary: dictionaries/prefit_dictionary.yaml
+    prefit_key: fit_ar
+    # no_linear: c0 = cQ = 0 (no linear continuum); full: sample c0 and cQ.
+    model: no_linear
+    # Log-space prior widths: Ar39 shape parameters and the two rates.
+    shape_sd: 0.5
+    rate_prior_sd: {n2nu: 0.5, ar39: 2.0}
+    sampler: {chains: 4, iter_warmup: 1000, iter_sampling: 1000, seed: 12345}
 
 output:
   overwrite: false
