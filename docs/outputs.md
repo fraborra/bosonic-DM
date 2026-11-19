@@ -27,7 +27,9 @@ Only products for workflows and energies that have valid inputs appear. The
 efficiency product is a Parquet table with one row per energy, detector, run,
 and selection; its columns are listed in
 [Simulation pipeline](simulation-pipeline.md#efficiencies). It also holds the
-primary counts (`n_primaries`); there is no separate primary-counts file.
+primary counts (`n_primaries`); there is no separate primary-counts file. The
+per-energy checkpoints under `<temporary_root>/primary_counts/` exist only while
+the `efficiencies` stage runs, or after it failed.
 
 Fit products are not part of this tree. `save_background_fit` and
 `save_signal_fit` write to the directory passed by the caller and record their
@@ -35,9 +37,11 @@ inputs in a `summary.yaml`; see [Spectral fits](fitting.md#products).
 
 ## Simulation manifests
 
-`<data_root>/<interaction>_manifest.yaml` is cumulative. Its stage records hold
-each stage's status, outputs, and the cut and plot settings used to decide
-whether efficiency and plot products can be reused. `last_run` records:
+`<data_root>/<interaction>_manifest.yaml` is cumulative and rewritten after
+every stage, so a failed run keeps the records of the stages it finished. Its
+stage records hold each stage's status, outputs, and the cut and plot settings
+used to decide whether efficiency and plot products can be reused. `last_run`
+records:
 
 - requested and dependency-resolved stages;
 - whether overwrite was enabled;

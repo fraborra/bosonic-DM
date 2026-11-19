@@ -53,7 +53,9 @@ build-dataset ─> efficiencies ─> plots
 ```
 
 Counting the primaries is part of `efficiencies`; there is no `count-vertices`
-stage and no primary-counts file.
+stage and no lasting primary-counts file. The manifest is written after every
+stage, so a run that fails in `plots` keeps the `efficiencies` record and the
+next run reuses the table.
 
 ### `build-dataset`
 
@@ -85,9 +87,16 @@ period/run**. It maps the STP vertices to detectors with the GDML geometry. The
 simulation assigns the primaries of a job to runs in contiguous `evtid` blocks;
 the blocks are read from the evt file of the same job (`read_run_ranges`) and
 applied to the vertex `evtid`s. `evtid` restarts in every job, which is why the
-per-job files are used.
+per-job files are used. The geometry is loaded once, and the vertices of one job
+at a time are held in memory (about 2 GB at 2M vertices per job).
 
 The counts are stored only in the `n_primaries` column of the efficiency table.
+While the stage runs, the counts of each energy also go to a checkpoint,
+`<temporary_root>/primary_counts/<interaction>/<energy>keV.parquet`, so a run
+that fails before the table is written does not count them again. A checkpoint
+is reused only for the same STP job numbers, never with `--overwrite`, and the
+directory is removed once the table is written.
+
 Counting is slow, so the stage reuses what the table already holds:
 
 | Situation                                    | Primary counts                         |

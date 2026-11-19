@@ -385,6 +385,7 @@ def assign_detectors_to_vertices(
     save: bool = False,
     counts_yaml: str | Path | None = None,
     return_evtids: bool = False,
+    det_map: Mapping | None = None,
 ) -> NDArray | list[NDArray] | tuple[NDArray | list[NDArray], NDArray | list[NDArray]]:
     """Determine which HPGe detector each vertex is inside.
 
@@ -411,6 +412,9 @@ def assign_detectors_to_vertices(
         ``{detector_name: n_vertices, ...}`` dictionary.
     return_evtids
         If True, also read and return the event IDs for each file.
+    det_map
+        Detector map from :func:`build_detector_map` for *gdml*. Pass it to
+        load the geometry once across several calls.
 
     Returns
     -------
@@ -419,7 +423,8 @@ def assign_detectors_to_vertices(
         If a list of files is given, returns a list of string arrays
         (and a list of evtid arrays if requested).
     """
-    det_map = build_detector_map(gdml)
+    if det_map is None:
+        det_map = build_detector_map(gdml)
 
     # Normalise to a list while remembering if the input was a single file.
     single_input = isinstance(lh5_files, str | Path)

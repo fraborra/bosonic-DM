@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import logging
 import re
+import shutil
+from collections import Counter
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
@@ -28,9 +30,10 @@ from bosonic_dm.efficiency import (
 from bosonic_dm.geometry import (
     aggregate_vertex_counts_by_run,
     assign_detectors_to_vertices,
+    build_detector_map,
     read_run_ranges,
 )
-from bosonic_dm.io import build_parquet_dataset
+from bosonic_dm.io import build_parquet_dataset, write_parquet_atomic
 from bosonic_dm.models import AnalysisArtifacts
 from bosonic_dm.pipeline.context import build_analysis_context
 from bosonic_dm.pipeline.manifest import (
@@ -160,6 +163,53 @@ def _reusable_primary_counts(
     return load_primary_counts(efficiency_path)
 
 
+def _count_checkpoint_dir(config: AnalysisConfig, interaction: str) -> Path:
+    """Return the directory of the per-energy primary-count checkpoints."""
+    return config.paths.temporary_root / "primary_counts" / interaction
+
+
+def _write_count_checkpoint(
+    path: Path,
+    counts: Mapping[str, Mapping[str, Mapping[str, int]]],
+    jobs: Sequence[str],
+) -> None:
+    """Store the primary counts of one energy and the jobs they come from."""
+    rows = [
+        (detector, period, run, n_primaries)
+        for detector, periods in counts.items()
+        for period, runs in periods.items()
+        for run, n_primaries in runs.items()
+    ]
+    frame = pl.DataFrame(
+        rows,
+        schema={
+            "detector": pl.String,
+            "period": pl.String,
+            "run": pl.String,
+            "n_primaries": pl.Int64,
+        },
+        orient="row",
+    ).with_columns(jobs=pl.lit(",".join(jobs)))
+    write_parquet_atomic(frame, path)
+
+
+def _read_count_checkpoint(
+    path: Path, jobs: Sequence[str]
+) -> dict[str, dict[str, dict[str, int]]] | None:
+    """Return the checkpointed counts of one energy if they match ``jobs``."""
+    if not path.exists():
+        return None
+    frame = pl.read_parquet(path)
+    if frame.is_empty() or frame["jobs"].unique().to_list() != [",".join(jobs)]:
+        return None
+    counts: dict[str, dict[str, dict[str, int]]] = {}
+    for detector, period, run, n_primaries in frame.select(
+        "detector", "period", "run", "n_primaries"
+    ).iter_rows():
+        counts.setdefault(detector, {}).setdefault(period, {})[run] = int(n_primaries)
+    return counts
+
+
 def _count_primaries(
     config: AnalysisConfig,
     interaction: str,
@@ -167,12 +217,19 @@ def _count_primaries(
     stp_files: Mapping[int, Mapping[str, Path]],
     evt_files: Mapping[int, Mapping[str, Path]],
     artifacts: AnalysisArtifacts,
+    *,
+    overwrite: bool = False,
 ) -> dict[int, dict[str, dict[str, dict[str, int]]]]:
     """Count the primaries generated in each detector for each period/run.
 
     Vertices come from the STP files and the ``evtid`` block of each run from
     the evt file of the same job. An energy is skipped, with a warning, when
     its STP and evt jobs do not match.
+
+    The counts of every energy are checkpointed under the temporary root as
+    soon as they are known, so a run that fails later does not count them
+    again. A checkpoint is reused only for the same set of jobs, and never
+    with ``overwrite``.
 
     Returns
     -------
@@ -197,6 +254,11 @@ def _count_primaries(
         _warn(artifacts, "Skipping primary counts: GDML not found at %s", gdml_path)
         return counts
 
+    # The geometry is loaded once, and the vertices of one job at a time are
+    # kept in memory: all the jobs of one energy together need several GB.
+    det_map: dict | None = None
+    checkpoint_dir = _count_checkpoint_dir(config, interaction)
+    restored: list[int] = []
     for energy in tqdm(energies, desc="Primary counts", position=0):
         stp_jobs = stp_files.get(energy, {})
         evt_jobs = evt_files.get(energy, {})
@@ -213,17 +275,45 @@ def _count_primaries(
             continue
 
         jobs = sorted(stp_jobs)
-        detector_arrays, evtid_arrays = assign_detectors_to_vertices(
-            gdml=gdml_path,
-            lh5_files=[stp_jobs[job] for job in jobs],
-            vtx_group="vtx",
-            save=False,
-            return_evtids=True,
-        )
-        counts[energy] = aggregate_vertex_counts_by_run(
-            detector_arrays,
-            evtid_arrays,
-            [read_run_ranges(evt_jobs[job]) for job in jobs],
+        checkpoint = checkpoint_dir / f"{energy}keV.parquet"
+        stored = None if overwrite else _read_count_checkpoint(checkpoint, jobs)
+        if stored is not None:
+            counts[energy] = stored
+            restored.append(energy)
+            continue
+
+        if det_map is None:
+            det_map = build_detector_map(gdml_path)
+        total: Counter[tuple[str, str, str]] = Counter()
+        for job in jobs:
+            detector_names, evtids = assign_detectors_to_vertices(
+                gdml=gdml_path,
+                lh5_files=stp_jobs[job],
+                vtx_group="vtx",
+                save=False,
+                return_evtids=True,
+                det_map=det_map,
+            )
+            job_counts = aggregate_vertex_counts_by_run(
+                [detector_names], [evtids], [read_run_ranges(evt_jobs[job])]
+            )
+            del detector_names, evtids
+            for detector, periods in job_counts.items():
+                for period, runs in periods.items():
+                    for run, n_primaries in runs.items():
+                        total[(detector, period, run)] += n_primaries
+        energy_counts: dict[str, dict[str, dict[str, int]]] = {}
+        for (detector, period, run), n_primaries in sorted(total.items()):
+            energy_counts.setdefault(detector, {}).setdefault(period, {})[run] = (
+                n_primaries
+            )
+        counts[energy] = energy_counts
+        _write_count_checkpoint(checkpoint, energy_counts, jobs)
+    if restored:
+        logger.info(
+            "Restored primary counts of %d energies from %s",
+            len(restored),
+            checkpoint_dir,
         )
     return counts
 
@@ -293,7 +383,7 @@ def _write_manifest(
     manifest_path = config.paths.data_root / f"{manifest['interaction']}_manifest.yaml"
     write_yaml(manifest, manifest_path)
     artifacts.manifest_path = manifest_path
-    logger.info("Pipeline manifest written to %s", manifest_path)
+    logger.debug("Pipeline manifest written to %s", manifest_path)
 
 
 def run_simulation_analysis(
@@ -332,6 +422,20 @@ def run_simulation_analysis(
 
     # Old manifests carry a record of the former count-vertices stage.
     stages_manifest.pop("count-vertices", None)
+
+    def save_manifest() -> None:
+        """Write the manifest as it stands; called after every stage.
+
+        A run that fails in a later stage keeps the records of the stages
+        that finished, so the next run reuses their outputs.
+        """
+        manifest["last_run"] = {
+            "requested_stages": list(requested_stages),
+            "resolved_stages": list(resolved_stages),
+            "overwrite": do_overwrite,
+            "warnings": list(artifacts.warnings),
+        }
+        _write_manifest(config, manifest, artifacts)
 
     stp_files: dict[int, dict[str, Path]] = {}
     evt_files: dict[int, dict[str, Path]] = {}
@@ -406,6 +510,7 @@ def run_simulation_analysis(
             "status": artifacts.stage_status["build-dataset"],
             "outputs": [str(dataset_dir)] if available_partitions else [],
         }
+        save_manifest()
 
     efficiency_path = efficiency_table_path(config.paths.dictionaries_root, interaction)
     efficiency_is_current = False
@@ -505,6 +610,7 @@ def run_simulation_analysis(
                     stp_files,
                     evt_files,
                     artifacts,
+                    overwrite=do_overwrite,
                 )
                 vertex_counts.update(counted)
                 ready_energies = [
@@ -537,6 +643,10 @@ def run_simulation_analysis(
 
                 efficiencies = efficiency_table(efficiency_dict)
                 write_efficiency_table(efficiencies, efficiency_path)
+                # The table now holds the counts: drop their checkpoints.
+                shutil.rmtree(
+                    _count_checkpoint_dir(config, interaction), ignore_errors=True
+                )
                 without_primaries = (
                     efficiencies.filter(pl.col("n_primaries").fill_null(0) <= 0)
                     .select("sim_e", "detector", "period", "run")
@@ -577,6 +687,8 @@ def run_simulation_analysis(
                     **blocked_record,
                     "status": "blocked",
                 }
+
+        save_manifest()
 
     if "plots" in resolved_stages:
         expected_plot_paths = _expected_simulation_plot_paths(config, interaction)
@@ -800,11 +912,7 @@ def run_simulation_analysis(
                 "plot_setup": plot_setup,
             }
 
-    manifest["last_run"] = {
-        "requested_stages": list(requested_stages),
-        "resolved_stages": list(resolved_stages),
-        "overwrite": do_overwrite,
-        "warnings": list(artifacts.warnings),
-    }
-    _write_manifest(config, manifest, artifacts)
+    save_manifest()
+    if artifacts.manifest_path is not None:
+        logger.info("Pipeline manifest written to %s", artifacts.manifest_path)
     return artifacts
