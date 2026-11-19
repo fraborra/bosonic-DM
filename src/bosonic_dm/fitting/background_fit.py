@@ -343,12 +343,15 @@ def run_background_fit(
     iter_warmup: int = 1000,
     iter_sampling: int = 1000,
     adapt_delta: float = 0.9,
+    max_treedepth: int = 12,
     output_dir: str | Path | None = None,
     show_progress: bool = False,
     inits: Mapping[str, Any] | Sequence[Mapping[str, Any]] | None = None,
     sig_figs: int | None = None,
 ) -> cmdstanpy.CmdStanMCMC:
     """Sample the background posterior for one detector group.
+
+    ``max_treedepth`` caps the NUTS trajectory length (Stan's default is 10).
 
     ``inits`` is optional: one mapping for all chains, one mapping per chain
     (e.g. from ``inits_from_prefit``), or ``None`` for Stan's default random
@@ -371,6 +374,7 @@ def run_background_fit(
         iter_warmup=iter_warmup,
         iter_sampling=iter_sampling,
         adapt_delta=adapt_delta,
+        max_treedepth=max_treedepth,
         seed=seed,
         output_dir=None if output_dir is None else str(output_dir),
         show_progress=show_progress,

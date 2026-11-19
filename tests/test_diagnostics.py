@@ -65,3 +65,20 @@ def test_thresholds_still_apply() -> None:
     assert not diagnostics_passed(low_ess)
     assert not diagnostics_passed(high_r_hat)
     assert diagnostics_passed(low_ess, ess_min=50.0)
+
+
+def _with_treedepth_hits(hits: int) -> dict[str, float]:
+    diagnostics = sampler_diagnostics(_FakeFit(), _parameters())
+    diagnostics["chains"] = 4
+    diagnostics["draws_per_chain"] = 1000
+    diagnostics["max_treedepth_hits"] = hits
+    return diagnostics
+
+
+def test_few_treedepth_hits_pass() -> None:
+    assert diagnostics_passed(_with_treedepth_hits(36))
+
+
+def test_many_treedepth_hits_fail() -> None:
+    assert not diagnostics_passed(_with_treedepth_hits(100))
+    assert diagnostics_passed(_with_treedepth_hits(100), max_treedepth_frac=0.05)
