@@ -22,6 +22,7 @@ from bosonic_dm.fitting.background_fit import (
     save_background_fit,
     summarize_background_fit,
 )
+from bosonic_dm.fitting.signal_fit import SIGNAL_STAN_FILE
 
 TOY_Q = 2039.0
 TOY_PREFIT = {
@@ -71,6 +72,19 @@ def background_model(tmp_path_factory: pytest.TempPathFactory):
         pytest.skip("CmdStan is not installed")
     target = tmp_path_factory.mktemp("stan_model_comparison") / STAN_FILE.name
     shutil.copyfile(STAN_FILE, target)
+    return cmdstanpy.CmdStanModel(stan_file=str(target))
+
+
+@pytest.fixture(scope="session")
+def signal_model(tmp_path_factory: pytest.TempPathFactory):
+    """Compile ``stan/signal.stan`` in a temporary directory, once per session."""
+    cmdstanpy = pytest.importorskip("cmdstanpy")
+    try:
+        cmdstanpy.cmdstan_path()
+    except ValueError:
+        pytest.skip("CmdStan is not installed")
+    target = tmp_path_factory.mktemp("stan_signal") / SIGNAL_STAN_FILE.name
+    shutil.copyfile(SIGNAL_STAN_FILE, target)
     return cmdstanpy.CmdStanModel(stan_file=str(target))
 
 

@@ -8,11 +8,13 @@ from __future__ import annotations
 import logging
 import os
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from ruamel.yaml import YAML
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -47,12 +49,172 @@ class InteractionConfig:
     make_aoe_survival_plots: bool
 
 
+# Standard table of gamma-line centres masked in the background fit; selected
+# with ``background.fit.peaks_keV: standard`` (the default).
+DEFAULT_BACKGROUND_FIT_PEAKS_KEV = (
+    238.632,  # Pb-212; merges 241.0 Ra-224, 242.0 Pb-214
+    295.224,  # Pb-214
+    351.932,  # Pb-214
+    511.0,  # e+e- / Tl-208
+    583.187,  # Tl-208
+    609.312,  # Bi-214
+    727.330,  # Bi-212
+    860.557,  # Tl-208
+    911.204,  # Ac-228
+    968.971,  # Ac-228; merges 964.8
+    1120.29,  # Bi-214
+    1238.11,  # Bi-214
+    1377.67,  # Bi-214
+    1460.82,  # K-40
+    1524.6,  # K-42; merges 1509.2, 1512.7
+    1588.2,  # Ac-228; merges 1592.5 DEP
+    1620.50,  # Bi-212; merges 1630.6
+    1729.6,  # Bi-214
+    1764.49,  # Bi-214
+    1847.42,  # Bi-214
+)
+BACKGROUND_FIT_MODELS = ("no_linear", "full")
+STANDARD_PEAKS_KEYWORD = "standard"
+
+
+def resolve_background_fit_peaks(
+    value: object,
+    fit_range_keV: tuple[float, float],
+    exclusion_width_keV: float,
+) -> tuple[float, ...]:
+    """Resolve ``background.fit.peaks_keV`` to the peaks masked in the fit.
+
+    Parameters
+    ----------
+    value
+        ``None`` or ``"standard"`` for the standard table
+        :data:`DEFAULT_BACKGROUND_FIT_PEAKS_KEV`, or a sequence of line
+        centres in keV. An empty sequence masks nothing.
+    fit_range_keV
+        Energy range of the fit.
+    exclusion_width_keV
+        Half-width of the mask around each centre.
+
+    Returns
+    -------
+    tuple[float, ...]
+        Sorted, unique centres whose mask reaches into the fit range
+        (``low - width < centre < high + width``); the others are dropped.
+
+    Raises
+    ------
+    ValueError
+        If ``value`` is another string or holds a non-numeric entry.
+    """
+    if value is None or value == STANDARD_PEAKS_KEYWORD:
+        centres: list[float] = list(DEFAULT_BACKGROUND_FIT_PEAKS_KEV)
+        explicit = False
+    elif isinstance(value, str) or not isinstance(value, Sequence):
+        msg = (
+            "background.fit.peaks_keV must be 'standard' or a list of line "
+            f"centres in keV, got {value!r}"
+        )
+        raise ValueError(msg)
+    else:
+        centres = []
+        for entry in value:
+            if isinstance(entry, bool) or not isinstance(entry, int | float):
+                msg = f"background.fit.peaks_keV entry {entry!r} is not a number"
+                raise ValueError(msg)
+            centres.append(float(entry))
+        explicit = True
+
+    low, high = fit_range_keV
+    kept = tuple(
+        sorted(
+            {
+                c
+                for c in centres
+                if low - exclusion_width_keV < c < high + exclusion_width_keV
+            }
+        )
+    )
+    dropped = sorted(set(centres) - set(kept))
+    if dropped and explicit:
+        logger.info(
+            "background.fit.peaks_keV: ignoring %s keV, outside the fit range %s keV",
+            dropped,
+            list(fit_range_keV),
+        )
+    return kept
+
+
+@dataclass(frozen=True)
+class BackgroundFitSamplerConfig:
+    """CmdStan sampler settings of the background fit."""
+
+    chains: int = 4
+    iter_warmup: int = 1000
+    iter_sampling: int = 1000
+    seed: int = 12345
+
+
+@dataclass(frozen=True)
+class BackgroundFitConfig:
+    """Settings of the per-group Stan background fit.
+
+    Attributes
+    ----------
+    spectrum_range_keV, spectrum_bin_width_keV
+        Energy range and bin width of the prepared group spectrum.
+    fit_range_keV
+        Range of the spectrum passed to Stan.
+    peaks_keV, peak_exclusion_width_keV
+        Gamma-line centres masked in the likelihood, already restricted to
+        the fit range (see :func:`resolve_background_fit_peaks`), and the
+        half-width of the mask.
+    prefit_dictionary, prefit_key
+        YAML file with the per-group curve_fit prefits, and the entry used
+        inside each group. A relative path is resolved against
+        ``paths.inputs_root``.
+    model
+        ``"no_linear"`` fixes ``c0 = cQ = 0``; ``"full"`` samples them.
+    shape_sd
+        Log-space prior standard deviation of the Ar39 shape parameters.
+    rate_prior_sd
+        Log-space prior standard deviations of ``n2nu`` and ``ar39``.
+    sampler
+        CmdStan sampler settings.
+    """
+
+    spectrum_range_keV: tuple[float, float] = (60.0, 2000.0)
+    spectrum_bin_width_keV: float = 1.0
+    fit_range_keV: tuple[float, float] = (100.0, 1100.0)
+    peaks_keV: tuple[float, ...] = DEFAULT_BACKGROUND_FIT_PEAKS_KEV
+    peak_exclusion_width_keV: float = 5.0
+    prefit_dictionary: Path = Path("dictionaries/prefit_dictionary.yaml")
+    prefit_key: str = "fit_ar"
+    model: str = "no_linear"
+    shape_sd: float = 0.5
+    rate_prior_sd: Mapping[str, float] = field(
+        default_factory=lambda: {"n2nu": 0.5, "ar39": 2.0}
+    )
+    sampler: BackgroundFitSamplerConfig = field(
+        default_factory=BackgroundFitSamplerConfig
+    )
+
+    def __post_init__(self) -> None:
+        """Validate the model name."""
+        if self.model not in BACKGROUND_FIT_MODELS:
+            msg = (
+                f"background.fit.model must be one of {BACKGROUND_FIT_MODELS}, "
+                f"got {self.model!r}."
+            )
+            raise ValueError(msg)
+
+
 @dataclass(frozen=True)
 class BackgroundConfig:
     pet_glob: str
     comparison_cut_profile: str
     energy_ranges_keV: list[tuple[int, int]]
     bin_widths_keV: list[int]
+    fit: BackgroundFitConfig = field(default_factory=BackgroundFitConfig)
 
 
 @dataclass(frozen=True)
@@ -131,6 +293,94 @@ def _resolve_path(path_str: str) -> Path:
     return Path(os.path.expandvars(path_str))
 
 
+def parse_background_fit_config(
+    raw: Mapping[str, object] | None,
+    inputs_root: Path,
+) -> BackgroundFitConfig:
+    """Parse the optional ``background.fit`` section.
+
+    Parameters
+    ----------
+    raw
+        The ``background.fit`` mapping, or ``None`` when absent. Missing keys
+        take the ``BackgroundFitConfig`` defaults.
+    inputs_root
+        Root for a relative ``prefit_dictionary``.
+
+    Returns
+    -------
+    BackgroundFitConfig
+        The validated settings.
+
+    Raises
+    ------
+    ValueError
+        If the section is not a mapping, has unknown keys, or names an unknown
+        model.
+    """
+    defaults = BackgroundFitConfig()
+    if raw is None:
+        raw = {}
+    if not isinstance(raw, Mapping):
+        msg = "background.fit must be a mapping."
+        raise ValueError(msg)
+    unknown = sorted(set(raw) - set(BackgroundFitConfig.__dataclass_fields__))
+    if unknown:
+        msg = f"Unknown background.fit keys: {unknown}"
+        raise ValueError(msg)
+
+    def _range(key: str, default: tuple[float, float]) -> tuple[float, float]:
+        low, high = raw.get(key, default)
+        return float(low), float(high)
+
+    rate_prior_sd = dict(defaults.rate_prior_sd)
+    raw_rate_sd = raw.get("rate_prior_sd") or {}
+    unknown_rates = sorted(set(raw_rate_sd) - set(rate_prior_sd))
+    if unknown_rates:
+        msg = f"Unknown background.fit.rate_prior_sd keys: {unknown_rates}"
+        raise ValueError(msg)
+    rate_prior_sd.update({str(k): float(v) for k, v in raw_rate_sd.items()})
+
+    raw_sampler = raw.get("sampler") or {}
+    sampler_fields = set(BackgroundFitSamplerConfig.__dataclass_fields__)
+    unknown_sampler = sorted(set(raw_sampler) - sampler_fields)
+    if unknown_sampler:
+        msg = f"Unknown background.fit.sampler keys: {unknown_sampler}"
+        raise ValueError(msg)
+    sampler = BackgroundFitSamplerConfig(
+        **{key: int(value) for key, value in raw_sampler.items()}
+    )
+
+    fit_range_keV = _range("fit_range_keV", defaults.fit_range_keV)
+    peak_exclusion_width_keV = float(
+        raw.get("peak_exclusion_width_keV", defaults.peak_exclusion_width_keV)
+    )
+
+    prefit_dictionary = _resolve_path(
+        str(raw.get("prefit_dictionary", defaults.prefit_dictionary))
+    )
+    if not prefit_dictionary.is_absolute():
+        prefit_dictionary = inputs_root / prefit_dictionary
+
+    return BackgroundFitConfig(
+        spectrum_range_keV=_range("spectrum_range_keV", defaults.spectrum_range_keV),
+        spectrum_bin_width_keV=float(
+            raw.get("spectrum_bin_width_keV", defaults.spectrum_bin_width_keV)
+        ),
+        fit_range_keV=fit_range_keV,
+        peaks_keV=resolve_background_fit_peaks(
+            raw.get("peaks_keV"), fit_range_keV, peak_exclusion_width_keV
+        ),
+        peak_exclusion_width_keV=peak_exclusion_width_keV,
+        prefit_dictionary=prefit_dictionary,
+        prefit_key=str(raw.get("prefit_key", defaults.prefit_key)),
+        model=str(raw.get("model", defaults.model)),
+        shape_sd=float(raw.get("shape_sd", defaults.shape_sd)),
+        rate_prior_sd=rate_prior_sd,
+        sampler=sampler,
+    )
+
+
 def load_analysis_config(path: str | Path) -> AnalysisConfig:
     """Load and validate the YAML configuration."""
     yaml = YAML(typ="safe")
@@ -161,7 +411,7 @@ def load_analysis_config(path: str | Path) -> AnalysisConfig:
         parquet_root=data_root_path / "parquet",
         dictionaries_root=data_root_path / "dictionaries",
         inputs_root=_resolve_path(raw_paths.get("inputs_root", "data/inputs")),
-        plots_root=_resolve_path(raw_paths.get("plots_root", "plots")),
+        plots_root=data_root_path / "plots",
         temporary_root=_resolve_path(raw_paths.get("temporary_root", "tmp")),
     )
 
@@ -223,6 +473,7 @@ def load_analysis_config(path: str | Path) -> AnalysisConfig:
         comparison_cut_profile=raw_bg["comparison_cut_profile"],
         energy_ranges_keV=[tuple(r) for r in raw_bg["energy_ranges_keV"]],
         bin_widths_keV=list(raw_bg["bin_widths_keV"]),
+        fit=parse_background_fit_config(raw_bg.get("fit"), paths.inputs_root),
     )
 
     det_groups_str = raw_analysis.get(

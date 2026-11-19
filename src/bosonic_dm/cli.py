@@ -33,6 +33,7 @@ def _banner_rows(
     config: AnalysisConfig,
     *,
     interactions: Sequence[str] | None,
+    groups: Sequence[str] | None = None,
     stages: Sequence[str],
     overwrite: bool | None,
 ) -> list[tuple[str, str]]:
@@ -42,7 +43,7 @@ def _banner_rows(
     )
     rows = [("Command", command)]
 
-    if command in {"simulation", "all"}:
+    if command == "simulation":
         if interactions:
             rows.append(("Interactions", ", ".join(interactions)))
         rows.extend(
@@ -61,8 +62,9 @@ def _banner_rows(
             ]
         )
 
-    if command in {"background", "all"}:
+    if command == "background":
         pet_glob = config.background.pet_glob or "from production config"
+        rows.append(("Fit groups", ", ".join(groups) if groups else "all"))
         energy_ranges = ", ".join(
             f"{lower}-{upper}" for lower, upper in config.background.energy_ranges_keV
         )
@@ -126,6 +128,7 @@ def _print_banner(
     config: AnalysisConfig,
     *,
     interactions: Sequence[str] | None = None,
+    groups: Sequence[str] | None = None,
     stages: Sequence[str],
     overwrite: bool | None,
 ) -> None:
@@ -134,6 +137,7 @@ def _print_banner(
         command,
         config,
         interactions=interactions,
+        groups=groups,
         stages=stages,
         overwrite=overwrite,
     )
@@ -174,19 +178,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
 
     # Background subcommand
-    subparsers.add_parser(
+    bkg_parser = subparsers.add_parser(
         "background", parents=[parent_parser], help="Run background analysis"
     )
-
-    # All subcommand
-    all_parser = subparsers.add_parser(
-        "all", parents=[parent_parser], help="Run all analyses"
-    )
-    all_parser.add_argument(
-        "--interactions",
+    bkg_parser.add_argument(
+        "--group",
         nargs="+",
-        default=["axio-electric", "dark-compton"],
-        help="Interactions to run",
+        default=None,
+        help="Detector groups for the fit and fit-plots stages (default: all)",
     )
 
     args = parser.parse_args(argv)
@@ -222,31 +221,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         _print_banner(
             "background",
             config,
+            groups=args.group,
             stages=stages,
             overwrite=overwrite,
         )
-        artifacts = run_background_analysis(config, stages=stages, overwrite=overwrite)
-        logger.info("Background artifacts created: %s", artifacts)
-
-    elif args.command == "all":
-        sim_stages = args.stage or SIMULATION_DEFAULT_STAGES
-        bg_stages = args.stage or BACKGROUND_DEFAULT_STAGES
-        _print_banner(
-            "all",
-            config,
-            interactions=args.interactions,
-            stages=list(dict.fromkeys([*sim_stages, *bg_stages])),
-            overwrite=overwrite,
+        artifacts = run_background_analysis(
+            config, stages=stages, groups=args.group, overwrite=overwrite
         )
-        # Run simulation for requested interactions
-        for interaction in args.interactions:
-            run_simulation_analysis(
-                config, interaction=interaction, stages=sim_stages, overwrite=overwrite
-            )
-
-        # Run background
-        run_background_analysis(config, stages=bg_stages, overwrite=overwrite)
-        logger.info("All analyses completed.")
+        logger.info("Background artifacts created: %s", artifacts)
 
     return 0
 

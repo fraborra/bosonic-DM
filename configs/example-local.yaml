@@ -9,7 +9,6 @@ paths:
   simulation_root: "/my/local/simulation/root"
   data_root: "data/v1"
   inputs_root: "data/inputs"
-  plots_root: "plots"
   temporary_root: "tmp"
 
 analysis:
@@ -46,6 +45,29 @@ background:
     - [20, 300]
   bin_widths_keV:
     - 5
+  # Per-group Stan background fit (stages fit and fit-plots). Every key is
+  # optional; the values below are the defaults.
+  fit:
+    # Prepared group spectrum: energy range and bin width [keV].
+    spectrum_range_keV: [60, 2000]
+    spectrum_bin_width_keV: 1
+    # Range of the spectrum passed to Stan [keV].
+    fit_range_keV: [100, 1100]
+    # Gamma lines masked in the likelihood; peak_exclusion_width_keV is the half-width.
+    # 'standard' = built-in table of 20 gamma lines; or a list of centres
+    # in keV, e.g. [583.187, 609.312]; [] masks nothing. Lines whose mask
+    # falls outside fit_range_keV are dropped.
+    peaks_keV: standard
+    peak_exclusion_width_keV: 5.0
+    # Per-group curve_fit prefits; a relative path is under paths.inputs_root.
+    prefit_dictionary: dictionaries/prefit_dictionary.yaml
+    prefit_key: fit_ar
+    # no_linear: c0 = cQ = 0 (no linear continuum); full: sample c0 and cQ.
+    model: no_linear
+    # Log-space prior widths: Ar39 shape parameters and the two rates.
+    shape_sd: 0.5
+    rate_prior_sd: {n2nu: 0.5, ar39: 2.0}
+    sampler: {chains: 4, iter_warmup: 1000, iter_sampling: 1000, seed: 12345}
 
 output:
   overwrite: false

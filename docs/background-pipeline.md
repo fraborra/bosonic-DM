@@ -102,6 +102,22 @@ ratio error bars must not be interpreted as inference-ready uncertainties.
 Exposure-normalized spectra for fitting come from `prepare_background_spectra`;
 see [Spectral fits](fitting.md).
 
+## Stan fit
+
+The `fit` stage fits each detector group with the Stan background model and
+`fit-plots` draws the diagnostics. Select groups with `--group` (see the
+[CLI reference](cli.md)); settings live under `background.fit`
+([configuration](configuration.md)).
+
+```text
+<data_root>/background_fits/<group_slug>/
+<plots_root>/background_fit/<group_slug>/
+```
+
+The manifest records each group's fit with its fit setup. A changed setup or a
+rebuilt dataset triggers a refit; `--overwrite` forces one. On NERSC:
+`sbatch scripts/run_bkg.sh <group|all> [stage ...]`.
+
 ## Reuse and rebuilding
 
 The manifest stores the cut setup, selected PET files, written and reused

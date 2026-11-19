@@ -9,13 +9,14 @@ complete set of analysis values.
 Environment variables in configured paths are expanded. Relative paths are
 resolved from the directory in which the command is run, not from the YAML
 file's directory. The loader creates `data_root`, its `parquet/` and
-`dictionaries/` children, `plots_root`, and `temporary_root` when needed.
+`dictionaries/` and `plots/` children, and `temporary_root` when needed.
 
-`parquet_root` and `dictionaries_root` are derived automatically:
+`parquet_root`, `dictionaries_root` and `plots_root` are derived automatically:
 
 ```text
 <data_root>/parquet/
 <data_root>/dictionaries/
+<data_root>/plots/
 ```
 
 ## Complete example
@@ -32,7 +33,6 @@ paths:
   simulation_root: /path/to/simulation
   data_root: data/v1
   inputs_root: data/inputs
-  plots_root: plots
   temporary_root: tmp
 
 analysis:
@@ -90,7 +90,6 @@ output:
 | `simulation_root` | Simulation production root.                      | required      |
 | `data_root`       | Generated datasets, dictionaries, and manifests. | required      |
 | `inputs_root`     | Static analysis inputs.                          | `data/inputs` |
-| `plots_root`      | Generated plots.                                 | `plots`       |
 | `temporary_root`  | Temporary products.                              | `tmp`         |
 
 ### `analysis`
@@ -148,6 +147,23 @@ The simulation pipeline looks for the expanded job name below:
 | `comparison_cut_profile` | Alternate cut profile stored and plotted alongside the default selection.                                     |
 | `energy_ranges_keV`      | Energy intervals used for diagnostic spectrum plots.                                                          |
 | `bin_widths_keV`         | Bin widths used for each configured interval.                                                                 |
+| `fit`                    | Optional Stan fit settings, below. Every key has a default.                                                   |
+
+#### `background.fit`
+
+| Key                        | Default                                                            | Meaning                                                                                                                                                     |
+| -------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `spectrum_range_keV`       | `[60, 2000]`                                                       | Energy range of the spectrum that is built.                                                                                                                 |
+| `spectrum_bin_width_keV`   | `1`                                                                | Spectrum bin width.                                                                                                                                         |
+| `fit_range_keV`            | `[100, 1100]`                                                      | Energy range used in the fit.                                                                                                                               |
+| `peaks_keV`                | `standard`                                                         | `standard` (the built-in table of 20 gamma lines) or a list of centres in keV; `[]` masks none. Lines whose mask falls outside `fit_range_keV` are dropped. |
+| `peak_exclusion_width_keV` | `5.0`                                                              | Half-width of the mask around each line.                                                                                                                    |
+| `prefit_dictionary`        | `dictionaries/prefit_dictionary.yaml`                              | Prefit file, relative to `inputs_root`.                                                                                                                     |
+| `prefit_key`               | `fit_ar`                                                           | Entry of the prefit file to use.                                                                                                                            |
+| `model`                    | `no_linear`                                                        | `no_linear` or `full`.                                                                                                                                      |
+| `shape_sd`                 | `0.5`                                                              | Prior width on the shape parameters.                                                                                                                        |
+| `rate_prior_sd`            | `{n2nu: 0.5, ar39: 2.0}`                                           | Prior widths on the rates.                                                                                                                                  |
+| `sampler`                  | `{chains: 4, iter_warmup: 1000, iter_sampling: 1000, seed: 12345}` | Stan sampler settings.                                                                                                                                      |
 
 ### `output`
 

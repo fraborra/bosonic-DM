@@ -5,7 +5,7 @@ Run all commands through Pixi from the package repository.
 ## Analysis pipeline
 
 ```text
-pixi run bosonic-dm {simulation,background,all} --config FILE [OPTIONS]
+pixi run bosonic-dm {simulation,background} --config FILE [OPTIONS]
 ```
 
 Common options:
@@ -44,29 +44,39 @@ pixi run bosonic-dm simulation \
 pixi run bosonic-dm background --config configs/local.yaml
 ```
 
-The background workflow currently exposes one stage, `build-dataset`. Diagnostic
-plots run automatically when `output.save_plots` is enabled.
+Stages are `build-dataset`, `fit` and `fit-plots`; all run by default. `fit`
+runs the Stan background fit per detector group and `fit-plots` draws its
+diagnostics. Requesting a downstream stage adds its dependencies.
 
-### All analyses
-
-By default, `all` runs `axio-electric`, `dark-compton`, and then the background
-workflow:
-
-```bash
-pixi run bosonic-dm all --config configs/local.yaml
-```
-
-Limit the simulation interactions with `--interactions`:
+`--group GROUP [GROUP ...]` limits `fit` and `fit-plots` to the named detector
+groups (default: every group in `analysis.detector_groups`). Quote names with
+spaces. An unknown group is an error.
 
 ```bash
-pixi run bosonic-dm all \
+pixi run bosonic-dm background \
   --config configs/local.yaml \
-  --interactions dark-compton
+  --stage fit fit-plots \
+  --group "ICPC group1" BEGe
 ```
 
-When combining `--stage` with `all`, the stage name is passed to both pipeline
-types. At present, `build-dataset` is the only stage name shared by simulation
-and background; use the individual subcommands for any other staged run.
+Outputs:
+
+- `<data_root>/background_fits/<group_slug>/`: fit products.
+- `<plots_root>/background_fit/<group_slug>/`: fit plots.
+
+A changed `background.fit` setup or a rebuilt dataset triggers a refit;
+`--overwrite` forces one.
+
+### Batch jobs (NERSC)
+
+```bash
+sbatch scripts/run_sim.sh dark-compton efficiencies
+sbatch scripts/run_bkg.sh "ICPC group1" fit fit-plots
+sbatch scripts/run_bkg.sh all
+```
+
+`run_bkg.sh` takes a group name or `all` (no `--group` flag), then optional
+stages. Submit from the repository root. It requests 4 CPUs for 4 hours.
 
 ## Simulation-input utilities
 

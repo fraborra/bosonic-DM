@@ -121,6 +121,42 @@ def current_background_plot_setup(config: AnalysisConfig) -> dict[str, object]:
     }
 
 
+def current_background_fit_setup(config: AnalysisConfig) -> dict[str, object]:
+    """Return the settings that determine the per-group background fits.
+
+    Parameters
+    ----------
+    config
+        Analysis configuration; only ``background.fit`` is read.
+
+    Returns
+    -------
+    dict[str, object]
+        Plain YAML/JSON-serializable mapping of the fit settings.
+    """
+    fit = config.background.fit
+    return {
+        "spectrum_range_keV": [float(value) for value in fit.spectrum_range_keV],
+        "spectrum_bin_width_keV": float(fit.spectrum_bin_width_keV),
+        "fit_range_keV": [float(value) for value in fit.fit_range_keV],
+        "peaks_keV": [float(value) for value in fit.peaks_keV],
+        "peak_exclusion_width_keV": float(fit.peak_exclusion_width_keV),
+        "prefit_dictionary": str(fit.prefit_dictionary),
+        "prefit_key": fit.prefit_key,
+        "model": fit.model,
+        "shape_sd": float(fit.shape_sd),
+        "rate_prior_sd": {
+            str(name): float(value) for name, value in fit.rate_prior_sd.items()
+        },
+        "sampler": {
+            "chains": int(fit.sampler.chains),
+            "iter_warmup": int(fit.sampler.iter_warmup),
+            "iter_sampling": int(fit.sampler.iter_sampling),
+            "seed": int(fit.sampler.seed),
+        },
+    }
+
+
 def manifest_stages(manifest: Mapping[str, object]) -> dict[str, object]:
     """Return the mutable stage mapping from a normalized manifest."""
     stages = manifest.get("stages")
