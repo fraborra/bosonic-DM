@@ -1,10 +1,12 @@
 #!/bin/bash
 # Run the background pipeline (dataset and Stan fit) on a NERSC compute node.
 #
-#   sbatch scripts/run_bkg.sh <group|all> [stage ...]
+#   sbatch scripts/run_bkg.sh <group|all> [--overwrite] [stage ...]
 #
 # `all` fits every detector group. Group names with spaces need quotes.
-# Example: sbatch scripts/run_bkg.sh "ICPC group1" fit fit-plots
+# `--overwrite` regenerates existing products (it can appear anywhere after
+# the group).
+# Example: sbatch scripts/run_bkg.sh "ICPC group1" --overwrite fit fit-plots
 #
 #SBATCH --job-name=bkg_fit
 #SBATCH --qos=shared
@@ -23,11 +25,19 @@ GROUP="${1:?usage: sbatch scripts/run_bkg.sh <group|all> [stage ...]}"
 shift
 
 ARGS=(--config configs/nersc.yaml)
+STAGES=()
+for arg in "$@"; do
+  if [[ "$arg" == "--overwrite" ]]; then
+    ARGS+=(--overwrite)
+  else
+    STAGES+=("$arg")
+  fi
+done
 if [[ "$GROUP" != "all" ]]; then
   ARGS+=(--group "$GROUP")
 fi
-if (($# > 0)); then
-  ARGS+=(--stage "$@")
+if ((${#STAGES[@]} > 0)); then
+  ARGS+=(--stage "${STAGES[@]}")
 fi
 
 # sbatch runs the job from the submission directory: submit from the repo root.
