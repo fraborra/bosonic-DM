@@ -243,3 +243,8 @@ __marimo__/
 .Trashes
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
+
+# CmdStan executables and build files, compiled next to the Stan models
+stan/*
+!stan/*.stan
+!stan/README.md
