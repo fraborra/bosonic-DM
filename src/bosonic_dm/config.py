@@ -411,7 +411,7 @@ def load_analysis_config(path: str | Path) -> AnalysisConfig:
         parquet_root=data_root_path / "parquet",
         dictionaries_root=data_root_path / "dictionaries",
         inputs_root=_resolve_path(raw_paths.get("inputs_root", "data/inputs")),
-        plots_root=_resolve_path(raw_paths.get("plots_root", "plots")),
+        plots_root=data_root_path / "plots",
         temporary_root=_resolve_path(raw_paths.get("temporary_root", "tmp")),
     )
 

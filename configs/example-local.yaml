@@ -9,7 +9,6 @@ paths:
   simulation_root: "/my/local/simulation/root"
   data_root: "data/v1"
   inputs_root: "data/inputs"
-  plots_root: "plots"
   temporary_root: "tmp"
 
 analysis:

@@ -103,7 +103,6 @@ paths:
   simulation_root: {tmp_path}/simulation
   data_root: {tmp_path}/data
   inputs_root: {tmp_path}/inputs
-  plots_root: {tmp_path}/plots
   temporary_root: {tmp_path}/tmp
 analysis:
   simulated_energies_keV: [200, 300]

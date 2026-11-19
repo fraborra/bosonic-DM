@@ -29,7 +29,6 @@ paths:
   simulation_root: {tmp_path}/simulation
   data_root: {output_root}
   inputs_root: {calibration_root}
-  plots_root: {tmp_path}/plots
   temporary_root: {tmp_path}/tmp
 analysis:
   simulated_energies_keV: [200]

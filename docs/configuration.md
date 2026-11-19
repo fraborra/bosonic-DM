@@ -9,13 +9,14 @@ complete set of analysis values.
 Environment variables in configured paths are expanded. Relative paths are
 resolved from the directory in which the command is run, not from the YAML
 file's directory. The loader creates `data_root`, its `parquet/` and
-`dictionaries/` children, `plots_root`, and `temporary_root` when needed.
+`dictionaries/` and `plots/` children, and `temporary_root` when needed.
 
-`parquet_root` and `dictionaries_root` are derived automatically:
+`parquet_root`, `dictionaries_root` and `plots_root` are derived automatically:
 
 ```text
 <data_root>/parquet/
 <data_root>/dictionaries/
+<data_root>/plots/
 ```
 
 ## Complete example
@@ -32,7 +33,6 @@ paths:
   simulation_root: /path/to/simulation
   data_root: data/v1
   inputs_root: data/inputs
-  plots_root: plots
   temporary_root: tmp
 
 analysis:
@@ -90,7 +90,6 @@ output:
 | `simulation_root` | Simulation production root.                      | required      |
 | `data_root`       | Generated datasets, dictionaries, and manifests. | required      |
 | `inputs_root`     | Static analysis inputs.                          | `data/inputs` |
-| `plots_root`      | Generated plots.                                 | `plots`       |
 | `temporary_root`  | Temporary products.                              | `tmp`         |
 
 ### `analysis`

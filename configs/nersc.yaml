@@ -10,7 +10,6 @@ paths:
   data_root: "data/v4"
   # Shared inputs root for all static data
   inputs_root: "data/inputs"
-  plots_root: "data/v4/plots"
   temporary_root: "tmp"
 
 analysis:
