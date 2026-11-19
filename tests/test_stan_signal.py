@@ -12,6 +12,7 @@ from scipy.stats import poisson
 
 from bosonic_dm.fitting.signal_fit import (
     build_signal_stan_data,
+    rate_upper_limits,
     run_signal_fit,
     save_signal_fit,
     suggest_rate_upper,
@@ -167,6 +168,25 @@ def test_upper_limit_matches_grid_posterior(
     tolerance = 4 * summary.rate["upper_limit_mcse"]
     assert abs(summary.upper_limit - expected) < tolerance
     assert summary.diagnostics["upper_limit_to_prior_bound"] < 0.1
+
+
+def test_grid_engine_matches_stan(
+    signal_model: cmdstanpy.CmdStanModel, tmp_path: Path
+) -> None:
+    rng = np.random.default_rng(21)
+    nominal = _window()
+    for toy in range(3):
+        window = _window(rng.poisson(nominal.stacked("b_hat")))
+        data = build_signal_stan_data(window, rate_upper=suggest_rate_upper(window))
+        fit = run_signal_fit(
+            signal_model, data, seed=100 + toy, output_dir=tmp_path / str(toy)
+        )
+        summary = summarize_signal_fit(fit, data)
+        grid = rate_upper_limits(
+            data["counts"], data["b_hat"], data["signal_template"], data["use_bin"]
+        )[0]
+        assert summary.passed, summary.diagnostics
+        assert abs(summary.upper_limit - grid) < 4 * summary.rate["upper_limit_mcse"]
 
 
 def test_injected_signal_is_recovered(
