@@ -35,10 +35,8 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
-from dbetto import Props
 
 from bosonic_dm.config import AnalysisConfig, load_analysis_config
-from bosonic_dm.efficiency import efficiency_table_path, load_efficiency_table
 from bosonic_dm.fitting.signal_fit import (
     SIGNAL_STAN_FILE,
     build_signal_stan_data,
@@ -51,10 +49,8 @@ from bosonic_dm.fitting.signal_fit import (
 from bosonic_dm.fitting.signal_template import (
     SignalWindow,
     build_signal_window,
-    group_efficiency,
-    load_background_prediction,
 )
-from bosonic_dm.pipeline.background import background_fit_dir, load_background_groups
+from bosonic_dm.pipeline.sensitivity import load_signal_inputs
 from bosonic_dm.plotting.signal_fit import plot_window_fit
 from bosonic_dm.yaml_io import write_yaml
 
@@ -109,34 +105,13 @@ def load_window(
     half_width_keV: float = 12.5,
 ) -> SignalWindow:
     """Build the signal window at one mass from the pipeline outputs."""
-    groups_dict = load_background_groups(config)
-    names = list(groups) if groups else list(groups_dict)
-    missing = sorted(set(names) - set(groups_dict))
-    if missing:
-        msg = f"Groups not in {config.detector_groups}: {missing}."
-        raise ValueError(msg)
-    groups_dict = {name: groups_dict[name] for name in names}
-
-    backgrounds = {
-        name: load_background_prediction(background_fit_dir(config, name), group=name)
-        for name in names
-    }
-    failed = [name for name, b in backgrounds.items() if not b.passed_diagnostics]
-    if failed:
-        logger.warning("Background fits that failed their diagnostics: %s", failed)
-
-    eres_path = config.paths.inputs_root / "dictionaries" / "eres_dict.yaml"
-    eres_dict = Props.read_from(str(eres_path))
-    table = load_efficiency_table(
-        efficiency_table_path(config.paths.dictionaries_root, interaction)
+    inputs = load_signal_inputs(
+        config, groups=groups, interaction=interaction, selection=selection
     )
-    efficiencies = group_efficiency(table, groups_dict, selection=selection)
     return build_signal_window(
         mass_keV,
-        backgrounds,
-        eres_dict=eres_dict,
-        groups_dict=groups_dict,
-        group_efficiencies=efficiencies,
+        inputs.backgrounds,
+        **inputs.window_options,
         half_width_keV=half_width_keV,
     )
 

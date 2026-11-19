@@ -10,20 +10,13 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-import polars as pl
 import pytest
-import yaml
+from signal_pipeline_outputs import B_HAT, OBSERVED, write_signal_pipeline_outputs
 
-from bosonic_dm.config import AnalysisConfig, load_analysis_config
-from bosonic_dm.efficiency import (
-    efficiency_table,
-    efficiency_table_path,
-    write_efficiency_table,
-)
+from bosonic_dm.config import AnalysisConfig
 from bosonic_dm.fitting.signal_template import SignalWindow
-from bosonic_dm.pipeline.background import background_fit_dir
 from bosonic_dm.plotting.signal_fit import plot_window_fit
-from bosonic_dm.yaml_io import read_yaml, write_yaml
+from bosonic_dm.yaml_io import read_yaml
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "signal_fit_one_mass.py"
 _spec = importlib.util.spec_from_file_location("signal_fit_one_mass", SCRIPT)
@@ -31,115 +24,12 @@ script = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(script)
 
 MASS = 300.0
-OBSERVED = 9  # observed counts per bin; a blinded check must never fit them
-B_HAT = 6.5
-GROUPS = {"B": {"D4": "all"}}
-
-
-def _det(expo: float) -> dict:
-    return {
-        "usability": "on",
-        "expo": expo,
-        "a": 1.5,
-        "b": 0.002,
-        "a_unc": 0.0,
-        "b_unc": 0.0,
-        "ab_corr": 0.0,
-    }
-
-
-def _efficiency_entry(efficiency: float, expo: float) -> dict:
-    n_primaries = round(1000 * expo)
-    return {
-        "expo": expo,
-        "n_primaries": n_primaries,
-        "selections": {
-            "all": {
-                "status": "valid",
-                "n_events": round(efficiency * n_primaries),
-                "efficiency": efficiency,
-                "efficiency_stat_unc": 0.01,
-                "efficiency_syst_fwhm": 0.0,
-            }
-        },
-    }
 
 
 @pytest.fixture
 def config(tmp_path: Path) -> AnalysisConfig:
     """Config, groups, eres, efficiency table and one background fit on disk."""
-    inputs = tmp_path / "inputs"
-    config_path = tmp_path / "config.yaml"
-    config_path.write_text(
-        f"""
-schema_version: 1
-production:
-  version: v1
-  reference_root: {tmp_path}/production
-paths:
-  simulation_root: {tmp_path}/simulation
-  data_root: {tmp_path}/outputs
-  inputs_root: {inputs}
-analysis:
-  simulated_energies_keV: [200, 400]
-  fep_window:
-    half_width_fwhm: 2.0
-  selections: [all]
-  apply_lar_veto: true
-interactions:
-  axio-electric:
-    job_template: electron_{{energy}}keV_hpge_bulk
-background:
-  comparison_cut_profile: without-bb-like
-  energy_ranges_keV: [[20, 300]]
-  bin_widths_keV: [5]
-output: {{}}
-""",
-        encoding="utf-8",
-    )
-    config = load_analysis_config(config_path)
-
-    config.detector_groups.parent.mkdir(parents=True, exist_ok=True)
-    write_yaml(GROUPS, config.detector_groups)
-    # safe_dump quotes "on", as in the real eres_dict.yaml; unquoted it would
-    # be read back as a boolean.
-    eres = {period: {"r000": {"D4": _det(3.0)}} for period in ("p03", "p04")}
-    (inputs / "dictionaries" / "eres_dict.yaml").write_text(
-        yaml.safe_dump(eres), encoding="utf-8"
-    )
-
-    efficiency = {
-        energy: {
-            "D4": {
-                "period_runs": {
-                    period: {"r000": _efficiency_entry(0.5, 3.0)}
-                    for period in ("p03", "p04")
-                }
-            }
-        }
-        for energy in (200, 400)
-    }
-    path = efficiency_table_path(config.paths.dictionaries_root, "axio-electric")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    write_efficiency_table(efficiency_table(efficiency), path)
-
-    fit_dir = background_fit_dir(config, "B")
-    fit_dir.mkdir(parents=True)
-    edges = np.arange(250.0, 351.0)
-    pl.DataFrame(
-        {
-            "bin_lo_keV": edges[:-1],
-            "bin_hi_keV": edges[1:],
-            "counts": np.full(len(edges) - 1, OBSERVED),
-            "B_hat": np.full(len(edges) - 1, B_HAT),
-            "used_in_fit": np.ones(len(edges) - 1, dtype=bool),
-        }
-    ).write_parquet(fit_dir / "bhat.parquet")
-    write_yaml(
-        {"passed_diagnostics": True, "provenance": {"group": "B"}},
-        fit_dir / "summary.yaml",
-    )
-    return config
+    return write_signal_pipeline_outputs(tmp_path)
 
 
 @pytest.fixture
