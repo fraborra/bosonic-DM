@@ -4,11 +4,8 @@
 #   sbatch scripts/submit_sensitivity.sh [expected_sensitivity.py arguments]
 #
 # Example (smoke run):
-#   sbatch scripts/submit_sensitivity.sh \
-#     --fits-dir data/v8fits/background --fit-subdir no_linear_shape_sd0.5 \
-#     --inputs data/inputs/dictionaries \
-#     --efficiency <sim_root>/axio-electric_efficiency.parquet \
-#     --masses 300,500,800 --n-toys 200 --outdir data/v8fits/sensitivity/smoke
+#   sbatch scripts/submit_sensitivity.sh --config configs/nersc.yaml \
+#     --masses 300,500,800 --n-toys 200 --outdir data/v4/sensitivity/smoke
 #
 #SBATCH --job-name=sensitivity
 #SBATCH --qos=shared
