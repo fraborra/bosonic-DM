@@ -3,9 +3,10 @@
 
 """Sampler diagnostics shared by the background and signal Stan fits.
 
-The screening targets follow ``stan/README.md``: no divergences, no
-maximum-treedepth hits, E-BFMI of at least 0.3, ``r_hat`` below 1.01, and
-bulk and tail effective sample sizes of at least 400. A fit with a
+The screening targets follow ``stan/README.md``: no divergences, fewer than
+5% of post-warmup draws at the maximum treedepth, E-BFMI of at least 0.3,
+``r_hat`` below 1.01, and bulk and tail effective sample sizes of at least
+400. A fit with a
 non-finite E-BFMI, ``r_hat``, or effective sample size fails.
 """
 
@@ -77,7 +78,7 @@ def diagnostics_passed(
     r_hat_max: float = 1.01,
     ess_min: float = 400.0,
     e_bfmi_min: float = 0.3,
-    max_treedepth_frac: float = 0.01,
+    max_treedepth_frac: float = 0.05,
 ) -> bool:
     """Return whether ``sampler_diagnostics`` output meets the screening targets.
 

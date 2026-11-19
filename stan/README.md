@@ -199,7 +199,7 @@ diagnostics as well; a visually overlapping trace alone is insufficient.
 | `ess_bulk`, `ess_tail`   | At least 400 across four chains as a starting target; increase for the precision needed |
 | `mcse_mean`              | Small relative to the posterior `sd` and the required reporting precision               |
 | Divergences after warmup | Zero                                                                                    |
-| Maximum-treedepth hits   | Zero unresolved hits                                                                    |
+| Maximum-treedepth hits   | Fewer than 5% of post-warmup draws (an efficiency warning, not a validity failure)      |
 | E-BFMI                   | Values below 0.3 call for investigation                                                 |
 
 These are screening criteria, not proof of convergence. For interpretation, see

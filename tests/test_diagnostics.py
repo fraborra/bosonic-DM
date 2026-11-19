@@ -76,9 +76,11 @@ def _with_treedepth_hits(hits: int) -> dict[str, float]:
 
 
 def test_few_treedepth_hits_pass() -> None:
+    # 4000 draws: the default 5% threshold is 200 hits.
     assert diagnostics_passed(_with_treedepth_hits(36))
+    assert diagnostics_passed(_with_treedepth_hits(199))
 
 
 def test_many_treedepth_hits_fail() -> None:
-    assert not diagnostics_passed(_with_treedepth_hits(100))
-    assert diagnostics_passed(_with_treedepth_hits(100), max_treedepth_frac=0.05)
+    assert not diagnostics_passed(_with_treedepth_hits(200))
+    assert not diagnostics_passed(_with_treedepth_hits(100), max_treedepth_frac=0.01)
