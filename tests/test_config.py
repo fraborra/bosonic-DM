@@ -140,8 +140,11 @@ def test_background_fit_defaults_when_section_is_absent(tmp_path: Path) -> None:
     assert fit.spectrum_range_keV == (60.0, 2000.0)
     assert fit.spectrum_bin_width_keV == 1.0
     assert fit.fit_range_keV == (100.0, 1100.0)
-    assert fit.peaks_keV == DEFAULT_BACKGROUND_FIT_PEAKS_KEV
-    assert len(fit.peaks_keV) == 20
+    # Standard table, restricted to the 10 lines inside 100-1100 keV.
+    assert fit.peaks_keV == tuple(
+        c for c in DEFAULT_BACKGROUND_FIT_PEAKS_KEV if 95.0 < c < 1105.0
+    )
+    assert len(fit.peaks_keV) == 10
     assert fit.peak_exclusion_width_keV == 5.0
     assert fit.prefit_dictionary == (
         config.paths.inputs_root / "dictionaries/prefit_dictionary.yaml"
@@ -175,9 +178,30 @@ def test_background_fit_section_overrides_defaults(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize(
+    ("peaks", "expected"),
+    [
+        ("standard", (238.632, 295.224, 351.932, 511.0, 583.187)),
+        ("[1460.82, 583.187, 511.0, 583.187]", (511.0, 583.187)),
+        ("[97, 603]", (97.0, 603.0)),
+        ("[90, 610]", ()),
+        ("[]", ()),
+    ],
+)
+def test_background_fit_peaks_standard_or_list(
+    tmp_path: Path, peaks: str, expected: tuple[float, ...]
+) -> None:
+    section = f"  fit:\n    fit_range_keV: [100, 600]\n    peaks_keV: {peaks}"
+    config = load_analysis_config(_write_config(tmp_path, "", section))
+
+    assert config.background.fit.peaks_keV == expected
+
+
+@pytest.mark.parametrize(
     ("section", "match"),
     [
         ("  fit:\n    model: linear", "background.fit.model"),
+        ("  fit:\n    peaks_keV: all", "background.fit.peaks_keV"),
+        ("  fit:\n    peaks_keV: [583.187, Tl-208]", "not a number"),
         ("  fit:\n    shapesd: 0.5", "Unknown background.fit keys"),
         ("  fit:\n    sampler: {thin: 2}", "Unknown background.fit.sampler keys"),
     ],

@@ -8,11 +8,13 @@ from __future__ import annotations
 import logging
 import os
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from ruamel.yaml import YAML
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -47,7 +49,8 @@ class InteractionConfig:
     make_aoe_survival_plots: bool
 
 
-# Centres of the gamma lines left out of the background-fit likelihood.
+# Standard table of gamma-line centres masked in the background fit; selected
+# with ``background.fit.peaks_keV: standard`` (the default).
 DEFAULT_BACKGROUND_FIT_PEAKS_KEV = (
     238.632,  # Pb-212; merges 241.0 Ra-224, 242.0 Pb-214
     295.224,  # Pb-214
@@ -71,6 +74,74 @@ DEFAULT_BACKGROUND_FIT_PEAKS_KEV = (
     1847.42,  # Bi-214
 )
 BACKGROUND_FIT_MODELS = ("no_linear", "full")
+STANDARD_PEAKS_KEYWORD = "standard"
+
+
+def resolve_background_fit_peaks(
+    value: object,
+    fit_range_keV: tuple[float, float],
+    exclusion_width_keV: float,
+) -> tuple[float, ...]:
+    """Resolve ``background.fit.peaks_keV`` to the peaks masked in the fit.
+
+    Parameters
+    ----------
+    value
+        ``None`` or ``"standard"`` for the standard table
+        :data:`DEFAULT_BACKGROUND_FIT_PEAKS_KEV`, or a sequence of line
+        centres in keV. An empty sequence masks nothing.
+    fit_range_keV
+        Energy range of the fit.
+    exclusion_width_keV
+        Half-width of the mask around each centre.
+
+    Returns
+    -------
+    tuple[float, ...]
+        Sorted, unique centres whose mask reaches into the fit range
+        (``low - width < centre < high + width``); the others are dropped.
+
+    Raises
+    ------
+    ValueError
+        If ``value`` is another string or holds a non-numeric entry.
+    """
+    if value is None or value == STANDARD_PEAKS_KEYWORD:
+        centres: list[float] = list(DEFAULT_BACKGROUND_FIT_PEAKS_KEV)
+        explicit = False
+    elif isinstance(value, str) or not isinstance(value, Sequence):
+        msg = (
+            "background.fit.peaks_keV must be 'standard' or a list of line "
+            f"centres in keV, got {value!r}"
+        )
+        raise ValueError(msg)
+    else:
+        centres = []
+        for entry in value:
+            if isinstance(entry, bool) or not isinstance(entry, int | float):
+                msg = f"background.fit.peaks_keV entry {entry!r} is not a number"
+                raise ValueError(msg)
+            centres.append(float(entry))
+        explicit = True
+
+    low, high = fit_range_keV
+    kept = tuple(
+        sorted(
+            {
+                c
+                for c in centres
+                if low - exclusion_width_keV < c < high + exclusion_width_keV
+            }
+        )
+    )
+    dropped = sorted(set(centres) - set(kept))
+    if dropped and explicit:
+        logger.info(
+            "background.fit.peaks_keV: ignoring %s keV, outside the fit range %s keV",
+            dropped,
+            list(fit_range_keV),
+        )
+    return kept
 
 
 @dataclass(frozen=True)
@@ -94,7 +165,9 @@ class BackgroundFitConfig:
     fit_range_keV
         Range of the spectrum passed to Stan.
     peaks_keV, peak_exclusion_width_keV
-        Gamma-line centres and the window width left out of the likelihood.
+        Gamma-line centres masked in the likelihood, already restricted to
+        the fit range (see :func:`resolve_background_fit_peaks`), and the
+        half-width of the mask.
     prefit_dictionary, prefit_key
         YAML file with the per-group curve_fit prefits, and the entry used
         inside each group. A relative path is resolved against
@@ -278,6 +351,11 @@ def parse_background_fit_config(
         **{key: int(value) for key, value in raw_sampler.items()}
     )
 
+    fit_range_keV = _range("fit_range_keV", defaults.fit_range_keV)
+    peak_exclusion_width_keV = float(
+        raw.get("peak_exclusion_width_keV", defaults.peak_exclusion_width_keV)
+    )
+
     prefit_dictionary = _resolve_path(
         str(raw.get("prefit_dictionary", defaults.prefit_dictionary))
     )
@@ -289,11 +367,11 @@ def parse_background_fit_config(
         spectrum_bin_width_keV=float(
             raw.get("spectrum_bin_width_keV", defaults.spectrum_bin_width_keV)
         ),
-        fit_range_keV=_range("fit_range_keV", defaults.fit_range_keV),
-        peaks_keV=tuple(float(p) for p in raw.get("peaks_keV", defaults.peaks_keV)),
-        peak_exclusion_width_keV=float(
-            raw.get("peak_exclusion_width_keV", defaults.peak_exclusion_width_keV)
+        fit_range_keV=fit_range_keV,
+        peaks_keV=resolve_background_fit_peaks(
+            raw.get("peaks_keV"), fit_range_keV, peak_exclusion_width_keV
         ),
+        peak_exclusion_width_keV=peak_exclusion_width_keV,
         prefit_dictionary=prefit_dictionary,
         prefit_key=str(raw.get("prefit_key", defaults.prefit_key)),
         model=str(raw.get("model", defaults.model)),

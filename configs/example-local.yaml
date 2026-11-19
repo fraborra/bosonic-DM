@@ -54,28 +54,11 @@ background:
     spectrum_bin_width_keV: 1
     # Range of the spectrum passed to Stan [keV].
     fit_range_keV: [100, 1100]
-    # Gamma-line centres [keV] left out of the likelihood, with window width.
-    peaks_keV:
-      - 238.632  # Pb-212; merges 241.0 Ra-224, 242.0 Pb-214
-      - 295.224  # Pb-214
-      - 351.932  # Pb-214
-      - 511.0  # e+e- / Tl-208
-      - 583.187  # Tl-208
-      - 609.312  # Bi-214
-      - 727.330  # Bi-212
-      - 860.557  # Tl-208
-      - 911.204  # Ac-228
-      - 968.971  # Ac-228; merges 964.8
-      - 1120.29  # Bi-214
-      - 1238.11  # Bi-214
-      - 1377.67  # Bi-214
-      - 1460.82  # K-40
-      - 1524.6  # K-42; merges 1509.2, 1512.7
-      - 1588.2  # Ac-228; merges 1592.5 DEP
-      - 1620.50  # Bi-212; merges 1630.6
-      - 1729.6  # Bi-214
-      - 1764.49  # Bi-214
-      - 1847.42  # Bi-214
+    # Gamma lines masked in the likelihood; peak_exclusion_width_keV is the half-width.
+    # 'standard' = built-in table of 20 gamma lines; or a list of centres
+    # in keV, e.g. [583.187, 609.312]; [] masks nothing. Lines whose mask
+    # falls outside fit_range_keV are dropped.
+    peaks_keV: standard
     peak_exclusion_width_keV: 5.0
     # Per-group curve_fit prefits; a relative path is under paths.inputs_root.
     prefit_dictionary: dictionaries/prefit_dictionary.yaml
