@@ -206,8 +206,11 @@ plotted or written. The script:
    `checks.yaml`, and `window.png` (toy, `B_hat`, and `B_hat + R90 S`).
 
 `--inject R` adds `R * S` to the toy; the posterior should recover `R`
-(`injection_pull` in `checks.yaml`), which checks the units of the template.
-`--unblind` fits the observed counts instead of a toy.
+(`injection_pull` in `checks.yaml`, within about ±3). This checks that Python
+and Stan see the same data (group and bin order) and that the fit is unbiased
+for `R > 0`. It does not check the units of `S`: the same template generates and
+fits the toy, so a wrong exposure or efficiency cancels. `--unblind` fits the
+observed counts instead of a toy.
 
 The reported limit is conditional on the fixed `B_hat` and the nominal response.
 A mass scan, pseudo-experiments, and the conversion to a coupling are not
