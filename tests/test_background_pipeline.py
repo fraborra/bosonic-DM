@@ -468,9 +468,20 @@ def _synthetic_spectrum() -> dbetto.AttrsDict:
 
 def _make_fit_config(tmp_path: Path, *, save_plots: bool = False) -> AnalysisConfig:
     config = _make_config(tmp_path)
-    config = replace(config, output=replace(config.output, save_plots=save_plots))
-    write_yaml(GROUPS, config.detector_groups)
     dictionaries = config.paths.inputs_root / "dictionaries"
+    # parse_background_fit_config resolves a relative prefit path against
+    # inputs_root; this config is built by hand, so resolve it here.
+    fit = replace(
+        config.background.fit,
+        prefit_dictionary=config.paths.inputs_root
+        / config.background.fit.prefit_dictionary,
+    )
+    config = replace(
+        config,
+        output=replace(config.output, save_plots=save_plots),
+        background=replace(config.background, fit=fit),
+    )
+    write_yaml(GROUPS, config.detector_groups)
     write_yaml({}, dictionaries / "eres_dict.yaml")
     write_yaml(
         {"ICPC_group1": {"fit_ar": PREFIT}, "BEGe": {"fit_ar": PREFIT}},

@@ -822,10 +822,8 @@ def _run_fit_stage(
         eres_dict = dbetto.Props.read_from(
             str(config.paths.inputs_root / "dictionaries" / "eres_dict.yaml")
         )
-        prefit_path = fit_config.prefit_dictionary
-        if not prefit_path.is_absolute():
-            prefit_path = config.paths.inputs_root / prefit_path
-        prefit_dictionary = dbetto.Props.read_from(str(prefit_path))
+        # Already resolved against inputs_root in parse_background_fit_config.
+        prefit_dictionary = dbetto.Props.read_from(str(fit_config.prefit_dictionary))
         prefits = {
             group: _resolve_prefit(prefit_dictionary, group, fit_config.prefit_key)
             for group in to_fit
