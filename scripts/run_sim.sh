@@ -5,6 +5,9 @@
 #
 # Example: sbatch scripts/run_sim.sh axio-electric efficiencies
 #
+# Submit from the repository root: the SLURM log goes to _out/, which must
+# exist (it is kept in git by _out/.gitkeep).
+#
 #SBATCH --job-name=sim_eff
 #SBATCH --qos=shared
 #SBATCH --nodes=1
@@ -14,7 +17,7 @@
 #SBATCH --time=02:00:00
 #SBATCH --account=m2676
 #SBATCH --mem-per-cpu=2G
-#SBATCH --output=slurm-%x-%j.out
+#SBATCH --output=_out/slurm-%x-%j.out
 
 set -euo pipefail
 

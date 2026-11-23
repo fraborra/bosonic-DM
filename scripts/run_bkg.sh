@@ -8,6 +8,9 @@
 # the group).
 # Example: sbatch scripts/run_bkg.sh "ICPC group1" --overwrite fit fit-plots
 #
+# Submit from the repository root: the SLURM log goes to _out/, which must
+# exist (it is kept in git by _out/.gitkeep).
+#
 #SBATCH --job-name=bkg_fit
 #SBATCH --qos=shared
 #SBATCH --nodes=1
@@ -17,7 +20,7 @@
 #SBATCH --time=01:40:00
 #SBATCH --account=m2676
 #SBATCH --mem-per-cpu=1G
-#SBATCH --output=slurm-%x-%j.out
+#SBATCH --output=_out/slurm-%x-%j.out
 
 set -euo pipefail
 

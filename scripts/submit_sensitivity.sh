@@ -7,6 +7,9 @@
 #   sbatch scripts/submit_sensitivity.sh --config configs/nersc.yaml \
 #     --masses 300,500,800 --n-toys 200 --outdir data/v5/sensitivity/smoke
 #
+# Submit from the repository root: the SLURM log goes to _out/, which must
+# exist (it is kept in git by _out/.gitkeep).
+#
 #SBATCH --job-name=sensitivity
 #SBATCH --qos=shared
 #SBATCH --nodes=1
@@ -16,7 +19,7 @@
 #SBATCH --time=01:00:00
 #SBATCH --account=m2676
 #SBATCH --mem=8G
-#SBATCH --output=slurm-%x-%j.out
+#SBATCH --output=_out/slurm-%x-%j.out
 
 set -euo pipefail
 
