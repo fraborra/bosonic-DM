@@ -14,7 +14,7 @@ Example (NERSC, from the repository root)::
 
     PYTHONPATH=src pixi run python3 scripts/expected_sensitivity.py \
         --config configs/nersc.yaml \
-        --masses 300,500,800 --n-toys 200 --outdir data/v4/sensitivity/smoke
+        --masses 300,500,800 --n-toys 200 --outdir data/v5/sensitivity/smoke
 
 Outputs in ``--outdir``: ``limits_per_toy.parquet``,
 ``expected_limits.parquet``, ``expected_limits.yaml``,

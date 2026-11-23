@@ -7,7 +7,7 @@ production:
 
 paths:
   simulation_root: "${BOSONIC_DM_SIM_ROOT}"
-  data_root: "data/v4"
+  data_root: "data/v5"
   # Shared inputs root for all static data
   inputs_root: "data/inputs"
   temporary_root: "tmp"
@@ -58,10 +58,11 @@ background:
   - 5
   - 10
   # Per-group Stan background fit (stages fit and fit-plots). Every key is
-  # optional; the values below are the defaults.
+  # optional; the values below are the defaults, except spectrum_range_keV
+  # (default [60, 2000]) and peaks_keV (default 'standard').
   fit:
     # Prepared group spectrum: energy range and bin width [keV].
-    spectrum_range_keV: [60, 2000]
+    spectrum_range_keV: [60, 1200]
     spectrum_bin_width_keV: 1
     # Range of the spectrum passed to Stan [keV].
     fit_range_keV: [110, 1100]

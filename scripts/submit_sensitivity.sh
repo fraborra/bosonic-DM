@@ -5,7 +5,7 @@
 #
 # Example (smoke run):
 #   sbatch scripts/submit_sensitivity.sh --config configs/nersc.yaml \
-#     --masses 300,500,800 --n-toys 200 --outdir data/v4/sensitivity/smoke
+#     --masses 300,500,800 --n-toys 200 --outdir data/v5/sensitivity/smoke
 #
 #SBATCH --job-name=sensitivity
 #SBATCH --qos=shared
