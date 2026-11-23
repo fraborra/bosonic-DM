@@ -129,6 +129,9 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--chains", type=int, default=4)
     parser.add_argument("--iter-warmup", type=int, default=1000)
     parser.add_argument("--iter-sampling", type=int, default=2000)
+    parser.add_argument(
+        "--adapt-delta", type=float, default=0.9, help="Stan target acceptance."
+    )
     parser.add_argument("--n-jobs", type=int, default=None)
     parser.add_argument("--job-index", type=int, default=None)
     parser.add_argument(
@@ -238,6 +241,7 @@ def fit_stage(
             chains=args.chains,
             iter_warmup=args.iter_warmup,
             iter_sampling=args.iter_sampling,
+            adapt_delta=args.adapt_delta,
             temporary_root=temporary_root,
         )
         grid_mass = grid.per_toy.filter(
@@ -289,6 +293,7 @@ def compare_stage(
                     "chains": args.chains,
                     "iter_warmup": args.iter_warmup,
                     "iter_sampling": args.iter_sampling,
+                    "adapt_delta": args.adapt_delta,
                 },
             },
             "inputs": {
