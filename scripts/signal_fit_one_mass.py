@@ -39,6 +39,7 @@ import numpy as np
 from bosonic_dm.config import AnalysisConfig, load_analysis_config
 from bosonic_dm.fitting.signal_fit import (
     SIGNAL_STAN_FILE,
+    STAN_GRID_AGREEMENT_MCSE,
     build_signal_stan_data,
     rate_posterior_quantiles,
     run_signal_fit,
@@ -55,12 +56,6 @@ from bosonic_dm.plotting.signal_fit import plot_window_fit
 from bosonic_dm.yaml_io import write_yaml
 
 logger = logging.getLogger("signal_fit_one_mass")
-
-# Stan and grid limits agree if they differ by less than this many Monte
-# Carlo standard errors of the Stan quantile, as in tests/test_stan_signal.py.
-# Over 12 seeds on one toy the Stan R90 was unbiased, but its spread was about
-# 1.5 times the ArviZ quantile MCSE, so 3 MCSE would fail too often.
-AGREEMENT_MCSE = 4.0
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -216,7 +211,9 @@ def check_mass(
 
     mcse = summary.rate["upper_limit_mcse"]
     difference = summary.upper_limit - grid_limit
-    agree = bool(np.isfinite(mcse) and abs(difference) <= AGREEMENT_MCSE * mcse)
+    agree = bool(
+        np.isfinite(mcse) and abs(difference) <= STAN_GRID_AGREEMENT_MCSE * mcse
+    )
     checks: dict[str, Any] = {
         "mass_keV": window.mass_keV,
         "dataset": dataset,

@@ -20,21 +20,34 @@ signal response; neither uncertainty is propagated.
 from __future__ import annotations
 
 import logging
+import tempfile
 import time
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import polars as pl
 
-from bosonic_dm.fitting.signal_fit import CONDITIONAL_LABEL, rate_posterior_quantiles
+from bosonic_dm.fitting.signal_fit import (
+    CONDITIONAL_LABEL,
+    STAN_GRID_AGREEMENT_MCSE,
+    build_signal_stan_data,
+    rate_posterior_quantiles,
+    run_signal_fit,
+    suggest_rate_upper,
+    summarize_signal_fit,
+)
 from bosonic_dm.fitting.signal_template import (
     BackgroundPrediction,
     GroupEfficiency,
     SignalWindow,
     build_signal_window,
 )
+
+if TYPE_CHECKING:
+    import cmdstanpy
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +66,23 @@ BAND_QUANTILES = {
 # Last SeedSequence entropy word of the bootstrap stream, so it never equals a
 # pseudo-experiment stream ``[base_seed, toy]``.
 _BOOTSTRAP_STREAM = 2**32 - 1
+
+# Entropy word of the Stan sampler seeds; distinct from the toy and bootstrap
+# streams.
+_STAN_STREAM = 2**32 - 2
+
+# Thresholds of the Stan-versus-grid agreement criteria (``agreement_checks``).
+# Per mass, the mean pull must satisfy |mean| <= PULL_MEAN_NSIGMA *
+# PULL_SD_EXPECTED / sqrt(n_passed), where PULL_SD_EXPECTED is the observed
+# spread of the pull (about 1.5, see STAN_GRID_AGREEMENT_MCSE).
+PULL_MEAN_NSIGMA = 3.0
+PULL_SD_EXPECTED = 1.5
+POOLED_PULL_SD_RANGE = (0.7, 2.5)
+RATIO_NSIGMA = 3.0
+# Pooled fraction of passed toys with |z| > STAN_GRID_AGREEMENT_MCSE; the
+# expected value is about 0.008 for a pull sd of 1.5.
+MAX_PULL_OUTLIER_FRACTION = 0.02
+MAX_FAILED_FRACTION = 0.01
 
 TOY_SCHEME = "A: shared full spectra, n ~ Poisson(B_hat), all masses on each"
 
@@ -370,3 +400,267 @@ def expected_limits(
         summary=pl.DataFrame(rows),
         settings=settings,
     )
+
+
+def stan_limits(
+    window: SignalWindow,
+    toy_counts: np.ndarray,
+    toy_index: Sequence[int],
+    model: cmdstanpy.CmdStanModel,
+    *,
+    base_seed: int,
+    credibility: float = 0.9,
+    chains: int = 4,
+    iter_warmup: int = 1000,
+    iter_sampling: int = 2000,
+    adapt_delta: float = 0.9,
+    temporary_root: str | Path | None = None,
+) -> pl.DataFrame:
+    """Stan credible upper limits of background-only toys in one window.
+
+    Parameters
+    ----------
+    window
+        Signal window at one mass.
+    toy_counts
+        Toy counts, shape (toys, groups, window bins).
+    toy_index
+        Index of each toy, used for the sampler seed and the output table.
+    model
+        Compiled signal model.
+    base_seed
+        Base seed; the Stan seed of each (mass, toy) is derived from it.
+    credibility
+        Credibility of the upper limit.
+    chains, iter_warmup, iter_sampling, adapt_delta
+        Sampler settings.
+    temporary_root
+        Directory for the temporary CmdStan output (default: system temp).
+
+    Returns
+    -------
+    polars.DataFrame
+        One row per toy: ``mass_keV``, ``toy``, ``r90_stan``,
+        ``r90_stan_mcse``, ``passed``, ``n_divergent`` and ``limit_to_bound``.
+        Failed fits have NaN limits and ``passed = False``.
+    """
+    toy_counts = np.asarray(toy_counts)
+    if toy_counts.shape[0] != len(toy_index):
+        msg = "toy_counts and toy_index must have the same length."
+        raise ValueError(msg)
+    mass = float(window.mass_keV)
+    nan = float("nan")
+    rows: list[dict[str, Any]] = []
+    for counts, toy_value in zip(toy_counts, toy_index, strict=True):
+        toy = int(toy_value)
+        seed = int(
+            np.random.SeedSequence(
+                [base_seed, _STAN_STREAM, toy, round(mass * 1000)]
+            ).generate_state(1)[0]
+            % (2**31 - 1)
+        )
+        row: dict[str, Any] = {
+            "mass_keV": mass,
+            "toy": toy,
+            "r90_stan": nan,
+            "r90_stan_mcse": nan,
+            "passed": False,
+            "n_divergent": 0,
+            "limit_to_bound": nan,
+        }
+        try:
+            toy_window = window.with_counts(counts)
+            data = build_signal_stan_data(toy_window, suggest_rate_upper(toy_window))
+            with tempfile.TemporaryDirectory(dir=temporary_root) as tmp:
+                fit = run_signal_fit(
+                    model,
+                    data,
+                    seed=seed,
+                    chains=chains,
+                    iter_warmup=iter_warmup,
+                    iter_sampling=iter_sampling,
+                    adapt_delta=adapt_delta,
+                    output_dir=tmp,
+                )
+                summary = summarize_signal_fit(fit, data, credibility=credibility)
+            row.update(
+                r90_stan=float(summary.upper_limit),
+                r90_stan_mcse=float(summary.rate["upper_limit_mcse"]),
+                passed=bool(summary.passed),
+                n_divergent=int(summary.diagnostics["divergences"]),
+                limit_to_bound=float(summary.diagnostics["upper_limit_to_prior_bound"]),
+            )
+        except Exception:
+            logger.warning(
+                "Stan fit failed at mass %s keV, toy %d.", mass, toy, exc_info=True
+            )
+        rows.append(row)
+    return pl.DataFrame(
+        rows,
+        schema={
+            "mass_keV": pl.Float64,
+            "toy": pl.Int64,
+            "r90_stan": pl.Float64,
+            "r90_stan_mcse": pl.Float64,
+            "passed": pl.Boolean,
+            "n_divergent": pl.Int64,
+            "limit_to_bound": pl.Float64,
+        },
+    )
+
+
+_COMPARISON_SCHEMA = {
+    "mass_keV": pl.Float64,
+    "near_masked_line": pl.Boolean,
+    "n_toys": pl.Int64,
+    "n_failed": pl.Int64,
+    "r90_grid_median": pl.Float64,
+    "r90_stan_median": pl.Float64,
+    "median_ratio": pl.Float64,
+    "median_ratio_err": pl.Float64,
+    "r90_grid_q16": pl.Float64,
+    "r90_grid_q84": pl.Float64,
+    "r90_stan_q16": pl.Float64,
+    "r90_stan_q84": pl.Float64,
+    "pull_mean": pl.Float64,
+    "pull_sd": pl.Float64,
+    "frac_pull_above_max": pl.Float64,
+}
+
+
+def _pulls(table: pl.DataFrame) -> pl.DataFrame:
+    """Add the pull ``z`` of the Stan limit with respect to the grid limit."""
+    return table.with_columns(
+        ((pl.col("r90_stan") - pl.col("r90")) / pl.col("r90_stan_mcse")).alias("z")
+    )
+
+
+def compare_stan_grid(
+    per_toy: pl.DataFrame, *, n_bootstrap: int = 1000, seed: int = 0
+) -> pl.DataFrame:
+    """Per-mass comparison of the Stan and the grid upper limits.
+
+    Parameters
+    ----------
+    per_toy
+        Columns ``mass_keV``, ``toy``, ``r90`` (grid), ``r90_stan``,
+        ``r90_stan_mcse``, ``passed`` and optionally ``near_masked_line``.
+    n_bootstrap
+        Bootstrap resamples for the error of the median ratio.
+    seed
+        Seed of the bootstrap.
+
+    Returns
+    -------
+    polars.DataFrame
+        One row per mass, sorted by mass. The pull is
+        ``(r90_stan - r90) / r90_stan_mcse`` over the toys that passed; all
+        medians and the pull are over those toys only. Masses without a
+        passed toy have NaN metrics.
+    """
+    if "near_masked_line" not in per_toy.columns:
+        per_toy = per_toy.with_columns(pl.lit(False).alias("near_masked_line"))
+    per_toy = _pulls(per_toy)
+    rng = np.random.default_rng(np.random.SeedSequence([seed, _BOOTSTRAP_STREAM, 1]))
+    nan = float("nan")
+    rows: list[dict[str, Any]] = []
+    for mass in sorted(per_toy["mass_keV"].unique().to_list()):
+        sub = per_toy.filter(pl.col("mass_keV") == mass).sort("toy")
+        ok = sub.filter(pl.col("passed"))
+        row: dict[str, Any] = {
+            "mass_keV": float(mass),
+            "near_masked_line": bool(sub["near_masked_line"][0]),
+            "n_toys": sub.height,
+            "n_failed": sub.height - ok.height,
+        }
+        row.update(dict.fromkeys(list(_COMPARISON_SCHEMA)[4:], nan))
+        if ok.height:
+            grid = ok["r90"].to_numpy()
+            stan = ok["r90_stan"].to_numpy()
+            z = ok["z"].to_numpy()
+            row.update(
+                r90_grid_median=float(np.median(grid)),
+                r90_stan_median=float(np.median(stan)),
+                median_ratio=float(np.median(stan) / np.median(grid)),
+                r90_grid_q16=float(np.quantile(grid, 0.16)),
+                r90_grid_q84=float(np.quantile(grid, 0.84)),
+                r90_stan_q16=float(np.quantile(stan, 0.16)),
+                r90_stan_q84=float(np.quantile(stan, 0.84)),
+                pull_mean=float(z.mean()),
+                pull_sd=float(z.std(ddof=1)) if z.size > 1 else nan,
+                frac_pull_above_max=float(
+                    np.mean(np.abs(z) > STAN_GRID_AGREEMENT_MCSE)
+                ),
+            )
+            if n_bootstrap >= 2 and grid.size >= 2:
+                resampled = rng.integers(0, grid.size, size=(n_bootstrap, grid.size))
+                ratios = np.median(stan[resampled], axis=1) / np.median(
+                    grid[resampled], axis=1
+                )
+                row["median_ratio_err"] = float(ratios.std(ddof=1))
+        rows.append(row)
+    return pl.DataFrame(rows, schema=_COMPARISON_SCHEMA)
+
+
+def agreement_checks(comparison: pl.DataFrame, per_toy: pl.DataFrame) -> dict[str, Any]:
+    """Pooled statistics and pass/fail criteria of the Stan-grid agreement.
+
+    Parameters
+    ----------
+    comparison
+        Output of ``compare_stan_grid``.
+    per_toy
+        The per-toy table it was computed from.
+
+    Returns
+    -------
+    dict
+        Pooled pull mean, sd and fraction above the agreement bound, the
+        failed-fit fraction, the largest per-mass ``|pull_mean|``, the number
+        of masses whose median ratio differs from one by more than
+        ``RATIO_NSIGMA`` sigma (masses without a ratio error are excluded and
+        counted in ``n_masses_without_ratio_error``), the boolean criteria and ``passed_all``.
+        All values are plain Python types.
+    """
+    nan = float("nan")
+    z = _pulls(per_toy).filter(pl.col("passed"))["z"].to_numpy()
+    z = z[np.isfinite(z)]
+    n_total = per_toy.height
+    n_failed = int(per_toy.filter(~pl.col("passed")).height)
+    failed_fraction = n_failed / n_total if n_total else nan
+
+    valid = comparison.filter(pl.col("pull_mean").is_not_nan())
+    n_ok = valid["n_toys"].to_numpy() - valid["n_failed"].to_numpy()
+    pull_mean = valid["pull_mean"].to_numpy()
+    mean_limit = PULL_MEAN_NSIGMA * PULL_SD_EXPECTED / np.sqrt(np.maximum(n_ok, 1))
+    ratio = valid["median_ratio"].to_numpy()
+    ratio_err = valid["median_ratio_err"].to_numpy()
+    has_error = np.isfinite(ratio_err)
+    ratio_off = has_error & (np.abs(ratio - 1.0) > RATIO_NSIGMA * ratio_err)
+
+    pooled_sd = float(z.std(ddof=1)) if z.size > 1 else nan
+    low, high = POOLED_PULL_SD_RANGE
+    outlier_fraction = (
+        float(np.mean(np.abs(z) > STAN_GRID_AGREEMENT_MCSE)) if z.size else nan
+    )
+    checks = {
+        "pull_mean_per_mass": bool(np.all(np.abs(pull_mean) <= mean_limit)),
+        "pooled_pull_sd": bool(low <= pooled_sd <= high),
+        "pull_outlier_fraction": bool(outlier_fraction <= MAX_PULL_OUTLIER_FRACTION),
+        "median_ratio_within_nsigma": bool(not np.any(ratio_off)),
+        "failed_fraction": bool(failed_fraction < MAX_FAILED_FRACTION),
+    }
+    return {
+        "pooled_pull_mean": float(z.mean()) if z.size else nan,
+        "pooled_pull_sd": pooled_sd,
+        "pooled_frac_pull_above_max": outlier_fraction,
+        "ratio_nsigma": float(RATIO_NSIGMA),
+        "n_masses_without_ratio_error": int(np.sum(~has_error)),
+        "failed_fraction": float(failed_fraction),
+        "max_abs_pull_mean": float(np.max(np.abs(pull_mean)))
+        if pull_mean.size
+        else nan,
+        "n_masses_ratio_off": int(np.sum(ratio_off)),
+        **{f"criterion_{name}": ok for name, ok in checks.items()},
+        "passed_all": bool(all(checks.values())),
+    }

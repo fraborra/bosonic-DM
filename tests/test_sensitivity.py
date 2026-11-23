@@ -11,17 +11,25 @@ mpl.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
+import polars as pl
 import pytest
 from scipy.integrate import cumulative_trapezoid
 
 from bosonic_dm.fitting.sensitivity import (
     BAND_QUANTILES,
+    agreement_checks,
+    compare_stan_grid,
     draw_background_toys,
     expected_limits,
     stack_backgrounds,
+    stan_limits,
     window_slice,
 )
-from bosonic_dm.fitting.signal_fit import rate_posterior_quantiles, rate_upper_limits
+from bosonic_dm.fitting.signal_fit import (
+    STAN_GRID_AGREEMENT_MCSE,
+    rate_posterior_quantiles,
+    rate_upper_limits,
+)
 from bosonic_dm.fitting.signal_template import (
     BackgroundPrediction,
     GroupEfficiency,
@@ -337,3 +345,165 @@ def test_plot_expected_limits(limits: object, tmp_path: Path) -> None:
     assert path.exists()
     assert fig.axes[0].get_yscale() == "log"
     plt.close(fig)
+
+
+# --- Stan-versus-grid comparison -------------------------------------------
+
+
+def _comparison_table() -> pl.DataFrame:
+    grid = [10.0, 10.0, 10.0, 10.0]
+    stan = [11.0, 12.0, 10.0, 11.0]
+    mcse = [0.5, 0.5, 0.5, 0.5]
+    rows = [
+        # mass 100: z = 2, 4, 0, 2 -> one failed row (z would be huge)
+        *[
+            (100.0, k, g, s_, m, True)
+            for k, (g, s_, m) in enumerate(zip(grid, stan, mcse, strict=True))
+        ],
+        (100.0, 4, 10.0, float("nan"), float("nan"), False),
+        # mass 200: all toys failed
+        (200.0, 0, 10.0, float("nan"), float("nan"), False),
+        (200.0, 1, 10.0, float("nan"), float("nan"), False),
+    ]
+    return pl.DataFrame(
+        rows,
+        schema=["mass_keV", "toy", "r90", "r90_stan", "r90_stan_mcse", "passed"],
+        orient="row",
+    )
+
+
+def test_compare_stan_grid_known_pulls() -> None:
+    comparison = compare_stan_grid(_comparison_table(), n_bootstrap=200, seed=1)
+    assert comparison["mass_keV"].to_list() == [100.0, 200.0]
+    assert comparison.schema["n_toys"] == pl.Int64
+    assert comparison.schema["near_masked_line"] == pl.Boolean
+    first, second = comparison.row(0, named=True), comparison.row(1, named=True)
+    assert (first["n_toys"], first["n_failed"]) == (5, 1)
+    assert first["near_masked_line"] is False
+    assert first["r90_grid_median"] == pytest.approx(10.0)
+    assert first["r90_stan_median"] == pytest.approx(11.0)
+    assert first["median_ratio"] == pytest.approx(1.1)
+    assert first["median_ratio_err"] > 0
+    assert first["pull_mean"] == pytest.approx(2.0)
+    assert first["pull_sd"] == pytest.approx(np.std([2, 4, 0, 2], ddof=1))
+    assert first["frac_pull_above_max"] == pytest.approx(0.0)
+    assert (second["n_toys"], second["n_failed"]) == (2, 2)
+    for name in ("median_ratio", "pull_mean", "pull_sd", "r90_stan_q84"):
+        assert np.isnan(second[name])
+    again = compare_stan_grid(_comparison_table(), n_bootstrap=200, seed=1)
+    assert again.equals(comparison)
+
+
+def test_agreement_checks_known_table() -> None:
+    table = _comparison_table()
+    comparison = compare_stan_grid(table, n_bootstrap=200, seed=1)
+    checks = agreement_checks(comparison, table)
+    assert checks["pooled_pull_mean"] == pytest.approx(2.0)
+    assert checks["pooled_pull_sd"] == pytest.approx(np.std([2, 4, 0, 2], ddof=1))
+    assert checks["pooled_frac_pull_above_max"] == pytest.approx(0.0)
+    assert checks["failed_fraction"] == pytest.approx(3 / 7)
+    assert checks["max_abs_pull_mean"] == pytest.approx(2.0)
+    row = comparison.row(0, named=True)
+    off = abs(row["median_ratio"] - 1) > 3 * row["median_ratio_err"]
+    assert checks["n_masses_ratio_off"] == int(off)
+    assert checks["n_masses_without_ratio_error"] == 0
+    assert checks["criterion_pull_outlier_fraction"] is True
+    assert checks["criterion_pooled_pull_sd"] is True
+    assert checks["criterion_failed_fraction"] is False
+    assert checks["criterion_median_ratio_within_nsigma"] is not off
+    # |mean| = 2 <= 3 * 1.5 / sqrt(4) = 2.25
+    assert checks["criterion_pull_mean_per_mass"] is True
+    assert checks["passed_all"] is False
+    assert all(type(v) in (float, int, bool) for v in checks.values())
+
+
+def test_agreement_checks_flags_a_biased_mass() -> None:
+    table = (
+        _comparison_table()
+        .filter(pl.col("passed"))
+        .with_columns((pl.col("r90_stan") + 1.5).alias("r90_stan"))
+    )
+    comparison = compare_stan_grid(table, n_bootstrap=200, seed=1)
+    checks = agreement_checks(comparison, table)
+    assert checks["criterion_pull_mean_per_mass"] is False
+    assert checks["criterion_pull_outlier_fraction"] is False
+    assert checks["failed_fraction"] == 0.0
+
+
+def test_stan_limits_match_grid_and_are_reproducible(
+    signal_model: object, tmp_path: Path
+) -> None:
+    window = build_signal_window(450.0, BACKGROUNDS, **WINDOW_OPTIONS)
+    rng = np.random.default_rng(3)
+    counts = rng.poisson(
+        np.broadcast_to(window.stacked("b_hat"), (3, *window.stacked("b_hat").shape))
+    )
+    index = [4, 5, 6]
+    options = {"base_seed": 11, "temporary_root": tmp_path}
+    table = stan_limits(window, counts, index, signal_model, **options)
+    assert table.columns == [
+        "mass_keV",
+        "toy",
+        "r90_stan",
+        "r90_stan_mcse",
+        "passed",
+        "n_divergent",
+        "limit_to_bound",
+    ]
+    assert table["toy"].to_list() == index
+    assert table["passed"].all()
+    assert list(tmp_path.iterdir()) == []
+    grid = rate_upper_limits(
+        counts,
+        window.stacked("b_hat"),
+        window.stacked("signal_template"),
+        window.stacked("use_bin").astype(bool),
+    )
+    deviation = np.abs(table["r90_stan"].to_numpy() - grid)
+    assert np.all(
+        deviation <= STAN_GRID_AGREEMENT_MCSE * table["r90_stan_mcse"].to_numpy()
+    )
+
+    repeat = stan_limits(window, counts, index, signal_model, **options)
+    assert repeat["r90_stan"].to_list() == table["r90_stan"].to_list()
+
+
+def _outlier_table(n_outliers: int, n_toys: int = 100) -> pl.DataFrame:
+    stan = np.full(n_toys, 10.0)
+    stan[:n_outliers] = 10.0 + 5.0 * 0.5  # z = 5
+    return pl.DataFrame(
+        {
+            "mass_keV": [100.0] * n_toys,
+            "toy": np.arange(n_toys),
+            "r90": [10.0] * n_toys,
+            "r90_stan": stan,
+            "r90_stan_mcse": [0.5] * n_toys,
+            "passed": [True] * n_toys,
+        }
+    )
+
+
+@pytest.mark.parametrize(("n_outliers", "expected"), [(2, True), (3, False)])
+def test_agreement_checks_outlier_fraction(n_outliers: int, expected: bool) -> None:
+    table = _outlier_table(n_outliers)
+    checks = agreement_checks(compare_stan_grid(table, n_bootstrap=50), table)
+    assert checks["pooled_frac_pull_above_max"] == pytest.approx(n_outliers / 100)
+    assert checks["criterion_pull_outlier_fraction"] is expected
+
+
+def test_agreement_checks_skip_mass_without_ratio_error() -> None:
+    table = pl.DataFrame(
+        {
+            "mass_keV": [100.0],
+            "toy": [0],
+            "r90": [10.0],
+            "r90_stan": [10.5],
+            "r90_stan_mcse": [0.5],
+            "passed": [True],
+        }
+    )
+    checks = agreement_checks(compare_stan_grid(table, n_bootstrap=50), table)
+    assert checks["n_masses_without_ratio_error"] == 1
+    assert checks["n_masses_ratio_off"] == 0
+    assert checks["criterion_median_ratio_within_nsigma"] is True
+    assert checks["ratio_nsigma"] == 3.0

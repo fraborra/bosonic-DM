@@ -39,6 +39,12 @@ CONDITIONAL_LABEL = (
     "and the nominal signal response"
 )
 
+# Stan and grid limits agree if they differ by less than this many Monte
+# Carlo standard errors of the Stan quantile, as in tests/test_stan_signal.py.
+# Over 12 seeds on one toy the Stan R90 was unbiased, but its spread was about
+# 1.5 times the ArviZ quantile MCSE, so 3 MCSE would fail too often.
+STAN_GRID_AGREEMENT_MCSE = 4.0
+
 
 @dataclass(frozen=True)
 class SignalFitSummary:
