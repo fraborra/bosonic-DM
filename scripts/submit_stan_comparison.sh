@@ -14,6 +14,14 @@
 #   sbatch scripts/submit_stan_comparison.sh --config configs/nersc.yaml \
 #     --outdir data/v5/sensitivity/stan_check --compare-only
 #
+# More toys in the same outdir, keeping the saved ones: add
+# --n-toys 1000 --toys 200:1000 to the array command (and --n-toys 1000 to
+# --compare-only).
+#
+# Every Stan fit writes and deletes CmdStan CSVs under paths.temporary_root of
+# the config: point it at $SCRATCH, not at the home directory, which slowed the
+# fits down by up to 10x (2026-11-23).
+#
 # Submit from the repository root: the SLURM log goes to _out/, which must
 # exist (it is kept in git by _out/.gitkeep).
 #

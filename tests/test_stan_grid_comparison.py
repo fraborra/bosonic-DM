@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import argparse
 import importlib.util
 from pathlib import Path
 from typing import Any
@@ -59,14 +60,15 @@ def test_main_writes_all_outputs(
         "comparison.parquet",
         "comparison.png",
         "comparison.yaml",
-        "per_mass/290keV.parquet",
-        "per_mass/310keV.parquet",
+        "per_mass/290keV_t0-2.parquet",
+        "per_mass/310keV_t0-2.parquet",
     ):
         assert (outdir / name).is_file(), name
     record = read_yaml(outdir / "comparison.yaml")
     assert record["complete"] is True
     assert record["masses_present"] == [290.0, 310.0]
     assert record["masses_requested"] == [290.0, 310.0]
+    assert record["masses_incomplete"] == []
     assert record["settings"]["n_toys"] == 3
     assert "passed_all" in record["agreement"]
 
@@ -79,13 +81,100 @@ def test_second_run_skips_the_fits(
 ) -> None:
     outdir = tmp_path / "out"
     _run(config_path, outdir, signal_model)
+    _no_fits(monkeypatch)
+    _run(config_path, outdir, signal_model)
 
+
+def _no_fits(monkeypatch: pytest.MonkeyPatch) -> None:
     def fail(*_a: Any, **_k: Any) -> None:
         msg = "stan_limits must not be called"
         raise AssertionError(msg)
 
     monkeypatch.setattr(script, "stan_limits", fail)
+
+
+def test_adding_toys_later_matches_one_run(
+    config_path: Path, tmp_path: Path, signal_model: Any
+) -> None:
+    single = tmp_path / "single"
+    _run(config_path, single, signal_model, "--n-toys", "5")
+    added = tmp_path / "added"
+    _run(config_path, added, signal_model, "--n-toys", "5", "--toys", "0:3")
+    partial = read_yaml(added / "comparison.yaml")
+    assert partial["complete"] is False
+    assert partial["masses_incomplete"] == [290.0, 310.0]
+
+    _run(config_path, added, signal_model, "--n-toys", "5", "--toys", "3:5")
+    assert (added / "per_mass" / "290keV_t3-4.parquet").is_file()
+    assert read_yaml(added / "comparison.yaml")["complete"] is True
+    a = pl.read_parquet(single / "stan_per_toy.parquet")
+    b = pl.read_parquet(added / "stan_per_toy.parquet")
+    assert a.equals(b)
+
+    # a smaller --n-toys compares only the first toys
+    _run(config_path, added, signal_model, "--compare-only")
+    assert pl.read_parquet(added / "stan_per_toy.parquet")["toy"].max() == 2
+
+
+def test_old_one_file_per_mass_is_read(
+    config_path: Path,
+    tmp_path: Path,
+    signal_model: Any,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    outdir = tmp_path / "out"
     _run(config_path, outdir, signal_model)
+    per_mass = outdir / "per_mass"
+    for mass in ("290", "310"):
+        (per_mass / f"{mass}keV_t0-2.parquet").rename(per_mass / f"{mass}keV.parquet")
+    _no_fits(monkeypatch)
+    _run(config_path, outdir, signal_model)
+    assert read_yaml(outdir / "comparison.yaml")["complete"] is True
+
+
+def test_overwrite_refits_only_the_requested_toys(
+    config_path: Path, tmp_path: Path, signal_model: Any
+) -> None:
+    outdir = tmp_path / "out"
+    _run(config_path, outdir, signal_model)
+    before = pl.read_parquet(outdir / "stan_per_toy.parquet")
+    _run(config_path, outdir, signal_model, "--overwrite", "--toys", "1:3")
+    per_mass = outdir / "per_mass"
+    assert pl.read_parquet(per_mass / "290keV_t0-2.parquet")["toy"].to_list() == [0]
+    assert pl.read_parquet(per_mass / "290keV_t1-2.parquet")["toy"].to_list() == [1, 2]
+    after = pl.read_parquet(outdir / "stan_per_toy.parquet")
+    # same seeds: the refit gives the same limits
+    assert before.equals(after)
+    assert read_yaml(outdir / "comparison.yaml")["complete"] is True
+
+
+def test_toys_saved_twice_are_rejected(
+    config_path: Path, tmp_path: Path, signal_model: Any
+) -> None:
+    outdir = tmp_path / "out"
+    _run(config_path, outdir, signal_model)
+    per_mass = outdir / "per_mass"
+    pl.read_parquet(per_mass / "290keV_t0-2.parquet").head(1).write_parquet(
+        per_mass / "290keV_t0-0.parquet"
+    )
+    with pytest.raises(SystemExit, match="more than once"):
+        _run(config_path, outdir, signal_model, "--compare-only")
+
+
+def test_parse_toy_range() -> None:
+    assert script.parse_toy_range("200:1000") == (200, 1000)
+    for bad in ("5", "3:3", "-1:2", "a:b"):
+        with pytest.raises(argparse.ArgumentTypeError):
+            script.parse_toy_range(bad)
+
+
+def test_toy_range_beyond_n_toys_is_rejected(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit):
+        script.parse_args(
+            ["--config", "c.yaml", "--outdir", str(tmp_path), "--toys", "0:300"]
+        )
+    args = script.parse_args(["--config", "c.yaml", "--outdir", str(tmp_path)])
+    assert args.toys == (0, 200)
 
 
 def test_split_jobs_then_compare_only_match_one_job(

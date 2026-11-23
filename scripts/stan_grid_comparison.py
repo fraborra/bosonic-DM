@@ -17,8 +17,19 @@ Example (NERSC, from the repository root)::
         --grid-per-toy data/v5/sensitivity/full/limits_per_toy.parquet \
         --outdir data/v5/sensitivity/stan_check
 
-Outputs in ``--outdir``: ``per_mass/<mass>keV.parquet`` (one per mass),
-``stan_per_toy.parquet``, ``comparison.parquet``, ``comparison.png`` and
+More toys can be added later without refitting the saved ones: toy ``k`` and
+its Stan seed depend only on ``k`` (and the mass), so a run with
+``--n-toys 1000 --toys 200:1000`` in the same ``--outdir`` fits toys 200-999
+and the comparison then uses all 1000::
+
+    sbatch --array=0-7 scripts/submit_stan_comparison.sh \
+        --config configs/nersc.yaml --n-toys 1000 --toys 200:1000 \
+        --grid-per-toy data/v5/sensitivity/full/limits_per_toy.parquet \
+        --outdir data/v5/sensitivity/stan_check
+
+Outputs in ``--outdir``: ``per_mass/<mass>keV_t<first>-<last>.parquet`` (one
+per mass and block of toys; ``<mass>keV.parquet`` of earlier versions is read
+too), ``stan_per_toy.parquet``, ``comparison.parquet``, ``comparison.png`` and
 ``comparison.yaml``.
 """
 
@@ -108,6 +119,35 @@ def default_job_split(env: Mapping[str, str] | None = None) -> tuple[int, int]:
     return 1, 0
 
 
+def parse_toy_range(text: str) -> tuple[int, int]:
+    """Parse ``start:stop`` (stop excluded) into ``(start, stop)``.
+
+    Parameters
+    ----------
+    text
+        Toy range, e.g. ``"200:1000"`` for toys 200 to 999.
+
+    Returns
+    -------
+    tuple of int
+        ``(start, stop)``.
+
+    Raises
+    ------
+    argparse.ArgumentTypeError
+        If the range is malformed, negative or empty.
+    """
+    try:
+        start, stop = (int(part) for part in text.split(":"))
+    except ValueError as err:
+        msg = f"Invalid toy range {text!r}; expected start:stop."
+        raise argparse.ArgumentTypeError(msg) from err
+    if start < 0 or stop <= start:
+        msg = f"Invalid toy range {text!r}; need 0 <= start < stop."
+        raise argparse.ArgumentTypeError(msg)
+    return start, stop
+
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Command-line arguments."""
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
@@ -116,7 +156,19 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--masses", type=parse_masses, default=parse_masses(DEFAULT_MASSES)
     )
-    parser.add_argument("--n-toys", type=int, default=200)
+    parser.add_argument(
+        "--n-toys",
+        type=int,
+        default=200,
+        help="Total toys per mass; the comparison is complete with toys 0 to N-1.",
+    )
+    parser.add_argument(
+        "--toys",
+        type=parse_toy_range,
+        default=None,
+        help="Toys to fit in this run, start:stop with stop excluded "
+        "(default 0:N); saved toys are skipped unless --overwrite.",
+    )
     parser.add_argument("--seed", type=int, default=20261117)
     parser.add_argument("--credibility", type=float, default=0.9)
     parser.add_argument("--half-width", type=float, default=12.5)
@@ -144,6 +196,10 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--compare-only", action="store_true")
     args = parser.parse_args(argv)
+    if args.toys is None:
+        args.toys = (0, args.n_toys)
+    if args.toys[1] > args.n_toys:
+        parser.error(f"--toys {args.toys[0]}:{args.toys[1]} goes beyond --n-toys.")
     default_jobs, default_index = default_job_split()
     if args.n_jobs is None:
         args.n_jobs = default_jobs
@@ -152,8 +208,49 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return args
 
 
-def _mass_file(outdir: Path, mass: float) -> Path:
-    return outdir / "per_mass" / f"{mass:g}keV.parquet"
+def _mass_files(outdir: Path, mass: float) -> list[Path]:
+    """Saved parquet files of one mass, including the old one-file name."""
+    per_mass = outdir / "per_mass"
+    old = per_mass / f"{mass:g}keV.parquet"
+    chunks = sorted(per_mass.glob(f"{mass:g}keV_t*.parquet"))
+    return [old, *chunks] if old.is_file() else chunks
+
+
+def _chunk_file(outdir: Path, mass: float, toys: Sequence[int]) -> Path:
+    return outdir / "per_mass" / f"{mass:g}keV_t{min(toys)}-{max(toys)}.parquet"
+
+
+def _saved_toys(files: Sequence[Path]) -> set[int]:
+    return {
+        int(toy)
+        for path in files
+        for toy in pl.read_parquet(path, columns=["toy"])["toy"]
+    }
+
+
+def _write_atomic(table: pl.DataFrame, path: Path) -> None:
+    tmp = path.with_name(path.name + ".tmp")
+    table.write_parquet(tmp)
+    tmp.replace(path)
+
+
+def _drop_toys(files: Sequence[Path], toys: Sequence[int], keep: Path) -> None:
+    """Remove ``toys`` from the saved files other than ``keep``.
+
+    Run before ``keep`` is written: if the job stops in between, the removed
+    toys are missing, not duplicated, and the next run fits them again.
+    """
+    for path in files:
+        if path == keep:
+            continue
+        table = pl.read_parquet(path)
+        kept = table.filter(~pl.col("toy").is_in(list(toys)))
+        if kept.height == table.height:
+            continue
+        if kept.height == 0:
+            path.unlink()
+        else:
+            _write_atomic(kept, path)
 
 
 def _check_against_grid(
@@ -182,19 +279,26 @@ def fit_stage(
     masses: np.ndarray,
     model: cmdstanpy.CmdStanModel,
 ) -> None:
-    """Fit this job's masses with Stan and write one parquet per mass."""
+    """Fit this job's masses with Stan; one parquet per mass and block of toys."""
     job_masses = split_masses(masses, args.n_jobs, args.job_index)
-    todo = [
-        float(m)
-        for m in job_masses
-        if args.overwrite or not _mass_file(args.outdir, float(m)).is_file()
-    ]
+    requested = list(range(*args.toys))
+    plan: dict[float, tuple[list[int], list[Path]]] = {}
+    for m in job_masses:
+        files = _mass_files(args.outdir, float(m))
+        toys_left = (
+            requested if args.overwrite else sorted(set(requested) - _saved_toys(files))
+        )
+        if toys_left:
+            plan[float(m)] = (toys_left, files)
+    todo = list(plan)
     logger.info(
-        "Job %d/%d: %d masses, %d to fit.",
+        "Job %d/%d: %d masses, %d to fit (toys %d to %d).",
         args.job_index,
         args.n_jobs,
         job_masses.size,
         len(todo),
+        args.toys[0],
+        args.toys[1] - 1,
     )
     if not todo:
         return
@@ -229,12 +333,13 @@ def fit_stage(
             logger.warning("All bins masked at %g keV; skipped.", mass)
             continue
         start = time.perf_counter()
+        toys_left, files = plan[mass]
         window = build_signal_window(mass, backgrounds, **window_options)
-        counts = toys[:, :, window_slice(edges, window.bin_edges)]
+        counts = toys[toys_left][:, :, window_slice(edges, window.bin_edges)]
         stan = stan_limits(
             window,
             counts,
-            range(args.n_toys),
+            toys_left,
             model,
             base_seed=args.seed,
             credibility=args.credibility,
@@ -250,22 +355,43 @@ def fit_stage(
         table = stan.join(grid_mass, on="toy", how="left").with_columns(
             pl.lit(bool(row["near_masked_line"][0])).alias("near_masked_line")
         )
-        path = _mass_file(args.outdir, mass)
-        tmp = path.with_name(path.name + ".tmp")
-        table.write_parquet(tmp)
-        tmp.replace(path)
-        logger.info("m = %g keV done in %.0f s.", mass, time.perf_counter() - start)
+        path = _chunk_file(args.outdir, mass, toys_left)
+        if args.overwrite:
+            _drop_toys(files, toys_left, keep=path)
+        _write_atomic(table, path)
+        logger.info(
+            "m = %g keV done in %.0f s (%d toys).",
+            mass,
+            time.perf_counter() - start,
+            len(toys_left),
+        )
 
 
 def compare_stage(
     args: argparse.Namespace, inputs: SignalInputs, masses: np.ndarray
 ) -> None:
     """Compare all per-mass results present and write the summary outputs."""
-    files = sorted((args.outdir / "per_mass").glob("*keV.parquet"))
+    files = sorted((args.outdir / "per_mass").glob("*.parquet"))
     if not files:
         logger.warning("No per-mass file in %s; nothing to compare.", args.outdir)
         return
-    per_toy = pl.concat([pl.read_parquet(f) for f in files]).sort("mass_keV", "toy")
+    per_toy = pl.concat([pl.read_parquet(f) for f in files])
+    duplicated = per_toy.group_by("mass_keV", "toy").len().filter(pl.col("len") > 1)
+    if duplicated.height:
+        masses_hit = sorted(duplicated["mass_keV"].unique().to_list())
+        msg = (
+            f"{duplicated.height} toys are saved more than once in "
+            f"{args.outdir / 'per_mass'} (masses {masses_hit} keV); refit them "
+            "with --overwrite."
+        )
+        raise SystemExit(msg)
+    beyond = per_toy.filter(pl.col("toy") >= args.n_toys).height
+    if beyond:
+        logger.info("Ignoring %d fits of toys >= --n-toys %d.", beyond, args.n_toys)
+    per_toy = per_toy.filter(pl.col("toy") < args.n_toys).sort("mass_keV", "toy")
+    if per_toy.height == 0:
+        logger.warning("No toy below --n-toys %d; nothing to compare.", args.n_toys)
+        return
     comparison = compare_stan_grid(per_toy, seed=0)
     checks = agreement_checks(comparison, per_toy)
 
@@ -279,8 +405,16 @@ def compare_stage(
     )
     plt.close(fig)
 
-    present = sorted({float(m) for m in per_toy["mass_keV"].unique().to_list()})
-    complete = all(any(abs(p - float(m)) < 1e-6 for p in present) for m in masses)
+    toys_per_mass = {
+        float(m): int(n) for m, n in per_toy.group_by("mass_keV").len().iter_rows()
+    }
+    present = sorted(toys_per_mass)
+
+    def n_saved(mass: float) -> int:
+        return next((n for m, n in toys_per_mass.items() if abs(m - mass) < 1e-6), 0)
+
+    incomplete = [float(m) for m in masses if n_saved(float(m)) < args.n_toys]
+    complete = not incomplete
     write_yaml(
         {
             "settings": {
@@ -311,6 +445,7 @@ def compare_stage(
             },
             "masses_requested": [float(m) for m in masses],
             "masses_present": present,
+            "masses_incomplete": incomplete,
             "complete": bool(complete),
             "n_jobs": args.n_jobs,
             "job_index": args.job_index,
