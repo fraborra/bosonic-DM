@@ -13,7 +13,7 @@
 #SBATCH --constraint=cpu
 #SBATCH --time=02:00:00
 #SBATCH --account=m2676
-#SBATCH --mem=8G
+#SBATCH --mem-per-cpu=2G
 #SBATCH --output=slurm-%x-%j.out
 
 set -euo pipefail

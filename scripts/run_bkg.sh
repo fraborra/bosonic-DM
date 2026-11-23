@@ -14,9 +14,9 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --constraint=cpu
-#SBATCH --time=04:00:00
+#SBATCH --time=01:40:00
 #SBATCH --account=m2676
-#SBATCH --mem=8G
+#SBATCH --mem-per-cpu=1G
 #SBATCH --output=slurm-%x-%j.out
 
 set -euo pipefail
