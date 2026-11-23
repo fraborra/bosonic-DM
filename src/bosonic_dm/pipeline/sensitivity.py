@@ -10,11 +10,13 @@ and the signal efficiency table.
 
 from __future__ import annotations
 
+import argparse
 import logging
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
+import numpy as np
 from dbetto import AttrsDict, Props
 
 from bosonic_dm.config import AnalysisConfig
@@ -111,3 +113,66 @@ def load_signal_inputs(
         fit_dirs=fit_dirs,
         efficiency_table=table_path,
     )
+
+
+def parse_masses(text: str) -> np.ndarray:
+    """Parse a comma-separated list of masses and ``start:stop:step`` ranges.
+
+    Parameters
+    ----------
+    text
+        Items separated by commas; each is a number or ``start:stop:step``
+        (stop included), e.g. ``"123,150,200:400:10,1020"``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Sorted unique masses in keV.
+
+    Raises
+    ------
+    argparse.ArgumentTypeError
+        If a range is malformed or empty.
+    """
+    masses: list[float] = []
+    for item in (part.strip() for part in text.split(",")):
+        if not item:
+            continue
+        if ":" in item:
+            try:
+                start, stop, step = (float(part) for part in item.split(":"))
+            except ValueError as err:
+                msg = f"Invalid mass range {item!r}."
+                raise argparse.ArgumentTypeError(msg) from err
+            if step <= 0 or stop < start:
+                msg = f"Invalid mass range {item!r}."
+                raise argparse.ArgumentTypeError(msg)
+            masses.extend(np.round(np.arange(start, stop + 0.5 * step, step), 9))
+        else:
+            masses.append(float(item))
+    return np.unique(np.round(np.asarray(masses, dtype=float), 9))
+
+
+def usable_masses(
+    masses: np.ndarray,
+    backgrounds: Mapping[str, BackgroundPrediction],
+    efficiency_ranges: Mapping[str, tuple[float, float]],
+    half_width_keV: float,
+) -> np.ndarray:
+    """Drop masses outside the simulated range or too close to the fit edges."""
+    edges = next(iter(backgrounds.values())).bin_edges
+    low = max(
+        [edges[0] + half_width_keV] + [lo for lo, _ in efficiency_ranges.values()]
+    )
+    high = min(
+        [edges[-1] - half_width_keV] + [hi for _, hi in efficiency_ranges.values()]
+    )
+    keep = (masses >= low) & (masses <= high)
+    if not keep.all():
+        logger.warning(
+            "Dropped %d masses outside [%g, %g] keV (simulated range and fit range).",
+            int((~keep).sum()),
+            low,
+            high,
+        )
+    return masses[keep]

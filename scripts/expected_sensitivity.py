@@ -34,7 +34,6 @@ import matplotlib as mpl
 mpl.use("Agg")
 
 import matplotlib.pyplot as plt
-import numpy as np
 import polars as pl
 
 from bosonic_dm.config import load_analysis_config
@@ -48,23 +47,16 @@ from bosonic_dm.fitting.signal_template import (
     BackgroundPrediction,
     build_signal_window,
 )
-from bosonic_dm.pipeline.sensitivity import load_signal_inputs
+from bosonic_dm.pipeline.sensitivity import (
+    load_signal_inputs,
+    parse_masses,
+    usable_masses,
+)
 from bosonic_dm.plotting.sensitivity import plot_expected_limits
 from bosonic_dm.plotting.signal_fit import plot_window_fit
 from bosonic_dm.yaml_io import write_yaml
 
 logger = logging.getLogger("expected_sensitivity")
-
-
-def parse_masses(text: str) -> np.ndarray:
-    """Parse ``"start:stop:step"`` (stop included) or ``"m1,m2,..."``."""
-    if ":" in text:
-        start, stop, step = (float(part) for part in text.split(":"))
-        if step <= 0 or stop < start:
-            msg = f"Invalid mass range {text!r}."
-            raise argparse.ArgumentTypeError(msg)
-        return np.round(np.arange(start, stop + 0.5 * step, step), 9)
-    return np.array([float(part) for part in text.split(",") if part.strip()])
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -92,31 +84,6 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--outdir", type=Path, required=True)
     return parser.parse_args(argv)
-
-
-def usable_masses(
-    masses: np.ndarray,
-    backgrounds: Mapping[str, BackgroundPrediction],
-    efficiency_ranges: Mapping[str, tuple[float, float]],
-    half_width_keV: float,
-) -> np.ndarray:
-    """Drop masses outside the simulated range or too close to the fit edges."""
-    edges = next(iter(backgrounds.values())).bin_edges
-    low = max(
-        [edges[0] + half_width_keV] + [lo for lo, _ in efficiency_ranges.values()]
-    )
-    high = min(
-        [edges[-1] - half_width_keV] + [hi for _, hi in efficiency_ranges.values()]
-    )
-    keep = (masses >= low) & (masses <= high)
-    if not keep.all():
-        logger.warning(
-            "Dropped %d masses outside [%g, %g] keV (simulated range and fit range).",
-            int((~keep).sum()),
-            low,
-            high,
-        )
-    return masses[keep]
 
 
 def plot_window_toys(

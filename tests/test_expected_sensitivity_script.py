@@ -121,3 +121,10 @@ def test_window_plot_shows_toy_0_not_the_data(
     expected = full_toy[:, lo : lo + len(window.bin_edges) - 1]
     np.testing.assert_array_equal(window.stacked("counts"), expected)
     assert not np.all(window.stacked("counts") == OBSERVED)
+
+
+def test_parse_masses_mixes_numbers_and_ranges() -> None:
+    masses = script.parse_masses("1020,123,150,200:220:10,150")
+    np.testing.assert_allclose(masses, [123, 150, 200, 210, 220, 1020])
+    np.testing.assert_allclose(script.parse_masses("100:102:1"), [100, 101, 102])
+    assert len(script.parse_masses("123,150,175,200:400:10,450:1000:50,1020")) == 37
