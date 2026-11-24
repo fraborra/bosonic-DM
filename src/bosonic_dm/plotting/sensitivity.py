@@ -22,6 +22,72 @@ BAND_68_COLOR = "#00b140"
 RATE_LABEL = r"$R_{90}$ [counts / (kg yr)]"
 
 
+def plot_brazil(
+    x: np.ndarray,
+    y: np.ndarray,
+    y_lo1: np.ndarray,
+    y_hi1: np.ndarray,
+    y_lo2: np.ndarray,
+    y_hi2: np.ndarray,
+    *,
+    ax: Axes | None = None,
+    log_y: bool = True,
+    xlabel: str = "DM mass [keV]",
+    ylabel: str = RATE_LABEL,
+    title: str | None = None,
+    output_path: str | Path | None = None,
+) -> Figure:
+    """Brazil plot: central line with a 68% and a 95% band.
+
+    Parameters
+    ----------
+    x
+        Abscissa, e.g. the DM masses.
+    y
+        Central value at each ``x``, e.g. the median expected limit.
+    y_lo1, y_hi1
+        Lower and upper edge of the inner (68%, 1 sigma) band.
+    y_lo2, y_hi2
+        Lower and upper edge of the outer (95%, 2 sigma) band.
+    ax
+        Axes to draw on; a new figure is created if omitted.
+    log_y
+        Use a logarithmic y axis.
+    xlabel, ylabel
+        Axis labels.
+    title
+        Axes title.
+    output_path
+        Optional file to save the figure to.
+    """
+    arrays = [np.asarray(a, dtype=float) for a in (x, y, y_lo1, y_hi1, y_lo2, y_hi2)]
+    if len({a.shape for a in arrays}) != 1 or arrays[0].ndim != 1:
+        msg = "x, y and the four band edges must be 1D arrays of the same length."
+        raise ValueError(msg)
+    order = np.argsort(arrays[0])
+    x, y, y_lo1, y_hi1, y_lo2, y_hi2 = (a[order] for a in arrays)
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(9, 5))
+    else:
+        fig = ax.figure
+
+    ax.fill_between(x, y_lo2, y_hi2, color=BAND_95_COLOR, lw=0, label="95% expected")
+    ax.fill_between(x, y_lo1, y_hi1, color=BAND_68_COLOR, lw=0, label="68% expected")
+    ax.plot(x, y, "k--", lw=1.2, label="median")
+    if log_y:
+        ax.set_yscale("log")
+    ax.set_xlim(x.min(), x.max())
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    if title:
+        ax.set_title(title)
+    ax.legend(loc="best", frameon=False)
+    fig.tight_layout()
+    if output_path is not None:
+        fig.savefig(output_path, dpi=150)
+    return fig
+
+
 def plot_expected_limits(
     summary: pl.DataFrame,
     *,
@@ -69,23 +135,17 @@ def plot_expected_limits(
                 label="window near masked line" if index == 0 else None,
             )
 
-    ax.fill_between(
+    plot_brazil(
         mass,
-        table["r90_q025"].to_numpy(),
-        table["r90_q975"].to_numpy(),
-        color=BAND_95_COLOR,
-        lw=0,
-        label="95% expected",
-    )
-    ax.fill_between(
-        mass,
+        table["r90_median"].to_numpy(),
         table["r90_q16"].to_numpy(),
         table["r90_q84"].to_numpy(),
-        color=BAND_68_COLOR,
-        lw=0,
-        label="68% expected",
+        table["r90_q025"].to_numpy(),
+        table["r90_q975"].to_numpy(),
+        ax=ax,
+        ylabel=ylabel,
+        title=title,
     )
-    ax.plot(mass, table["r90_median"].to_numpy(), "k--", lw=1.2, label="median")
     if "r90_asimov" in table.columns:
         ax.plot(
             mass,
@@ -95,14 +155,7 @@ def plot_expected_limits(
             lw=1.0,
             label="Asimov",
         )
-    ax.set_yscale("log")
-    ax.set_xlim(mass.min(), mass.max())
-    ax.set_xlabel("DM mass [keV]")
-    ax.set_ylabel(ylabel)
-    if title:
-        ax.set_title(title)
     ax.legend(loc="best", frameon=False)
-    fig.tight_layout()
     if output_path is not None:
         fig.savefig(output_path, dpi=150)
     return fig

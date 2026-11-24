@@ -36,7 +36,7 @@ from bosonic_dm.fitting.signal_template import (
     build_signal_window,
     gaussian_bin_probabilities,
 )
-from bosonic_dm.plotting.sensitivity import plot_expected_limits
+from bosonic_dm.plotting.sensitivity import plot_brazil, plot_expected_limits
 
 # --- grid posterior ---------------------------------------------------------
 
@@ -345,6 +345,21 @@ def test_plot_expected_limits(limits: object, tmp_path: Path) -> None:
     assert path.exists()
     assert fig.axes[0].get_yscale() == "log"
     plt.close(fig)
+
+
+def test_plot_brazil(tmp_path: Path) -> None:
+    x = np.array([300.0, 100.0, 200.0])
+    y = np.array([3.0, 1.0, 2.0])
+    path = tmp_path / "bands.png"
+    fig = plot_brazil(x, y, 0.8 * y, 1.2 * y, 0.6 * y, 1.5 * y, output_path=path)
+    ax = fig.axes[0]
+    assert path.exists()
+    assert ax.get_xlim() == (100.0, 300.0)
+    median = next(line for line in ax.get_lines() if line.get_label() == "median")
+    np.testing.assert_array_equal(median.get_xdata(), [100.0, 200.0, 300.0])
+    plt.close(fig)
+    with pytest.raises(ValueError, match="same length"):
+        plot_brazil(x, y[:2], y, y, y, y)
 
 
 # --- Stan-versus-grid comparison -------------------------------------------
