@@ -293,6 +293,6 @@ def test_mass_presets() -> None:
     coarse = script.parse_mass_option("coarse")
     fine = script.parse_mass_option("fine")
     assert len(coarse) == 37
-    assert len(fine) == 204
+    assert len(fine) == 313
     assert set(coarse) <= set(fine)
     assert np.array_equal(script.parse_mass_option("300,500"), np.array([300.0, 500.0]))

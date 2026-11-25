@@ -78,17 +78,25 @@ if TYPE_CHECKING:
 logger = logging.getLogger("stan_grid_comparison")
 
 # Named mass grids for --masses (keV, ``start:stop:step`` with stop included).
-# "coarse": the first 37-mass check. "fine": every 5 keV from 123 to 400 keV,
-# every 1 keV within 8 keV of the masked gamma lines (238.6, 295.2, 351.9,
-# 911.2, 969.0 keV) plus 10, 13 and 17 keV away, and every 2 keV around the
-# Ar-39 endpoint (545-585 keV); it contains all the "coarse" masses (204 total).
+# "coarse": the first 37-mass check. "fine": every 5 keV from 123 to 400 keV
+# and every 25 keV from 400 to 1000 keV; every 1 keV within 8 keV of the
+# gamma lines of DEFAULT_BACKGROUND_FIT_PEAKS_KEV inside the mass range, the
+# masked ones (238.6, 295.2, 351.9, 911.2, 969.0 keV) and the unmasked ones
+# (511.0, 583.2, 609.3, 727.3, 860.6 keV), plus 10, 13 and 17 keV away; every
+# 5 keV over 520-610 keV and every 2 keV around the Ar-39 endpoint
+# (545-585 keV). It contains all the "coarse" masses.
 MASS_PRESETS = {
     "coarse": "123,150,175,200:400:10,450:1000:50,1020",
     "fine": (
-        "123,125:400:5,200:400:10,"
+        "123,125:400:5,200:400:10,400:1000:25,"
         "222,226,229,231:247:1,249,252,256,"
         "278,282,285,287:303:1,305,308,312,"
         "335,339,342,344:360:1,362,365,369,"
+        "494,498,501,503:519:1,521,524,528,"
+        "566,570,573,575:591:1,593,596,600,"
+        "592,596,599,601:617:1,619,622,626,"
+        "710,714,717,719:735:1,737,740,744,"
+        "844,848,851,853:869:1,871,874,878,"
         "450:1000:50,520:610:5,545:585:2,"
         "894,898,901,903:919:1,921,924,928,"
         "952,956,959,961:977:1,979,982,986,1020"
