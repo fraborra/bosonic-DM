@@ -77,7 +77,29 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("stan_grid_comparison")
 
-DEFAULT_MASSES = "123,150,175,200:400:10,450:1000:50,1020"
+# Named mass grids for --masses (keV, ``start:stop:step`` with stop included).
+# "coarse": the first 37-mass check. "fine": every 5 keV from 123 to 400 keV,
+# every 1 keV within 8 keV of the masked gamma lines (238.6, 295.2, 351.9,
+# 911.2, 969.0 keV) plus 10, 13 and 17 keV away, and every 2 keV around the
+# Ar-39 endpoint (545-585 keV); it contains all the "coarse" masses (204 total).
+MASS_PRESETS = {
+    "coarse": "123,150,175,200:400:10,450:1000:50,1020",
+    "fine": (
+        "123,125:400:5,200:400:10,"
+        "222,226,229,231:247:1,249,252,256,"
+        "278,282,285,287:303:1,305,308,312,"
+        "335,339,342,344:360:1,362,365,369,"
+        "450:1000:50,520:610:5,545:585:2,"
+        "894,898,901,903:919:1,921,924,928,"
+        "952,956,959,961:977:1,979,982,986,1020"
+    ),
+}
+DEFAULT_MASSES = "coarse"
+
+
+def parse_mass_option(text: str) -> np.ndarray:
+    """``--masses``: a preset name from ``MASS_PRESETS`` or an explicit list."""
+    return parse_masses(MASS_PRESETS.get(text.strip(), text))
 
 
 def split_masses(masses: np.ndarray, n_jobs: int, job_index: int) -> np.ndarray:
@@ -154,7 +176,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--config", type=Path, required=True, help="Analysis YAML.")
     parser.add_argument("--outdir", type=Path, required=True)
     parser.add_argument(
-        "--masses", type=parse_masses, default=parse_masses(DEFAULT_MASSES)
+        "--masses",
+        type=parse_mass_option,
+        default=parse_mass_option(DEFAULT_MASSES),
+        help=(
+            f"Preset ({', '.join(MASS_PRESETS)}; default {DEFAULT_MASSES}) or a "
+            "comma list of masses and start:stop:step ranges in keV."
+        ),
     )
     parser.add_argument(
         "--n-toys",

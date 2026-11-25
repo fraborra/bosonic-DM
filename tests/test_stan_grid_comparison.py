@@ -287,3 +287,12 @@ def test_job_split_defaults_from_slurm_env(monkeypatch: pytest.MonkeyPatch) -> N
     monkeypatch.setenv("SLURM_ARRAY_TASK_MIN", "10")
     args = script.parse_args(["--config", "c", "--outdir", "o"])
     assert (args.n_jobs, args.job_index) == (4, 2)
+
+
+def test_mass_presets() -> None:
+    coarse = script.parse_mass_option("coarse")
+    fine = script.parse_mass_option("fine")
+    assert len(coarse) == 37
+    assert len(fine) == 204
+    assert set(coarse) <= set(fine)
+    assert np.array_equal(script.parse_mass_option("300,500"), np.array([300.0, 500.0]))
